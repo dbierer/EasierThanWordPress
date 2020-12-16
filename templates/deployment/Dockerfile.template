@@ -1,0 +1,51 @@
+FROM asclinux/linuxforphp-8.2-ultimate:7.4-nts
+MAINTAINER %%EMAIL_ADDR%%
+RUN \
+    echo "Setting up for docker-compose ..." && \
+    rm -rf /srv/repo && \
+    mkdir /srv/repo
+RUN \
+    echo "Clone from repo ..." && \
+    rm -rf %%BASE_DIR%%/%%URL%% && \
+    echo "Use this for private repos:" && \
+    echo git clone https://%%REPO_USER%%:%%REPO_TOKEN%%@github.com/%%REPO_USER%%/%%REPO_URL%% %%REPO_BRANCH%% %%BASE_DIR%%/%%URL%% && \
+    echo "Use this for public repos:" && \
+    git clone https://github.com/%%REPO_USER%%/%%REPO_URL%% %%REPO_BRANCH%% %%BASE_DIR%%/%%URL%% && \
+    cd %%BASE_DIR%%/%%URL%% && \
+    mkdir -p logs && \
+    mkdir -p public/img/captcha && \
+    php composer.phar install
+RUN \
+    echo "Update config file ..." && \
+    cd %%BASE_DIR%%/%%URL%% && \
+    sed -i 's/REPL_SMTP_HOST/%%SMTP_HOST%%/g' src/config/config.php && \
+    sed -i 's/REPL_SMTP_USERNAME/%%SMTP_USERNAME%%/g' src/config/config.php && \
+    sed -i 's/REPL_SMTP_PASSWORD/%%SMTP_PASSWORD%%/g' src/config/config.php && \
+    sed -i 's/REPL_DB_USER/%%DB_USER%%/g' src/config/config.php && \
+    sed -i 's/REPL_DB_PWD/%%DB_PWD%%/g' src/config/config.php && \
+    sed -i 's/REPL_DB_NAME/%%DB_NAME%%/g' src/config/config.php
+RUN \
+    echo "Creating sample database and assigning permissions ..." && \
+    /etc/init.d/mysql start && \
+    sleep 5 && \
+    mysql -uroot -v -e "CREATE DATABASE IF NOT EXISTS %%DB_NAME%%;" && \
+    mysql -uroot -v -e "CREATE USER IF NOT EXISTS '%%DB_USER%%'@'localhost' IDENTIFIED BY '%%DB_PWD%%';" && \
+    mysql -uroot -v -e "GRANT ALL PRIVILEGES ON *.* TO '%%DB_USER%%'@'localhost';" && \
+    mysql -uroot -v -e "FLUSH PRIVILEGES;"
+RUN \
+    echo "Restoring sample database ..." && \
+    /etc/init.d/mysql start && \
+    sleep 5 && \
+    mysql -uroot -e "SOURCE %%BASE_DIR%%/%%URL%%/src/%%DB_NAME%%.sql;" %%DB_NAME%%
+RUN \
+    echo "Installing phpMyAdmin ..." && \
+    lfphp-get phpmyadmin
+RUN \
+    echo "Setting up Apache ..." && \
+    mv -fv /srv/www /srv/www.OLD && \
+    ln -sfv %%BASE_DIR%%/%%URL%%/public /srv/www && \
+    echo "ServerName %%URL%%" >> /etc/httpd/httpd.conf && \
+    chown apache:apache /srv/www && \
+    chown -R apache:apache %%BASE_DIR%%/%%URL%% && \
+    chmod -R 775 %%BASE_DIR%%/%%URL%%
+CMD lfphp --mysql --phpfpm --apache

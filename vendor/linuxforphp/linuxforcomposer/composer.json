@@ -1,0 +1,26 @@
+{
+  "name": "linuxforphp/linuxforcomposer",
+  "description": "Composer package that helps to easily configure and run Docker and Linux for PHP containers for any PHP project.",
+  "license": "Apache-2.0",
+  "keywords": [
+    "PHP",
+    "Composer",
+    "Docker",
+    "Linux for PHP",
+    "Linux for Composer"
+  ],
+  "homepage": "https://linuxforphp.net",
+  "authors": [
+    {
+      "name": "Foreach Code Factory",
+      "email": "lfphp@asclinux.net"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/linuxforphp/linuxforcomposer/issues"
+  },
+  "bin": ["bin/linuxforcomposer.phar"],
+  "require": {
+    "php": "^7.2"
+  }
+}

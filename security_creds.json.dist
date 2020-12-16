@@ -1,0 +1,32 @@
+{
+    "Dockerfile": {
+        "EMAIL_ADDR": "Your email address",
+        "BASE_DIR": "\/srv\/tempo",
+        "BACKUP_LOC": "backups",
+        "DOC_ROOT": "public",
+        "REPO_BRANCH": "branch (if any)",
+        "REPO_TOKEN": "github token",
+        "REPO_USER": "github username",
+        "REPO_URL": "URL for your github repository",
+        "SMTP_HOST": "Enter hostname for your SMTP server here",
+        "SMTP_USERNAME": "SMTP username",
+        "SMTP_PASSWORD": "SMTP password",
+        "DB_USER": "Database username",
+        "DB_PWD": "Database password",
+        "DB_NAME": "Database name",
+        "URL": "Website URL"
+    },
+    "linuxforcomposer.json": {
+        "LFC_ACCOUNT": "LfPHP cloud services account",
+        "LFC_USERNAME": "LfPHP cloud services username",
+        "LFC_CONTAINER": "LfPHP cloud services container name",
+        "LFC_TOKEN": "LfPHP cloud services token"
+    },
+    "docker-compose.yml": {
+        "LFC_CONTAINER": "dentalprovider_net",
+        "BASE_DIR": "\/srv\/tempo",
+        "URL": "dentalprovider.net",
+        "IP_ADDR": "172.16.6.101",
+        "IP_SUBNET_MASK": "172.16.6.0\/24"
+    }
+}

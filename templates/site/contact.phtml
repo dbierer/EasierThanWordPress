@@ -1,0 +1,163 @@
+<?php
+use Common\Image\Captcha;
+use Common\Contact\{Email,Storage};
+// init vars
+$msg = 'Drop us a line';
+// $OBJ == calling instance
+$uri    = $OBJ->uri;
+$config = $OBJ->config;
+// process contact post (if any)
+if ($_POST) {
+    $body = '';
+    $log = $config['CONTACT_LOG'];
+    $inputs = [
+        'email'   => '',
+        'name'    => '',
+        'phone'   => '',
+        'subject' => '',
+        'source'  => '',
+        'message' => '',
+    ];
+    $msg = Email::processPost($config, $inputs, $body);
+    // log body + message
+    $body .= ($msg) ? "\n$msg\n" : '';
+    if ($body) {
+        file_put_contents($log, $body, FILE_APPEND);
+        $storage = new Storage($config['STORAGE']);
+        $storage->save('contacts', $inputs);
+    }
+}
+// generate CAPTCHA
+$hashKey = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
+$token   = bin2hex(random_bytes(4));
+$captcha = new Captcha($config['CAPTCHA']);
+$images  = $captcha->writeImages($token);
+$hash    = password_hash($captcha->phrase, PASSWORD_BCRYPT);
+$_SESSION[$hashKey] = $hash;
+?>
+            <div class="row mb-4">
+                <div class="col-md-8 col-lg-6">
+                    <h5>Leave a Message</h5>
+                    <!-- Heading -->
+                    <h2 class="section-title mb-2 ">
+                        Tell us about <span class="font-weight-normal">yourself</span>
+                    </h2>
+
+                    <!-- Subheading -->
+                    <p class="mb-5 ">
+                        Whether you have questions, want to request a quote, would just like to just get started right now, contact us.
+                    </p>
+
+                </div>
+            </div> <!-- / .row -->
+
+            <div class="row">
+                <div class="col-lg-6">
+                   <!-- form message -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-success contact__msg" style="display: none" role="alert">
+                                <?= $msg ?>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end message -->
+                    <!-- Contacts Form -->
+                    <form class="contact_form" action="mail.php">
+                        <div class="row">
+                            <!-- Input -->
+                            <div class="col-sm-6 mb-6">
+                                <div class="form-group">
+                                    <label class="h6 small d-block text-uppercase">
+                                        Your name
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <div class="input-group">
+                                        <input class="form-control" name="name" id="name" required="" placeholder="John Doe" type="text">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Input -->
+
+                            <!-- Input -->
+                            <div class="col-sm-6 mb-6">
+                                <div class="form-group">
+                                    <label class="h6 small d-block text-uppercase">
+                                        Your email address
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <div class="input-group ">
+                                        <input class="form-control" name="email" id="email" required="" placeholder="john@gmail.com" type="email">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Input -->
+
+                            <div class="w-100"></div>
+
+                            <!-- Input -->
+                            <div class="col-sm-6 mb-6">
+                                <div class="form-group">
+                                    <label class="h6 small d-block text-uppercase">
+                                        Subject
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <div class="input-group">
+                                        <input class="form-control" name="subject" id="subject" required="" placeholder="Website Quote" type="text">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Input -->
+
+                            <!-- Input -->
+                            <div class="col-sm-6 mb-6">
+                                <div class="form-group">
+                                    <label class="h6 small d-block text-uppercase">
+                                        Your Phone Number
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <div class="input-group ">
+                                        <input class="form-control" id="phone" name="phone" required="" placeholder="1-800-643-4500" type="text">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Input -->
+                        </div>
+
+                        <!-- Input -->
+                        <div class="form-group mb-5">
+                            <label class="h6 small d-block text-uppercase">
+                                How can we help you?
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+                                <textarea class="form-control" rows="4" name="message" id="message" required="" placeholder="Hello, I would like to ..."></textarea>
+                            </div>
+                        </div>
+                        <!-- End Input -->
+
+                        <div class="">
+                            <br />
+                            &nbsp;&nbsp;Prove you're human! Enter the characters below:<br />&nbsp;&nbsp;
+                            <?php foreach ($images as $fn) : ?><img src="/img/captcha/<?= $fn; ?>" style="width:50px;height:auto;" /><?php endforeach; ?>
+                            &nbsp;<input type="text" name="phrase" placeholder="I'm not a robot" /><br /><br />
+                            <input type="hidden" id="source" name="source" value="<?= $config['HOST'] . $uri; ?>">
+                            <input name="submit" type="submit" class="btn btn-primary btn-circled" value="Send Message">
+
+                            <p class="small pt-3">We'll get back to you in 1-2 business days.</p>
+                        </div>
+                    </form>
+                    <!-- End Contacts Form -->
+                </div>
+
+                <div class="col-lg-6 col-md-6">
+                    <!-- START MAP -->
+                    <div id="map" ></div>
+                    <!-- END MAP -->
+                </div>
+            </div>

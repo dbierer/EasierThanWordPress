@@ -1,0 +1,11 @@
+{
+    "require": {
+        "linuxforphp/linuxforcomposer": "^2.0",
+        "phpmailer/phpmailer" : "^6.1"
+    },
+    "autoload" : {
+        "psr-4" : {
+            "Common\\" : "src/Common/"
+        }
+    }
+}

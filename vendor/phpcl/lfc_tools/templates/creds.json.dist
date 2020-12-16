@@ -1,0 +1,12 @@
+{
+	"Dockerfile" : {
+		"FORK"         : "URL to the github fork you created from https://github.com/phpcl/phpcl_core_php8_developers.git",
+		"GITHUB_EMAIL" : "Email associated with your github account",
+		"GITHUB_NAME"  : "Github account username"
+	},
+	"linuxforcomposer.json" : {
+        "ACCOUNT" : "%%ACCOUNT%%",
+        "USER"    : "%%USER%%",
+        "TOKEN"   : "%%TOKEN%%"
+	}
+}

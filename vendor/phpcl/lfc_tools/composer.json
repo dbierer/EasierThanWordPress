@@ -1,0 +1,21 @@
+{
+    "name": "phpcl/lfc-tools",
+    "type": "library",
+    "description": "Creates deployment files leveraging Linux for Composer",
+    "keywords": ["phpcl","laminas","zf","zf3","zend framework"],
+    "homepage": "https://github.com/phpcl/lfc_tools",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Doug Bierer",
+            "email": "doug.bierer@etista.com",
+            "homepage": "https://php-cl.com/",
+            "role": "CTO"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "linuxforphp/linuxforcomposer": "^2.0"
+    },
+    "bin": ["bin/phpcl-lfc-tools","bin/phpcl-lfc-tools.bat"]
+}
