@@ -1,5 +1,5 @@
 <?php
-namespace Common\View;
+namespace SimpleHtml\Common\View;
 
 use LimitIterator;
 use RecursiveDirectoryIterator;

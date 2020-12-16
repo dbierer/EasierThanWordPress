@@ -1,5 +1,5 @@
 <?php
-namespace Common\Contact;
+namespace SimpleHtml\Common\Contact;
 
 class Base
 {

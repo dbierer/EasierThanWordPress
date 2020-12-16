@@ -7,8 +7,7 @@ define('SRC_DIR', BASE_DIR . '/src');
 
 // autoloader
 include __DIR__ . '/../vendor/autoload.php';
-use Common\View\Html;
-use Common\Image\Captcha;
+use SimpleHtml\Common\View\Html;
 
 // grab config
 $config = include SRC_DIR . '/config/config.php';

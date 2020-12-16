@@ -1,5 +1,5 @@
 <?php
-namespace Common\Contact;
+namespace SimpleHtml\Common\Contact;
 
 use PHPMailer\PHPMailer\PHPMailer;
 class Email extends Base
