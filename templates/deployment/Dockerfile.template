@@ -8,9 +8,9 @@ RUN \
     echo "Clone from repo ..." && \
     rm -rf %%BASE_DIR%%/%%URL%% && \
     echo "Use this for private repos:" && \
-    echo git clone https://%%REPO_USER%%:%%REPO_TOKEN%%@github.com/%%REPO_USER%%/%%REPO_URL%% %%REPO_BRANCH%% %%BASE_DIR%%/%%URL%% && \
+    echo git clone https://%%REPO_USER%%:%%REPO_TOKEN%%@%%REPO_URL%% %%REPO_BRANCH%% %%BASE_DIR%%/%%URL%% && \
     echo "Use this for public repos:" && \
-    git clone https://github.com/%%REPO_USER%%/%%REPO_URL%% %%REPO_BRANCH%% %%BASE_DIR%%/%%URL%% && \
+    git clone %%REPO_URL%% %%REPO_BRANCH%% %%BASE_DIR%%/%%URL%% && \
     cd %%BASE_DIR%%/%%URL%% && \
     mkdir -p logs && \
     mkdir -p public/img/captcha && \
