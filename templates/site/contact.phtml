@@ -18,6 +18,8 @@ if ($_POST) {
         'source'  => '',
         'message' => '',
     ];
+    foreach ($inputs as $key => $value)
+        $inputs[$key] = $_POST[$key] ?? '';
     $msg = Email::processPost($config, $inputs, $body);
     // log body + message
     $body .= ($msg) ? "\n$msg\n" : '';

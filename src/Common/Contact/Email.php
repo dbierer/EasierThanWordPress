@@ -2,95 +2,96 @@
 namespace Common\Contact;
 
 use PHPMailer\PHPMailer\PHPMailer;
-class Email
+class Email extends Base
 {
-	const BODY_PATTERN = '%-20s : %s' . "\n";
-	/**
-	 * @param array $config : from /src/config/config.php
-	 * @param array $inputs : {key:value} where key is the field to be accepted from $_POST; returns by reference
-	 * @param string $body : message body is passed back by reference
-	 * @return string $msg : any error or other messages
-	 */
-	public static function processPost(array $config, array &$inputs, string &$body)
-	{
-		$msg = '';
-		// sanitize email
-		$email = $_POST['email'] ?? '';
-		$email = filter_var($email, FILTER_SANITIZE_EMAIL);
-		// store inputs for later processing
-		foreach ($inputs as $key => $value)
-			$inputs[$key] = $_POST[$key] ?? '';
-		$hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
-		$phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
-		if ($_POST) {
-			$msg = '<b style="color:red;">Sorry! Unable to post your message or comment.</b>';
-			if (!empty($email)) {
-				$body    = "\n";
-				foreach ($inputs as $key => $value) {
-					$inputs[$key] = strip_tags(trim($value));
-					$body .= sprintf(self::BODY_PATTERN, ucfirst($key), $value);
-				}
-				$subject = $inputs['subject'] ?? 'PHP-CL Contact/Comment/Career';
-				$msg = Email::confirmAndSend($email, $config, $subject, $body);
-			}
-		}
-		return $msg;
-	}
-	public static function confirmAndSend(
-		string $email,
-		array $config,
-		string $subject,
-		string $body)
-	{
-		$msg       = $config['COMPANY_EMAIL']['ERROR'];
-		$phraseKey = $config['captcha']['input_tag_name'] ?? 'phrase';
-		$hashKey   = $config['captcha']['sess_hash_key'] ?? 'hash';
-		$phrase    = $_REQUEST[$phraseKey] ?? '';
-		$hash      = $_SESSION[$hashKey] ?? 'UNKNOWN';
-		$to        = $config['COMPANY_EMAIL']['to'];
-		$cc        = $config['COMPANY_EMAIL']['cc'] ?? '';
-		$bcc       = $config['COMPANY_EMAIL']['bcc'] ?? '';
-		$from      = $config['COMPANY_EMAIL']['from'];
-		$phpmailerConfig = $config['COMPANY_EMAIL']['phpmailer'];
-		if (password_verify($phrase, $hash)) {
-			// validate email
-			if (PHPMailer::validateAddress($email)) {
-				// send request for 30 day trial
-				try {
-					// set up SMTP
-					$mail = new PHPMailer();
-					if ($phpmailerConfig['smtp']) {
-						$mail->IsSMTP();
-						$mail->Host       = $phpmailerConfig['smtp_host'];
-						$mail->Port       = $phpmailerConfig['smtp_port'];
-						$mail->SMTPAuth   = $phpmailerConfig['smtp_auth'];
-						$mail->Username   = $phpmailerConfig['smtp_username'];
-						$mail->Password   = $phpmailerConfig['smtp_password'];
-						$mail->SMTPSecure = $phpmailerConfig['smtp_secure'];
-					}
-					// set up mail obj
-					$mail->setFrom($from);
-					$mail->addAddress($to);
-					if ($cc) $mail->addCC($cc);
-					if ($bcc) $mail->addBCC($bcc);
-					$mail->Subject = $subject;
-					$mail->Body    = $body;					
-					//send the message, check for errors
-					if ($mail->send()) {
-						$msg = $config['COMPANY_EMAIL']['SUCCESS'];
-					} else {
-						$msg = $config['COMPANY_EMAIL']['ERROR'];
-					}
-				} catch (\Exception $e) {
-					$msg = $config['COMPANY_EMAIL']['ERROR'];
-					error_log(__METHOD__ . ':' . $e->getMessage());
-				}
-			} else {
-				error_log(basename(__FILE__) . ': email does not verify');
-			}
-		} else {
-			error_log(basename(__FILE__) . ': CAPTCHA does not verify');
-		}
-		return $msg;
-	}
+    const BODY_PATTERN = '%-20s : %s' . "\n";
+    /**
+     * @param array $config : from /src/config/config.php
+     * @param array $inputs : {key:value} where key is the field to be accepted from $_POST; returns by reference
+     * @param string $body : message body is passed back by reference
+     * @return string $msg : any error or other messages
+     */
+    public static function processPost(array $config, array &$inputs, string &$body)
+    {
+        $msg = '';
+        // sanitize email
+        $email = $_POST['email'] ?? '';
+        $email = filter_var($email, FILTER_SANITIZE_EMAIL);
+        $inputs = $this->filter($table, $inputs);
+        $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
+        $phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
+        if ($_POST) {
+            $msg = '<b style="color:red;">Sorry! Unable to post your message or comment.</b>';
+            if (!empty($email)) {
+                $body    = "\n";
+                foreach ($inputs as $key => $value) {
+                    if (is_array($value)) {
+                        $value = json_encode($value);
+                    }
+                    $inputs[$key] = strip_tags(trim($value));
+                    $body .= sprintf(self::BODY_PATTERN, ucfirst($key), $value);
+                }
+                $subject = $inputs['subject'] ?? 'PHP-CL Contact/Comment/Career';
+                $msg = Email::confirmAndSend($email, $config, $subject, $body);
+            }
+        }
+        return $msg;
+    }
+    public static function confirmAndSend(
+        string $email,
+        array $config,
+        string $subject,
+        string $body)
+    {
+        $msg       = $config['COMPANY_EMAIL']['ERROR'];
+        $phraseKey = $config['captcha']['input_tag_name'] ?? 'phrase';
+        $hashKey   = $config['captcha']['sess_hash_key'] ?? 'hash';
+        $phrase    = $_REQUEST[$phraseKey] ?? '';
+        $hash      = $_SESSION[$hashKey] ?? 'UNKNOWN';
+        $to        = $config['COMPANY_EMAIL']['to'];
+        $cc        = $config['COMPANY_EMAIL']['cc'] ?? '';
+        $bcc       = $config['COMPANY_EMAIL']['bcc'] ?? '';
+        $from      = $config['COMPANY_EMAIL']['from'];
+        $phpmailerConfig = $config['COMPANY_EMAIL']['phpmailer'];
+        if (password_verify($phrase, $hash)) {
+            // validate email
+            if (PHPMailer::validateAddress($email)) {
+                // send request for 30 day trial
+                try {
+                    // set up SMTP
+                    $mail = new PHPMailer();
+                    if ($phpmailerConfig['smtp']) {
+                        $mail->IsSMTP();
+                        $mail->Host       = $phpmailerConfig['smtp_host'];
+                        $mail->Port       = $phpmailerConfig['smtp_port'];
+                        $mail->SMTPAuth   = $phpmailerConfig['smtp_auth'];
+                        $mail->Username   = $phpmailerConfig['smtp_username'];
+                        $mail->Password   = $phpmailerConfig['smtp_password'];
+                        $mail->SMTPSecure = $phpmailerConfig['smtp_secure'];
+                    }
+                    // set up mail obj
+                    $mail->setFrom($from);
+                    $mail->addAddress($to);
+                    if ($cc) $mail->addCC($cc);
+                    if ($bcc) $mail->addBCC($bcc);
+                    $mail->Subject = $subject;
+                    $mail->Body    = $body;
+                    //send the message, check for errors
+                    if ($mail->send()) {
+                        $msg = $config['COMPANY_EMAIL']['SUCCESS'];
+                    } else {
+                        $msg = $config['COMPANY_EMAIL']['ERROR'];
+                    }
+                } catch (\Exception $e) {
+                    $msg = $config['COMPANY_EMAIL']['ERROR'];
+                    error_log(__METHOD__ . ':' . $e->getMessage());
+                }
+            } else {
+                error_log(basename(__FILE__) . ': email does not verify');
+            }
+        } else {
+            error_log(basename(__FILE__) . ': CAPTCHA does not verify');
+        }
+        return $msg;
+    }
 }
