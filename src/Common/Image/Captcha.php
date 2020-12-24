@@ -9,9 +9,11 @@ use SimpleHtml\Common\Image\SingleChar;
 use SimpleHtml\Common\Image\Strategy\ {LineFill,DotFill,Shadow,RotateText};
 class Captcha
 {
-    const NUM_BYTES = 2;
+    const NUM_BYTES = 4;
     const FONT_FILE = SRC_DIR . '/fonts/FreeSansBold.ttf';
     const IMG_DIR   = BASE_DIR . '/public/img/captcha';
+    public static $min = 1000;  // used if only numbers
+    public static $max = 9999;  // used if only numbers
     public $token   = '';
     public $phrase  = '';
     public $images  = [];
@@ -19,13 +21,18 @@ class Captcha
     /**
      * Writes out NUM_BYTES * 2 CAPTCHA images
      *
-     * @param string $token : used to identify this user
+     * @param string $token  : used to identify this user
+     * @param bool $numbers  : numbers only
      * @return array $images : filenames of CAPTCHA images produced
      */
-    public function writeImages(string $token)
+    public function writeImages(string $token, bool $numbers = TRUE)
     {
         // generate random hex number for CAPTCHA
-        $phrase = strtoupper(bin2hex(random_bytes(self::NUM_BYTES)));
+        if ($numbers) {
+            $phrase = (string) random_int(self::$min, self::$max);
+        } else {
+            $phrase = strtoupper(bin2hex(random_bytes(self::NUM_BYTES)));
+        }
         $length = strlen($phrase);
         $images = [];
         for ($x = 0; $x < $length; $x++) {

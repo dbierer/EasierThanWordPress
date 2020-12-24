@@ -7,30 +7,26 @@ class Email extends Base
     const BODY_PATTERN = '%-20s : %s' . "\n";
     /**
      * @param array $config : from /src/config/config.php
-     * @param array $inputs : {key:value} where key is the field to be accepted from $_POST; returns by reference
-     * @param string $body : message body is passed back by reference
-     * @return string $msg : any error or other messages
+     * @param array $post   : $_POST
+     * @param string $body  : message body is passed back by reference
+     * @param string $table : database table for filters
+     * @return string $msg  : any error or other messages
      */
-    public static function processPost(array $config, array &$inputs, string &$body)
+    public static function processPost(array $config, array $post, string &$body, string $table = Storage::DEFAULT_TABLE)
     {
         $msg = '';
         // sanitize email
         $email = $_POST['email'] ?? '';
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-        $inputs = $this->filter($table, $inputs);
+        $inputs = self::filter($table, $post, $config);
         $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
         $phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
         if ($_POST) {
-            $msg = '<b style="color:red;">Sorry! Unable to post your message or comment.</b>';
+            $msg = $config['COMPANY_EMAIL']['ERROR'];
             if (!empty($email)) {
                 $body    = "\n";
-                foreach ($inputs as $key => $value) {
-                    if (is_array($value)) {
-                        $value = json_encode($value);
-                    }
-                    $inputs[$key] = strip_tags(trim($value));
+                foreach ($inputs as $key => $value)
                     $body .= sprintf(self::BODY_PATTERN, ucfirst($key), $value);
-                }
                 $subject = $inputs['subject'] ?? 'PHP-CL Contact/Comment/Career';
                 $msg = Email::confirmAndSend($email, $config, $subject, $body);
             }

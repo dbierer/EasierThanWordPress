@@ -24,8 +24,9 @@ DROP TABLE IF EXISTS `contacts`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `contacts` (
   `id` int(8) NOT NULL AUTO_INCREMENT,
-  `email` varchar(255) NOT NULL,
   `name` varchar(64) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(32) NOT NULL,
   `subject` varchar(64) DEFAULT NULL,
   `source` varchar(64) DEFAULT NULL,
   `message` varchar(4096) DEFAULT NULL,

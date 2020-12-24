@@ -105,20 +105,34 @@ class Html
         $name = basename($dir);
         $search = $this->config['DELIM'] . strtoupper($name);
         if (stripos($body, $search) !== FALSE) {
-            $search = '!' . $this->config['DELIM'] . strtoupper($name) . '(=\d+?)?' . $this->config['DELIM'] . '!i';
+            $search = '!' . $this->config['DELIM'] . strtoupper($name) . '(.*?)?' . $this->config['DELIM'] . '!i';
             preg_match($search, $body, $matches);
+            $qualifier = $matches[1] ?? NULL;
             // randomize linked list of cards
-            $iter = $this->getCardIterator($dir, $card_dir);
-            if ($iter !== FALSE) {
-                if (!empty($matches[1])) {
-                    $max = (int) str_replace('=', '', $matches[1]);
+            if (empty($qualifier)) {
+                $iter = $this->getCardIterator($dir, $card_dir);
+            } else {
+                // get rid of "="
+                $qualifier = trim(str_replace('=', '', $qualifier));
+                // is it just a number?
+                if (ctype_digit($qualifier)) {
+                    $iter = $this->getCardIterator($dir, $card_dir);
                     $temp = clone $iter;
-                    $iter = new LimitIterator($temp, 0, $max);
+                    $iter = new LimitIterator($temp, 0, (int) $qualifier);
                     $iter->rewind();
+                // otherwise look for "::"
+                } elseif (strpos($qualifier, '::')) {
+                    $iter = $this->getOrderedCardIterator($qualifier);
+                } else {
+                    $iter = FALSE;
                 }
+            }
+            // loop through iteration
+            if ($iter !== FALSE) {
                 $card = '';
                 while ($iter->valid()) {
-                    $card .= file_get_contents($iter->current());
+                    $fn = $iter->current();
+                    $card .= (file_exists($fn)) ? file_get_contents($fn) : '';
                     $iter->next();
                 }
                 $body = str_replace($matches[0], $card, $body);
@@ -149,6 +163,34 @@ class Html
                 $temp[$key] = $cards[$key];
             $iter = new \ArrayIterator($temp);
         }
+        return $iter;
+    }
+    /**
+     * Produces ordered iteration of cards
+     *
+     * @param string $qualifier  : something like "ORDER::php8_tech::/some/card/dir"
+     * @return ArrayIterator $iter | bool FALSE
+     */
+    public function getOrderedCardIterator(string $qualifier)
+    {
+        $keys = explode('::', $qualifier);
+        // last item should be a directory
+        $dir  = array_pop($keys);
+        // pull 1st key off list
+        $key  = array_shift($keys);
+        $list = $this->config[$key];
+        // navigate array until lowest level key is pulled
+        while(count($keys)) {
+            $key  = array_shift($keys);
+            $list = $list[$key];
+        }
+        // build out directory path
+        foreach ($list as $key => $value) {
+            $value .= (substr($value, -4) !== 'html') ? '.html' : '';
+            $list[$key] = str_replace(['//','..'], ['/','.'], HTML_DIR . '/' . $value);
+        }
+        // return new iterator
+        $iter = new ArrayIterator(array_values($list));
         return $iter;
     }
 }

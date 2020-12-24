@@ -84,3 +84,38 @@ If you see `200` or `201` codes you're good
 If you see an error code
 * Test locally and debug
 
+## Templates
+### Config File
+Default: `/src/config/config.php`
+* Delimiter: `DELIM` defaults to `%%`
+* "Cards" `CARDS` defaults to `cards`
+  * Represents the subdirectory under which view renderer expects to file HTML "cards"
+### Cards
+#### Auto-Populate All Cards
+To get an HTML file to auto-populate with cards use this syntax:
+```
+DELIM+DIR+DELIM
+``
+Example: you have a subdirectory off `HTML_DIR` named `projects` and you want to load all HTML card files under the `cards` folder:
+```
+%%PROJECTS%%
+```
+#### Auto-Populate Specific Number of Cards
+To only load a certain (random) number of cards, use `=`.
+Example: you have a subdirectory off `HTML_DIR` named `features` and you want to load 3 random HTML card files under the `cards` folder:
+```
+%%FEATURES=3%%
+```
+#### Auto-Populate Specified Cards in a Certain Order
+Add an entry in `/src/config/config` as follows:
+```
+'ORDER' => [
+    'KEY' => ['CARD1','CARD2', etc.],
+],
+```
+* For each card, only use the base filename, no extension (i.e. do not add `.html`).
+Example: you have a directory `HTML_DIR/bundles/cards` and you want the cards to be loaded in a certain order.
+The config file KEY is `ORDER => php8_tech`:
+```
+%%BUNDLES=ORDER::php8_tech::/bundles/cards%%
+```
