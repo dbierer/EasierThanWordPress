@@ -16,13 +16,18 @@ $config = include SRC_DIR . '/config/config.php';
 $body = '';
 $uri  = $_POST['uri'] ?? $_SERVER['REQUEST_URI'] ?? '';
 $uri  = (strlen($uri) <= 1) ? '/home' : $uri;
-
+$msg  = '';
 // routes w/ forms need to do an include
 header('Content-Type: text/html');
 header('Content-Encoding: compress');
 
-// add pre-processing logic in this file:
-include SRC_DIR . '/processing.php';
-
-$html = new Html($config, $uri, HTML_DIR);
-echo $html->render($body);
+try {
+    // add pre-processing logic in this file:
+    include SRC_DIR . '/processing.php';
+    $html = new Html($config, $uri, HTML_DIR);
+    echo $html->render();
+} catch (Throwable $t) {
+    $_SESSION['msg'] = $t->getMessage();
+    $html = new Html($config, '/error', HTML_DIR);
+    echo $html->render();
+}

@@ -3,6 +3,7 @@ namespace SimpleHtml\Common\Image;
 /**
  * Creates a single image, by default black on white
  */
+use Exception;
 use SimpleHtml\Common\Image\Strategy\ {PlainText,PlainFill};
 class SingleChar
 {
@@ -15,6 +16,7 @@ class SingleChar
     const DEFAULT_TX_ANGLE = 0;
     const DEFAULT_WIDTH = 100;
     const DEFAULT_HEIGHT = 100;
+    const ERR_GD = 'ERROR: GD extension needs to be installed to use CAPTCHA';
     public $text     = '';
     public $fontFile = '';
     public $width    = 0;
@@ -48,6 +50,8 @@ class SingleChar
         int    $textX    = self::DEFAULT_TX_X,
         int    $textY    = self::DEFAULT_TX_Y)
     {
+        if (!function_exists('imagecreate'))
+            throw new Exception(self::ERR_GD);
         $this->text     = $text;
         $this->fontFile = $fontFile;
         $this->width    = $width;
