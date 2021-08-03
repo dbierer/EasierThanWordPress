@@ -8,6 +8,7 @@ define('SRC_DIR', BASE_DIR . '/src');
 // autoloader
 include __DIR__ . '/../vendor/autoload.php';
 use SimpleHtml\Common\View\Html;
+use SimpleHtml\Common\Generic\Registry;
 
 // grab config
 $config = include SRC_DIR . '/config/config.php';
@@ -27,7 +28,7 @@ try {
     $html = new Html($config, $uri, HTML_DIR);
     echo $html->render();
 } catch (Throwable $t) {
-    $_SESSION['msg'] = $t->getMessage();
+    Registry::setItem('msg', $t->getMessage());
     $html = new Html($config, '/error', HTML_DIR);
     echo $html->render();
 }

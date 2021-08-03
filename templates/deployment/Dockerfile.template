@@ -1,20 +1,9 @@
-FROM asclinux/linuxforphp-8.2-ultimate:7.4-nts
+FROM asclinux/linuxforphp-8.2-ultimate:8.0-nts
 MAINTAINER %%EMAIL_ADDR%%
+COPY startup.sh /tmp/startup.sh
 RUN \
-    echo "Setting up for docker-compose ..." && \
-    rm -rf /srv/repo && \
-    mkdir /srv/repo
-RUN \
-    echo "Clone from repo ..." && \
-    rm -rf %%BASE_DIR%%/%%URL%% && \
-    echo "Use this for private repos:" && \
-    echo git clone https://%%REPO_USER%%:%%REPO_TOKEN%%@%%REPO_URL%% %%REPO_BRANCH%% %%BASE_DIR%%/%%URL%% && \
-    echo "Use this for public repos:" && \
-    git clone %%REPO_URL%% %%REPO_BRANCH%% %%BASE_DIR%%/%%URL%% && \
-    cd %%BASE_DIR%%/%%URL%% && \
-    mkdir -p logs && \
-    mkdir -p public/img/captcha && \
-    php composer.phar install
+    echo "Setting permissions on /tmp/startup.sh ..." && \
+    chmod +x /tmp/*.sh
 RUN \
     echo "Update config file ..." && \
     cd %%BASE_DIR%%/%%URL%% && \
@@ -39,7 +28,9 @@ RUN \
     mysql -uroot -e "SOURCE %%BASE_DIR%%/%%URL%%/src/%%DB_NAME%%.sql;" %%DB_NAME%%
 RUN \
     echo "Installing phpMyAdmin ..." && \
-    lfphp-get phpmyadmin
+    wget -O /tmp/phpmyadmin_install.sh https://opensource.unlikelysource.com/phpmyadmin_install.sh && \
+    chmod +x /tmp/*.sh && \
+    /tmp/phpmyadmin_install.sh 5.1.1
 RUN \
     echo "Setting up Apache ..." && \
     mv -fv /srv/www /srv/www.OLD && \

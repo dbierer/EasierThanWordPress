@@ -1,11 +1,12 @@
 # Simple HTML
 Really simple PHP app that builds HTML files from HTML widgets.
 
-## Update
-Use composer to update existing `/vendor` source code
+## Initial Installation
+Use composer to install 3rd party source code
 ```
+wget https://getcomposer.org/download/latest-stable/composer.phar
 php composer.phar self-update
-php composer.phar update
+php composer.phar install
 ```
 
 ## Basic website config
@@ -18,28 +19,6 @@ php composer.phar update
     * `HTML_DIR`
     * `SRC_DIR`
 
-## Configure the management utlity `admin.sh`
-Edit `admin.sh` and change the value of the `NAME` variable
-* If your website is called `http://my.supersite.com/` the short name would be `supersite`
-Edit `admin.sh` and change the value of the `EXT` variable
-* If your website is called `http://my.supersite.com/` the ext would be `com`
-
-## Populate Credentials
-Copy security credentials file
-```
-cp security_cred.json.dist security_cred.json
-```
-Populate `security_cred.json` file with the appropriate information
-* Any info you don't have or will not use just leave blank
-Initialize run files with prompts:
-```
-./admin.sh creds templates/deployment
-```
-Initialize run files no prompts:
-```
-./admin.sh creds templates/deployment --no-prompts
-```
-
 ## To Run Locally Using PHP
 From this directory, run the following command:
 ```
@@ -47,13 +26,37 @@ php -S localhost:8888 -t public
 ```
 
 ## To Run Locally Using Docker-Compose
+
+Configure the management utlity `admin.sh`
+* Edit `admin.sh` and change the value of the `NAME` variable
+  * If your website is called `http://my.supersite.com/` the short name would be `supersite`
+* Edit `admin.sh` and change the value of the `EXT` variable
+  * If your website is called `http://my.supersite.com/` the ext would be `com`
+* Populate Credentials
+  * Copy security credentials file
+```
+cp security_cred.json.dist security_cred.json
+```
+  * Populate `security_cred.json` file with the appropriate information
+  * Any info you don't have or will not use just leave blank
+* Create customer `Dockerfile` and `docker-compose.yml` files based upon `security_creds.json`
+```
+# use this if you want to be prompted
+./admin.sh creds templates/deployment
+# use this for no prompts
+./admin.sh creds templates/deployment --no-prompts
+```
+
 * Install Docker
 * Install Docker-Compose
-* Run this command:
+
+## Bring Container Online
+
+To bring the docker container online, run this command:
 ```
 ./admin.sh up
 ```
-* To stop the container:
+To stop the container do this:
 ```
 ./admin.sh down
 ```

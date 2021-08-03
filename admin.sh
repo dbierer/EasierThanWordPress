@@ -5,8 +5,7 @@ export EXT="net"
 export URL="$NAME.$EXT"
 export CONTAINER="$NAME_$EXT"
 export USAGE="Usage: admin.sh up|down|build|init|shell|creds"
-export INIT=0
-export SWAP=0
+export TOOLS_DIR=`pwd`/templates/deployment
 if [[ -z "$1" ]]; then
     echo $USAGE
     exit 1

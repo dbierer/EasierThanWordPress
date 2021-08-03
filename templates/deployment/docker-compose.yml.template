@@ -3,9 +3,9 @@ services:
   %%URL%%:
     container_name: %%COMPOSE_CONTAINER%%
     hostname: %%URL%%
-    image: asclinux/linuxforphp-8.2-ultimate:7.4-nts
+    image: unlikelysource/simple_html
     volumes:
-     - ".:/srv/repo"
+     - ".:/repo"
     ports:
      - "8888:80"
     build: .
