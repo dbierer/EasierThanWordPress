@@ -72,7 +72,7 @@ Default: `/src/config/config.php`
 To get an HTML file to auto-populate with cards use this syntax:
 ```
 DELIM+DIR+DELIM
-``
+```
 Example: you have a subdirectory off `HTML_DIR` named `projects` and you want to load all HTML card files under the `cards` folder:
 ```
 %%PROJECTS%%
