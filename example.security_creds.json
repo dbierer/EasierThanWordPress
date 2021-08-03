@@ -1,6 +1,6 @@
 {
     "Dockerfile": {
-        "EMAIL_ADDR": "doug@unlikelysource.cpom",
+        "EMAIL_ADDR": "doug[at]unlikelysource.comm",
         "BASE_DIR": "\/srv\/tempo",
         "BACKUP_LOC": "backups",
         "DOC_ROOT": "public",
@@ -15,12 +15,6 @@
         "DB_PWD": "test",
         "DB_NAME": "test",
         "URL": "test.net"
-    },
-    "linuxforcomposer.json": {
-        "LFC_ACCOUNT": "LfPHP cloud services account",
-        "LFC_USERNAME": "LfPHP cloud services username",
-        "LFC_CONTAINER": "LfPHP cloud services container name",
-        "LFC_TOKEN": "LfPHP cloud services token"
     },
     "docker-compose.yml": {
         "COMPOSE_CONTAINER": "test_net",
