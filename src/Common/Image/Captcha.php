@@ -9,17 +9,30 @@ use SimpleHtml\Common\Image\SingleChar;
 use SimpleHtml\Common\Image\Strategy\ {LineFill,DotFill,Shadow,RotateText};
 class Captcha
 {
-    const NUM_BYTES = 4;
-    const FONT_FILE = SRC_DIR . '/fonts/FreeSansBold.ttf';
-    const IMG_DIR   = BASE_DIR . '/public/img/captcha';
+    public const DEFAULT_FONT_FILE = __DIR__ . '/fonts/FreeSansBold.ttf';
+    public const DEFAULT_IMG_DIR   = __DIR__;
+    public const DEFAULT_NUM_BYTES = 4;
+    public static $old_files = 360;     // # seconds old CAPTCHA files can remain
+    public static $num_bytes = 4;
+    public static $font_file = '';
+    public static $img_dir   = '';
     public static $min = 1000;  // used if only numbers
     public static $max = 9999;  // used if only numbers
+    public static $strategies = ['rotate', 'dot', 'line', 'shadow', 'line', 'dot', 'shadow'];
     public $token   = '';
     public $phrase  = '';
     public $images  = [];
-    public $strategies = ['rotate', 'line', 'line', 'dot', 'dot', 'shadow'];
     /**
-     * Writes out NUM_BYTES * 2 CAPTCHA images
+     * @param array $config
+     */
+    public function __construct(array $config)
+    {
+        self::$font_file = $config['font_file'] ?? self::DEFAULT_FONT_FILE;
+        self::$img_dir   = $config['img_dir']   ?? self::DEFAULT_IMG_DIR;
+        self::$num_bytes = $config['num_bytes'] ?? self::DEFAULT_NUM_BYTES;
+    }
+    /**
+     * Writes out $num_bytes * 2 CAPTCHA images
      *
      * @param string $token  : used to identify this user
      * @param bool $numbers  : numbers only
@@ -31,18 +44,18 @@ class Captcha
         if ($numbers) {
             $phrase = (string) random_int(self::$min, self::$max);
         } else {
-            $phrase = strtoupper(bin2hex(random_bytes(self::NUM_BYTES)));
+            $phrase = strtoupper(bin2hex(random_bytes(self::$num_bytes)));
         }
         $length = strlen($phrase);
         $images = [];
         for ($x = 0; $x < $length; $x++) {
-            $char = new SingleChar($phrase[$x], self::FONT_FILE);
+            $char = new SingleChar($phrase[$x], self::$font_file);
             $char->writeFill();
-            shuffle($this->strategies);
-            foreach ($this->strategies as $item) {
+            shuffle(self::$strategies);
+            foreach (self::$strategies as $item) {
                 switch ($item) {
                     case 'rotate' :
-                        RotateText::writeText($char, -25, 25);
+                        RotateText::writeText($char, -40, 40);
                         break;
                     case 'line' :
                         $num = rand(1, 20);
@@ -53,10 +66,10 @@ class Captcha
                         DotFill::writeFill($char, $num);
                         break;
                     case 'shadow' :
-                        $num = rand(1, 8);
-                        $red = rand(0x70, 0xEF);
+                        $num   = rand(1, 8);
+                        $red   = rand(0x70, 0xEF);
                         $green = rand(0x70, 0xEF);
-                        $blue = rand(0x70, 0xEF);
+                        $blue  = rand(0x70, 0xEF);
                         Shadow::writeText($char, $num, $red, $green, $blue);
                         break;
                     default :
@@ -65,23 +78,23 @@ class Captcha
             }
             $char->writeText();
             $fn = $x . '_' . $token . '.png';
-            $char->save(self::IMG_DIR . '/' . $fn);
+            $char->save(self::$img_dir . '/' . $fn);
             $this->images[] = $fn;
         }
         $this->phrase = $phrase;
         return $this->images;
     }
     /**
-     * Erase images older than 1 day
+     * Erase images older than self::$old_files number of seconds
      */
     public function __destruct()
     {
-        $iter = new \RecursiveDirectoryIterator(self::IMG_DIR);
+        $iter = new \RecursiveDirectoryIterator(self::$img_dir);
         $now = time();
-        $yesterday = $now - (60 * 60 * 24);
+        $expired = $now - self::$old_files;
         foreach ($iter as $name => $obj) {
             // find files older than 24 hours
-            if ($obj->isFile() && $obj->getCTime() < $yesterday) {
+            if ($obj->isFile() && $obj->getCTime() < $expired) {
                 unlink($name);
             }
         }

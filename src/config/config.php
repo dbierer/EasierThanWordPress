@@ -4,6 +4,8 @@ $config = [
     'LAYOUT' => 'layout.html',
     'HOST'   => '',
     'DELIM'  => '%%',
+    // use '' for CACHE if you want to disable it
+    'CACHE'  => str_replace('//', '/', BASE_DIR . '/logs/cache.txt'),
     'META' => [
         'default' => [
             'title' => 'SimpleHtml',

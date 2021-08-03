@@ -1,6 +1,7 @@
 <?php
 namespace SimpleHtml\Common\View;
 
+use ArrayIterator;
 use LimitIterator;
 use RecursiveDirectoryIterator;
 class Html
@@ -25,7 +26,7 @@ class Html
         $fn     = str_replace('//', '/', $this->htmlDir . '/' . $this->config['LAYOUT']);
         $layout = file_get_contents($fn);
         // inject meta + title tags
-        $meta = $this->config['META'][$this->uri] ?? $this->config['META']['default'];
+        $meta = $this->config['META'][$this->uri] ?? $this->config['META']['default'] ?? [];
         foreach ($meta as $tag => $val) {
             $this->injectMeta($layout, $tag, $val);
         }
@@ -107,7 +108,8 @@ class Html
         if (stripos($body, $search) !== FALSE) {
             $search = '!' . $this->config['DELIM'] . strtoupper($name) . '(.*?)?' . $this->config['DELIM'] . '!i';
             preg_match($search, $body, $matches);
-            $qualifier = $matches[1] ?? NULL;
+            $qualifier = $matches[1] ?? '';
+            $qualifier = trim($qualifier);
             // randomize linked list of cards
             if (empty($qualifier)) {
                 $iter = $this->getCardIterator($dir, $card_dir);
@@ -115,14 +117,14 @@ class Html
                 // get rid of "="
                 $qualifier = trim(str_replace('=', '', $qualifier));
                 // is it just a number?
-                if (ctype_digit($qualifier)) {
+                if (((int) $qualifier) > 0) {
                     $iter = $this->getCardIterator($dir, $card_dir);
                     $temp = clone $iter;
                     $iter = new LimitIterator($temp, 0, (int) $qualifier);
                     $iter->rewind();
-                // otherwise look for "::"
-                } elseif (strpos($qualifier, '::')) {
-                    $iter = $this->getOrderedCardIterator($qualifier);
+                // otherwise look for ","
+                } elseif (strpos($qualifier, ',') !== FALSE) {
+                    $iter = $this->getOrderedCardIterator($dir, $card_dir, $qualifier);
                 } else {
                     $iter = FALSE;
                 }
@@ -168,26 +170,20 @@ class Html
     /**
      * Produces ordered iteration of cards
      *
-     * @param string $qualifier  : something like "ORDER::php8_tech::/some/card/dir"
+     * @param string $dir  : current card dir we're working on
+     * @param string $card_dir : directory name for cards
+     * @param string $qualifier  : something like "adding_intelligence,talk_to_users,etc."
      * @return ArrayIterator $iter | bool FALSE
      */
-    public function getOrderedCardIterator(string $qualifier)
+    public function getOrderedCardIterator(string $dir, string $card_dir, string $qualifier)
     {
-        $keys = explode('::', $qualifier);
-        // last item should be a directory
-        $dir  = array_pop($keys);
-        // pull 1st key off list
-        $key  = array_shift($keys);
-        $list = $this->config[$key];
-        // navigate array until lowest level key is pulled
-        while(count($keys)) {
-            $key  = array_shift($keys);
-            $list = $list[$key];
-        }
         // build out directory path
+        $list = explode(',', $qualifier);
+        $path = $dir . '/' . $card_dir;
         foreach ($list as $key => $value) {
+            $value = trim($value);
             $value .= (substr($value, -4) !== 'html') ? '.html' : '';
-            $list[$key] = str_replace(['//','..'], ['/','.'], HTML_DIR . '/' . $value);
+            $list[$key] = str_replace(['//','..'], ['/','.'], $path . '/' . $value);
         }
         // return new iterator
         $iter = new ArrayIterator(array_values($list));

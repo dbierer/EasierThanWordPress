@@ -1,7 +1,5 @@
 # Simple HTML
-Really simple PHP app that build HTML files from HTML fragments.
-For more information on LfPHP Cloud Services:
-[https://lfphpcloud.net](https://lfphpcloud.net)
+Really simple PHP app that builds HTML files from HTML widgets.
 
 ## Update
 Use composer to update existing `/vendor` source code
@@ -20,10 +18,10 @@ php composer.phar update
     * `HTML_DIR`
     * `SRC_DIR`
 
-## Configure the management utlity `lfc.sh`
-Edit `lfc.sh` and change the value of the `NAME` variable
+## Configure the management utlity `admin.sh`
+Edit `admin.sh` and change the value of the `NAME` variable
 * If your website is called `http://my.supersite.com/` the short name would be `supersite`
-Edit `lfc.sh` and change the value of the `EXT` variable
+Edit `admin.sh` and change the value of the `EXT` variable
 * If your website is called `http://my.supersite.com/` the ext would be `com`
 
 ## Populate Credentials
@@ -35,11 +33,11 @@ Populate `security_cred.json` file with the appropriate information
 * Any info you don't have or will not use just leave blank
 Initialize run files with prompts:
 ```
-./lfc.sh creds templates/deployment
+./admin.sh creds templates/deployment
 ```
 Initialize run files no prompts:
 ```
-./lfc.sh creds templates/deployment --no-prompts
+./admin.sh creds templates/deployment --no-prompts
 ```
 
 ## To Run Locally Using PHP
@@ -53,36 +51,12 @@ php -S localhost:8888 -t public
 * Install Docker-Compose
 * Run this command:
 ```
-./lfc.sh up
+./admin.sh up
 ```
 * To stop the container:
 ```
-./lfc.sh down
+./admin.sh down
 ```
-
-## To Test Actual Deployment:
-Bring online:
-```
-./lfc.sh start
-```
-You can access your website on `http://locahost:8888/`
-
-Take off line:
-```
-./lfc.sh stop
-```
-
-## Deployment to LfPHP Cloud Services
-Bring online:
-```
-./lfc.sh deploy
-```
-If you see `200` or `201` codes you're good
-* Wait a few minutes for the deployment to complete
-* You can get an idea how long it will take to deploy by running `./lfc.sh start`
-
-If you see an error code
-* Test locally and debug
 
 ## Templates
 ### Config File
