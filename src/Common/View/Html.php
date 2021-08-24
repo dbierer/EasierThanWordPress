@@ -7,14 +7,18 @@ use RecursiveDirectoryIterator;
 class Html
 {
     const DEFAULT_CARD_DIR = 'cards';
+    const DEFAULT_LAYOUT   = 'layout.html';
+    const DEFAULT_DELIM    = '%%';
     public $uri    = '';
     public $htmDir = '';
+    public $delim  = '';
     public $config = [];
     public function __construct(array $config, string $uri, string $htmlDir)
     {
         $this->config  = $config;
         $this->uri     = $uri;
         $this->htmlDir = $htmlDir;
+        $this->delim   = $config['DELIM'] ?? static::DEFAULT_DELIM;
     }
     public function render(string $body = '')
     {
@@ -23,7 +27,8 @@ class Html
         $msg    = '';
         $output = '';
         $card   = '';
-        $fn     = str_replace('//', '/', $this->htmlDir . '/' . $this->config['LAYOUT']);
+        $layout = $this->config['LAYOUT'] ?? static::DEFAULT_LAYOUT;
+        $fn     = str_replace('//', '/', $this->htmlDir . '/' . $layout);
         $layout = file_get_contents($fn);
         // inject meta + title tags
         $meta = $this->config['META'][$this->uri] ?? $this->config['META']['default'] ?? [];
@@ -65,7 +70,7 @@ class Html
         }
 
         // render and deliver final output
-        $search   = $this->config['DELIM'] . 'CONTENTS' . $this->config['DELIM'];
+        $search   = $this->delim . 'CONTENTS' . $this->delim;
         $output   = str_replace($search, $body, $layout);
         // replace message if present
         if ($msg && strpos($output, $this->config['MSG_MARKER'])) {
@@ -85,7 +90,7 @@ class Html
     public function injectMeta(string &$body, string $tag, string $val)
     {
         $repl = 0;
-        $search = $this->config['DELIM'] . strtoupper($tag) . $this->config['DELIM'];
+        $search = $this->delim . strtoupper($tag) . $this->delim;
         if (strpos($body, $search)) {
             $body = str_replace($search, $val, $body);
             $repl++;
@@ -104,9 +109,9 @@ class Html
     {
         // randomize linked list of cards
         $name = basename($dir);
-        $search = $this->config['DELIM'] . strtoupper($name);
+        $search = $this->delim . strtoupper($name);
         if (stripos($body, $search) !== FALSE) {
-            $search = '!' . $this->config['DELIM'] . strtoupper($name) . '(.*?)?' . $this->config['DELIM'] . '!i';
+            $search = '!' . $this->delim . strtoupper($name) . '(.*?)?' . $this->delim . '!i';
             preg_match($search, $body, $matches);
             $qualifier = $matches[1] ?? '';
             $qualifier = trim($qualifier);
@@ -163,16 +168,16 @@ class Html
             shuffle($linked);
             foreach ($linked as $key)
                 $temp[$key] = $cards[$key];
-            $iter = new \ArrayIterator($temp);
+            $iter = new ArrayIterator($temp);
         }
         return $iter;
     }
     /**
      * Produces ordered iteration of cards
      *
-     * @param string $dir  : current card dir we're working on
-     * @param string $card_dir : directory name for cards
-     * @param string $qualifier  : something like "adding_intelligence,talk_to_users,etc."
+     * @param string $dir       : current card dir we're working on
+     * @param string $card_dir  : directory name for cards
+     * @param string $qualifier : something like "adding_intelligence,talk_to_users,etc."
      * @return ArrayIterator $iter | bool FALSE
      */
     public function getOrderedCardIterator(string $dir, string $card_dir, string $qualifier)

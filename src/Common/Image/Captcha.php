@@ -9,8 +9,8 @@ use SimpleHtml\Common\Image\SingleChar;
 use SimpleHtml\Common\Image\Strategy\ {LineFill,DotFill,Shadow,RotateText};
 class Captcha
 {
-    public const DEFAULT_FONT_FILE = __DIR__ . '/fonts/FreeSansBold.ttf';
-    public const DEFAULT_IMG_DIR   = __DIR__;
+    public const DEFAULT_FONT_FILE = __DIR__ . '/../../fonts/FreeSansBold.ttf';
+    public const DEFAULT_IMG_DIR   = __DIR__ . '/../../../public/img/captcha';
     public const DEFAULT_NUM_BYTES = 4;
     public static $old_files = 360;     // # seconds old CAPTCHA files can remain
     public static $num_bytes = 4;
@@ -25,11 +25,11 @@ class Captcha
     /**
      * @param array $config
      */
-    public function __construct(array $config)
+    public function __construct(array $config = [])
     {
-        self::$font_file = $config['font_file'] ?? self::DEFAULT_FONT_FILE;
-        self::$img_dir   = $config['img_dir']   ?? self::DEFAULT_IMG_DIR;
-        self::$num_bytes = $config['num_bytes'] ?? self::DEFAULT_NUM_BYTES;
+        self::$font_file = $config['font_file'] ?? static::DEFAULT_FONT_FILE;
+        self::$img_dir   = $config['img_dir']   ?? static::DEFAULT_IMG_DIR;
+        self::$num_bytes = $config['num_bytes'] ?? static::DEFAULT_NUM_BYTES;
     }
     /**
      * Writes out $num_bytes * 2 CAPTCHA images
@@ -42,16 +42,16 @@ class Captcha
     {
         // generate random hex number for CAPTCHA
         if ($numbers) {
-            $phrase = (string) random_int(self::$min, self::$max);
+            $phrase = (string) rand(static::$min, static::$max);
         } else {
-            $phrase = strtoupper(bin2hex(random_bytes(self::$num_bytes)));
+            $phrase = strtoupper(bin2hex(random_bytes(static::$num_bytes)));
         }
         $length = strlen($phrase);
         $images = [];
         for ($x = 0; $x < $length; $x++) {
-            $char = new SingleChar($phrase[$x], self::$font_file);
+            $char = new SingleChar($phrase[$x], static::$font_file);
             $char->writeFill();
-            shuffle(self::$strategies);
+            shuffle(static::$strategies);
             foreach (self::$strategies as $item) {
                 switch ($item) {
                     case 'rotate' :
@@ -78,7 +78,7 @@ class Captcha
             }
             $char->writeText();
             $fn = $x . '_' . $token . '.png';
-            $char->save(self::$img_dir . '/' . $fn);
+            $char->save(static::$img_dir . '/' . $fn);
             $this->images[] = $fn;
         }
         $this->phrase = $phrase;
@@ -89,7 +89,7 @@ class Captcha
      */
     public function __destruct()
     {
-        $iter = new \RecursiveDirectoryIterator(self::$img_dir);
+        $iter = new \RecursiveDirectoryIterator(static::$img_dir);
         $now = time();
         $expired = $now - self::$old_files;
         foreach ($iter as $name => $obj) {

@@ -84,15 +84,9 @@ Example: you have a subdirectory off `HTML_DIR` named `features` and you want to
 %%FEATURES=3%%
 ```
 #### Auto-Populate Specified Cards in a Certain Order
-Add an entry in `/src/config/config` as follows:
+For each card, only use the base filename, no extension (i.e. do not add `.html`).
+Example: you have a directory `HTML_DIR/blog/cards` with files `one.html`, `two.html`, `three.html`, etc.
+You want the cards to be loaded in the order `one.html`, `two.html`, `three.html`, etc.:
 ```
-'ORDER' => [
-    'KEY' => ['CARD1','CARD2', etc.],
-],
-```
-* For each card, only use the base filename, no extension (i.e. do not add `.html`).
-Example: you have a directory `HTML_DIR/bundles/cards` and you want the cards to be loaded in a certain order.
-The config file KEY is `ORDER => php8_tech`:
-```
-%%BUNDLES=ORDER::php8_tech::/bundles/cards%%
+%%BUNDLES=one,two,three,etc.%%
 ```

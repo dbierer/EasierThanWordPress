@@ -3,7 +3,7 @@ services:
   %%URL%%:
     container_name: %%COMPOSE_CONTAINER%%
     hostname: %%URL%%
-    image: unlikelysource/simple_html
+    image: unlikelysource/%%COMPOSE_CONTAINER%%
     volumes:
      - ".:/repo"
     ports:

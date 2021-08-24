@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Finishing Apache setup ..."
 mv -f /srv/www /srv/www.OLD
-ln -sfv /repo /srv/www
+ln -sfv /repo/public /srv/www
 chown apache:apache /srv/www
 chgrp -R apache /repo
 chmod -R 775 /repo

@@ -9,8 +9,8 @@ $config = [
     'META' => [
         'default' => [
             'title' => 'SimpleHtml',
-            'keywords' => 'php, php 8, cloud services, lfphpclout',
-            'description'  => 'My super fantastic website',
+            'keywords' => 'php, html, simple',
+            'description'  => 'Once installed all you need to do is to upload HTML snippets into the site templates folder',
         ],
     ],
     'STORAGE' => [
