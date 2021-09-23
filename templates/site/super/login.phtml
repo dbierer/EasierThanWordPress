@@ -1,5 +1,7 @@
 <?php
 use SimpleHtml\Common\Image\Captcha;
+use SimpleHtml\Common\Security\Profile;
+use SimpleHtml\Common\Generic\Registry;
 // process contact post (if any)
 // $OBJ == calling instance
 if (!empty($OBJ)) {
@@ -7,9 +9,9 @@ if (!empty($OBJ)) {
     $config = $OBJ->config;
 }
 $hashKey = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
-$max = $config['SUPER']['attempts'] ?? 3;
-$msg = 'Enter your login information';
-$other = [];
+$max     = $config['SUPER']['attempts'] ?? 3;
+$msg     = Registry::get('msg') ?? 'Enter your login information';
+$other   = [];
 if ($_POST) {
     // capture login params
     $name   = $_POST['name']     ?? 'Default';
@@ -34,14 +36,14 @@ if ($_POST) {
     }
     if ($valid === $expected) {
         // store md5 of selected $_SERVER array settings
-        $_SESSION['super'] = '';
+        Profile::set(Profile::build($config));
         // redirect to "super" area
         header('Location: /super/edit');
         exit;
     } else {
         $msg = $config['SUPER']['message'] ?? 'Unable to login';
     }
-    $msg = var_export($_POST, TRUE);
+    $msg .= var_export($_POST, TRUE);
     $msg .= var_export($_SESSION, TRUE);
 }
 // login attempt control
@@ -93,7 +95,7 @@ $_SESSION[$hashKey] = $hash;
                             </label>
 
                             <div class="input-group">
-                                <input class="form-control" name="name" id="name" required="1" placeholder="John Doe" type="text">
+                                <input class="form-control" name="name" id="name" required="1" placeholder="John Doe" type="text" />
                             </div>
                         </div>
                     </div>
@@ -108,7 +110,7 @@ $_SESSION[$hashKey] = $hash;
                             </label>
 
                             <div class="input-group">
-                                <input class="form-control" name="password" id="password" required="1" placeholder="Password" type="password">
+                                <input class="form-control" name="password" id="password" required="1" placeholder="Password" type="password" />
                             </div>
                         </div>
                     </div>
@@ -124,7 +126,7 @@ $_SESSION[$hashKey] = $hash;
                             </label>
 
                             <div class="input-group">
-                                <input class="form-control" name="other" id="other" required="1" placeholder="<?= ucfirst($other) ?>" type="text">
+                                <input class="form-control" name="other" id="other" required="1" placeholder="<?= ucfirst($other) ?>" type="text" />
                             </div>
                         </div>
                     </div>
@@ -136,8 +138,8 @@ $_SESSION[$hashKey] = $hash;
                     &nbsp;&nbsp;Prove you're human! Enter the characters below:<br />&nbsp;&nbsp;
                     <?php foreach ($images as $fn) : ?><img src="/img/captcha/<?= $fn; ?>" style="width:50px;height:auto;" /><?php endforeach; ?>
                     &nbsp;<input type="text" name="phrase" placeholder="I'm not a robot" /><br /><br />
-                    <input type="hidden" id="source" name="source" value="<?= $config['HOST'] . $uri; ?>">
-                    <input name="submit" type="submit" class="btn btn-primary btn-circled" value="Login">
+                    <input type="hidden" id="source" name="source" value="<?= $config['HOST'] . $uri; ?>" />
+                    <input name="submit" type="submit" class="btn btn-primary btn-circled" value="Login" />
 
                 </div>
             </form>

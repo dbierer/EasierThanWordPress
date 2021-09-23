@@ -1,35 +1,115 @@
 <?php
+use SimpleHtml\Common\Page\Edit;
+use SimpleHtml\Common\Security\Profile;
+use SimpleHtml\Common\Generic\Registry;
 // process contact post (if any)
 // $OBJ == calling instance
 if (!empty($OBJ)) {
     $uri    = $OBJ->uri;
     $config = $OBJ->config;
 }
-// confirm that $_SESSION['super'] matches selected $_SERVER settings
+// check to see if authenticated
+if (Profile::verify() === FALSE) {
+    Registry::set('msg', 'Unable to authenticate');
+    header('Location: /super/login');
+    exit;
+}
+// init vars
+$edit     = new Edit($config);
+$contents = '';
+// check to make sure user is "super"
+$msg = $_SESSION['super'] ?? '';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>Content Editor</title>
-<meta name="generator" content="Geany 1.36" />
-</head>
-<body>
-<form method="post" name="choice">
-<h3>Create New Page</h3>
-<table>
-<tr><th>Title</th><td><input type="text" name="add_title" title="Title for this page" /></td></tr>
-<tr><th>Folder (optional)</th><td><input type="text" name="add_folder" title="Leave this blank if you want this page to appear off the main URL" /></td></tr>
-<tr><td><input type="submit" name="add_submit" value="Add New Page" /></td></tr>
-</table>
-<h3>Edit Existing Page</h3>
-<table>
-<tr><th>URL</th><td><input type="text" name="edit_url" title="Enter the URL for the page you want to edit" /></td></tr>
-<tr><td><input type="submit" name="edit_submit" value="Edit Page" /></td></tr>
-</table>
-</form>
-<script src="https://cdn.ckeditor.com/4.16.1/standard/ckeditor.js"></script>
-</body>
+  <!-- Header -->
+  <header class="bg-primary py-5 mb-5">
+    <div class="container h-100">
+      <div class="row h-100 align-items-center">
+        <div class="col-lg-12">
+          <h1 class="display-4 text-white mt-5 mb-2">Edit</h1>
+          <p class="lead mb-5 text-white-50">Use this page to edit web pages.</p>
+        </div>
+      </div>
+    </div>
+  </header>
 
-</html>
+  <div class="container">
+    <div class="row">
+        <div class="col-lg-6">
+            <!-- Edit Form -->
+            <form class="contact_form" action="/super/edit" method="post">
+                <div class="row">
+                    <!-- Input -->
+                    <div class="col-sm-12 mb-12">
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                Enter Page URL
+                                <span class="text-danger">*</span>
+                            </label>
 
+                            <div class="input-group">
+                                <input class="form-control" name="page_url" id="page_url" required="1" placeholder="http://company.com/page/title" type="text" />
+                                <input class="form-control" name="page_new" id="page_new" title="Checkmark this if it's a new page" type="checkbox" value="1" />
+                                New Page
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Input -->
+                </div>
+                <div class="row">
+                    <!-- Input -->
+                    <div class="col-sm-12 mb-12">
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                Page Editor
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+                                <textarea id="page_edit" type="textarea" name="page_edit" rows="20" cols="70"><?= $contents ?></textarea><br><br>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Input -->
+
+                    <?php if (!empty($other)) : ?>
+                    <!-- Input -->
+                    <div class="col-sm-6 mb-6">
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                <?= ucfirst($other) ?>
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+                                <input class="form-control" name="other" id="other" required="1" placeholder="<?= ucfirst($other) ?>" type="text">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Input -->
+                    <?php endif; ?>
+
+                <div class="">
+                    <input name="submit" type="submit" class="btn btn-primary btn-circled" value="Submit">
+                </div>
+            </form>
+            <!-- End Edit Form -->
+           <!-- form message -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-success contact__msg">
+                        <?= $msg ?>
+                    </div>
+                </div>
+            </div>
+            <!-- end message -->
+        </div>
+
+    </div>
+  </div>
+    <script src="https://cdn.ckeditor.com/4.16.1/standard/ckeditor.js"></script>
+    <script type="text/javascript">
+    CKEDITOR.replace('page_edit', {
+        startupFocus: true,
+        filebrowserUploadUrl: '/super/upload'
+    });
+    </script>

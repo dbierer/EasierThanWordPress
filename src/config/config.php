@@ -15,11 +15,11 @@ $config = [
     ],
     'SUPER' => [
         'username' => 'admin',
-        'password' => 'Sup5rSecr5t!',
+        'password' => 'password',
         'attempts' => 3,
         'message'  => 'Sorry! Unable to login.  Please contact your administrator',
         // array of $_SERVER keys to store in session if authenticated
-        'settings' => [],
+        'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE','HTTP_COOKIE'],
         'validation' => [
             'City' => 'London',
             'Postal Code' => '12345',
