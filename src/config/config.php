@@ -13,6 +13,19 @@ $config = [
             'description'  => 'Once installed all you need to do is to upload HTML snippets into the site templates folder',
         ],
     ],
+    'SUPER' => [
+        'username' => 'admin',
+        'password' => 'Sup5rSecr5t!',
+        'attempts' => 3,
+        'message'  => 'Sorry! Unable to login.  Please contact your administrator',
+        // array of $_SERVER keys to store in session if authenticated
+        'settings' => [],
+        'validation' => [
+            'City' => 'London',
+            'Postal Code' => '12345',
+            'Last Name' => 'Smith',
+        ]
+    ],
     'STORAGE' => [
         'db_host' => 'localhost',
         'db_name' => 'REPL_DB_NAME',

@@ -1,0 +1,35 @@
+<?php
+// process contact post (if any)
+// $OBJ == calling instance
+if (!empty($OBJ)) {
+    $uri    = $OBJ->uri;
+    $config = $OBJ->config;
+}
+// confirm that $_SESSION['super'] matches selected $_SERVER settings
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Content Editor</title>
+<meta name="generator" content="Geany 1.36" />
+</head>
+<body>
+<form method="post" name="choice">
+<h3>Create New Page</h3>
+<table>
+<tr><th>Title</th><td><input type="text" name="add_title" title="Title for this page" /></td></tr>
+<tr><th>Folder (optional)</th><td><input type="text" name="add_folder" title="Leave this blank if you want this page to appear off the main URL" /></td></tr>
+<tr><td><input type="submit" name="add_submit" value="Add New Page" /></td></tr>
+</table>
+<h3>Edit Existing Page</h3>
+<table>
+<tr><th>URL</th><td><input type="text" name="edit_url" title="Enter the URL for the page you want to edit" /></td></tr>
+<tr><td><input type="submit" name="edit_submit" value="Edit Page" /></td></tr>
+</table>
+</form>
+<script src="https://cdn.ckeditor.com/4.16.1/standard/ckeditor.js"></script>
+</body>
+
+</html>
+
