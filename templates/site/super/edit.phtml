@@ -1,7 +1,7 @@
 <?php
 use SimpleHtml\Common\Page\Edit;
 use SimpleHtml\Common\Security\Profile;
-use SimpleHtml\Common\Generic\Registry;
+use SimpleHtml\Common\Generic\Messages;
 // process contact post (if any)
 // $OBJ == calling instance
 if (!empty($OBJ)) {
@@ -10,8 +10,10 @@ if (!empty($OBJ)) {
 }
 // check to see if authenticated
 if (Profile::verify() === FALSE) {
-    Registry::set('msg', 'Unable to authenticate');
-    header('Location: /super/login');
+    Profile::logout();
+    $message = Messages::getInstance();
+    $message->addMessage('Unable to authenticate');
+    header('Location: /');
     exit;
 }
 // init vars

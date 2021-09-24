@@ -1,3 +1,9 @@
+<?php
+use SimpleHtml\Common\Generic\Messages;
+$message = Messages::getInstance();
+$msg = $message->getMessages();
+?>
+
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
     <div class="container h-100">
@@ -45,6 +51,14 @@
     %%SERVICES=3%%
     </div>
     <!-- /.row -->
+
+    <?php if (!empty($msg)) : ?>
+    <div class="row">
+        <div class="col-md-12">
+            <?= $msg; ?>
+        </div>
+    </div>
+    <?php endif; ?>
 
   </div>
   <!-- /.container -->

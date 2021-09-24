@@ -1,16 +1,19 @@
 <?php
 use SimpleHtml\Common\Image\Captcha;
 use SimpleHtml\Common\Security\Profile;
-use SimpleHtml\Common\Generic\Registry;
+use SimpleHtml\Common\Generic\Messages;
 // process contact post (if any)
 // $OBJ == calling instance
+$uri = '';
+$config = [];
 if (!empty($OBJ)) {
     $uri    = $OBJ->uri;
     $config = $OBJ->config;
 }
+Profile::logout();
 $hashKey = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
-$max     = $config['SUPER']['attempts'] ?? 3;
-$msg     = Registry::get('msg') ?? 'Enter your login information';
+$message = Messages::getInstance();
+$msg     = $message->getMessages() ?? 'Enter your login information';
 $other   = [];
 if ($_POST) {
     // capture login params
@@ -43,10 +46,13 @@ if ($_POST) {
     } else {
         $msg = $config['SUPER']['message'] ?? 'Unable to login';
     }
+    $msg .= '<br />' . PHP_EOL;
     $msg .= var_export($_POST, TRUE);
+    $msg .= '<br />' . PHP_EOL;
     $msg .= var_export($_SESSION, TRUE);
 }
 // login attempt control
+$max      = $config['SUPER']['attempts'] ?? 3;
 $attempts = $_SESSION['attempts'] ?? 0;
 $_SESSION['attempts'] = ++$attempts;
 if ($attempts > $max) {

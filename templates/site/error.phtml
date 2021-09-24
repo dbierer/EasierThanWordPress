@@ -1,4 +1,8 @@
-  <?php $msg = \SimpleHtml\Common\Generic\Registry::getItem('msg') ?? 'Unknown Error'; ?>
+  <?php
+  use SimpleHtml\Common\Generic\Messages;
+  $message = Messages::getInstance();
+  $msg = $message->getMessages() ?? 'Unknown Error';
+  ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
     <div class="container h-100">

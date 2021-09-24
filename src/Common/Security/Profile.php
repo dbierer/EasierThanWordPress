@@ -25,6 +25,15 @@ class Profile
         return md5($info);
     }
     /**
+     * Sets $_SESSION[PROFILE_KEY] to NULL
+     *
+     * @return void
+     */
+    public static function logout()
+    {
+        $_SESSION[self::PROFILE_KEY] = NULL;
+    }
+    /**
      * Saves MD5 hash in $_SESSION[PROFILE_KEY]
      *
      * @param string $hash : generated hash

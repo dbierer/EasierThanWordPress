@@ -4,6 +4,7 @@ namespace SimpleHtml\Common\Generic;
 use ArrayObject;
 class Registry
 {
+    const MSG_KEY = 'messages';
     public static $storage = NULL;
     public static function getStorage()
     {

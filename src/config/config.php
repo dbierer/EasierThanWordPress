@@ -2,6 +2,7 @@
 $config = [
     'CARDS'  => 'cards',
     'LAYOUT' => 'layout.html',
+    'HOME'   => 'home.phtml',   // default home page
     'HOST'   => '',
     'DELIM'  => '%%',
     // use '' for CACHE if you want to disable it
@@ -20,7 +21,14 @@ $config = [
         'message'  => 'Sorry! Unable to login.  Please contact your administrator',
         // array of $_SERVER keys to store in session if authenticated
         'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE','HTTP_COOKIE'],
-        'validation' => [
+        // change the values to reflect the names of fiels in your login.phtml form
+        'login_fields' => [
+            'name'     => 'name',
+            'password' => 'password',
+            'other'    => 'other',
+            'phrase'   => 'phrase',     // CAPTCHA phrase
+        ],
+        'validation'   => [
             'City' => 'London',
             'Postal Code' => '12345',
             'Last Name' => 'Smith',

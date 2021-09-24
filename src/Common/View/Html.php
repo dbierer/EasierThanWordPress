@@ -8,6 +8,7 @@ class Html
 {
     const DEFAULT_CARD_DIR = 'cards';
     const DEFAULT_LAYOUT   = 'layout.html';
+    const DEFAULT_HOME     = 'index.html';
     const DEFAULT_DELIM    = '%%';
     public $uri    = '';
     public $htmDir = '';
@@ -23,7 +24,6 @@ class Html
     public function render(string $body = '')
     {
         // pull in layout and body
-        $OBJ    = $this;
         $msg    = '';
         $output = '';
         $card   = '';
@@ -44,15 +44,17 @@ class Html
                 $bodyFn = $this->htmlDir . $this->uri . '.phtml';
                 // if phtml, use "include" + output buffering to grab contents
                 if (file_exists($bodyFn)) {
-                    ob_start();
-                    include $bodyFn;
-                    $body = ob_get_contents();
-                    ob_end_clean();
+                    $body = $this->runPhpFile($bodyFn);
                 // fallback: just go home
                 } else {
                     $this->uri = '/home';
-                    $bodyFn = $this->htmlDir . '/home.html';
-                    $body = file_get_contents($bodyFn);
+                    $home   = $this->config['HOME'] ?? self::DEFAULT_HOME;
+                    $bodyFn = $this->htmlDir . '/' . $home;
+                    if (substr($bodyFn, -5) === 'phtml') {
+                        $body = $this->runPhpFile($bodyFn);
+                    } else {
+                        $body = file_get_contents($bodyFn);
+                    }
                 }
             }
         }
@@ -193,5 +195,20 @@ class Html
         // return new iterator
         $iter = new ArrayIterator(array_values($list));
         return $iter;
+    }
+    /**
+     * Produces output from "phtml" or "php" files
+     *
+     * @param string $fn
+     * @return string HTML
+     */
+    protected function runPhpFile(string $fn)
+    {
+        $OBJ = $this;
+        ob_start();
+        include $fn;
+        $body = ob_get_contents();
+        ob_end_clean();
+        return $body;
     }
 }
