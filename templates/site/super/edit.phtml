@@ -17,6 +17,7 @@ if (Profile::verify($config) === FALSE) {
     exit;
 }
 // init vars
+$key      = '';
 $edit     = new Edit($config);
 $contents = '';
 $message  = Messages::getInstance();
@@ -26,15 +27,20 @@ $action = (!empty($_POST['new_page'])) ? 'add' : 'edit';
 if ($action === 'edit') {
     $key = $_POST['page_key'] ?? '';
     // get page contents via key
-    if (!empty($_POST['page_key'])) {
-        $contents = $edit->getContentsFromPage($_POST['page_key'], HTML_DIR);
+    if (!empty($_POST['save'])) {
+        $data = $_POST['page_content'] ?? '';
+        if (!$edit->save($key, $data)) {
+            $messages->addMessage(Edit::ERROR_SAVE);
+        } else {
+            $messages->addMessage(Edit::SUCCESS_SAVE);
+        }
+    } elseif (!empty($key)) {
+        $contents = $edit->getContentsFromPage($key, HTML_DIR);
     // get page contents via url
     } elseif (!empty($_POST['page_url'])) {
         $key = $edit->getKeyFromURL($_POST['page_url']);
         $contents = $edit->getContentsFromPage($key, HTML_DIR);
-    // save data?
-    } elseif (!empty($_POST['save'])) {
-        $messages->addMessage();
+    // save data
     }
 }
 // get messages
@@ -69,7 +75,8 @@ $msg = $message->getMessages() ?? var_export($_GET, TRUE);
                             </label>
 
                             <div class="input-group">
-                                <textarea id="page_edit" type="textarea" name="page_edit" rows="20" cols="70"><?= $contents ?></textarea><br><br>
+                                <textarea id="page_content" type="textarea" name="page_content" rows="20" cols="70"><?= $contents ?></textarea>
+                                <input type="hidden" name="page_key" value="<?= $key ?>" />
                             </div>
                         </div>
                     </div>
@@ -77,7 +84,7 @@ $msg = $message->getMessages() ?? var_export($_GET, TRUE);
                 </div>
                 <div class="row">
                     <!-- Input -->
-                    <div class="col-sm-6 mb-6">
+                    <div class="col-sm-12 mb-12">
                         <div class="form-group">
                             <div class="input-group">
                                 <input name="save" type="submit" class="btn btn-primary btn-circled" value="Save">
@@ -103,7 +110,7 @@ $msg = $message->getMessages() ?? var_export($_GET, TRUE);
   </div>
     <script src="https://cdn.ckeditor.com/4.16.1/standard/ckeditor.js"></script>
     <script type="text/javascript">
-    CKEDITOR.replace('page_edit', {
+    CKEDITOR.replace('page_content', {
         startupFocus: true,
         filebrowserUploadUrl: '/super/upload'
     });

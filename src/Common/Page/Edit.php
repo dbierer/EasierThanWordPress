@@ -168,4 +168,29 @@ class Edit
                 $html = file_get_contents($pages[$key]);
             return $html;
     }
+    public function save(string $key, string $contents) : bool
+    {
+        // use Tidy to sanitize
+        $ok = 0;
+        if (function_exists('tidy_repair_string')) {
+            $fixed = tidy_repair_string($contents);
+            // extract content between <body>*</body> tags
+            [$first, $last] = explode('<body>', $fixed);
+            $pos   = strpos('</body>', $last);
+            $contents = substr($last, 0, $pos);
+        }
+        // check to see if it's an existing file
+        $pages = $this->getListOfPages($path);
+        $fn    = $pages[$key] ?? '';
+        // file already exists, overwrite it
+        if (file_exists($fn)) {
+            $ok = file_put_contents($fn, $contents);
+        } else {
+            // if key doesn't exist, it's a new file
+            // split key to get directory and filename
+            // create directory if needed
+            // save to file
+        }
+        return (bool) $ok;
+    }
 }
