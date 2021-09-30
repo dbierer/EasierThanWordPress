@@ -13,6 +13,13 @@ class EditTest extends TestCase
         $config = include __DIR__ . '/../../../src/config/config.php';
         $this->edit = new Edit($config);
     }
+    public function testGetKeyFromURL()
+    {
+        $url = 'https://unlikelysource.com/test1';
+        $expected = '/test1';
+        $actual   = $this->edit->getKeyFromURL($url, $this->testFileDir);
+        $this->assertEquals($expected, $actual, 'Edit::getKeyFromURL() does not produce expected key');
+    }
     public function testGetKeyFromFilename()
     {
         $fn  = $this->testFileDir . '/test1.html';

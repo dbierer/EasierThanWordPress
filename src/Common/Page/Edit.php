@@ -37,7 +37,9 @@ use RecursiveIteratorIterator;
 use FilterIterator;
 class Edit
 {
-    const DEFAULT_EXT = ['html', 'htm'];
+    const DEFAULT_EXT  = ['html', 'htm'];
+    const SUCCESS_SAVE = 'SUCCESS: page saved successfully';
+    const ERROR_SAVE   = 'ERROR: unable to save page';
     public $allowed = [];   // allowed extensions
     public $config  = [];
     public $pages   = [];
@@ -62,6 +64,21 @@ class Edit
      * @return $key        : sanitized filename
      */
     public function getKeyFromFilename(string $fn, string $path)
+    {
+        $key = str_replace($path, '', $fn);
+        if ($key[0] !== '/') $key = '/' . $key;
+        foreach ($this->allowed as $ext)
+            $key = str_ireplace('.' . $ext, '', $key);
+        return $key;
+    }
+    /**
+     * Returns filename from key
+     *
+     * @param $key        : sanitized filename
+     * @param string $path : usually HTML_DIR
+     * @return string $fn   : filename
+     */
+    public function getFilenameFromKey(string $key, string $path)
     {
         $key = str_replace($path, '', $fn);
         if ($key[0] !== '/') $key = '/' . $key;
@@ -117,9 +134,22 @@ class Edit
      */
     public function getPageFromURL(string $url, string $path = HTML_DIR) : string
     {
-        $key  = parse_url($url, PHP_URL_PATH) ?? '';
-        if ($key[0] !== '/') $key = '/' . $key;
+        $key  = $this->getKeyFromURL($url);
         return $this->getContentsFromPage($key, $path);
+    }
+    /**
+     * Builds a page key from a URL
+     * If page doesn't exist, returns empty string
+     *
+     * @param string $url   : URL used to view page
+     * @param string $path  : starting path (if other than HTML_DIR
+     * @return string $key  : key in $this->pages
+     */
+    public function getKeyFromURL(string $url, string $path = HTML_DIR) : string
+    {
+        $key  = parse_url($url, PHP_URL_PATH) ?? ' ';
+        if ($key[0] !== '/') $key = '/' . $key;
+        return trim($key);
     }
     /**
      * Returns contents of file listed in $this->pages

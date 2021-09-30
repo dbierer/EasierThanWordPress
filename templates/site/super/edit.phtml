@@ -19,9 +19,26 @@ if (Profile::verify($config) === FALSE) {
 // init vars
 $edit     = new Edit($config);
 $contents = '';
+$message  = Messages::getInstance();
+// determine action
+$action = (!empty($_POST['new_page'])) ? 'add' : 'edit';
+// if edit, get contents
+if ($action === 'edit') {
+    $key = $_POST['page_key'] ?? '';
+    // get page contents via key
+    if (!empty($_POST['page_key'])) {
+        $contents = $edit->getContentsFromPage($_POST['page_key'], HTML_DIR);
+    // get page contents via url
+    } elseif (!empty($_POST['page_url'])) {
+        $key = $edit->getKeyFromURL($_POST['page_url']);
+        $contents = $edit->getContentsFromPage($key, HTML_DIR);
+    // save data?
+    } elseif (!empty($_POST['save'])) {
+        $messages->addMessage();
+    }
+}
 // get messages
-$message = Messages::getInstance();
-$msg     = $message->getMessages() ?? var_export($_GET, TRUE);
+$msg = $message->getMessages() ?? var_export($_GET, TRUE);
 ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
@@ -42,41 +59,6 @@ $msg     = $message->getMessages() ?? var_export($_GET, TRUE);
             <form class="contact_form" action="/super/edit" method="post">
                 <div class="row">
 
-                    <!-- Input -->
-                    <div class="col-sm-12 mb-12">
-                        <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                Enter Page URL (or choose from Page List)
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <div class="input-group">
-                                <input class="form-control" name="page_url" id="page_url" size=60 placeholder="http://company.com/page/title" type="text" />
-                            </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Input -->
-
-                    <!-- Input -->
-                    <div class="col-sm-12 mb-12">
-                        <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                Choose from Page List (or Enter Page URL)
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <div class="input-group">
-                                <?= $select ?>
-                            </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Input -->
-
-                                <input class="form-control" name="page_new" id="page_new" title="Checkmark this if it's a new page" type="checkbox" value="1" />
-                                New Page
-                </div>
                 <div class="row">
                     <!-- Input -->
                     <div class="col-sm-12 mb-12">
@@ -92,26 +74,17 @@ $msg     = $message->getMessages() ?? var_export($_GET, TRUE);
                         </div>
                     </div>
                     <!-- End Input -->
-
-                    <?php if (!empty($other)) : ?>
+                </div>
+                <div class="row">
                     <!-- Input -->
                     <div class="col-sm-6 mb-6">
                         <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                <?= ucfirst($other) ?>
-                                <span class="text-danger">*</span>
-                            </label>
-
                             <div class="input-group">
-                                <input class="form-control" name="other" id="other" required="1" placeholder="<?= ucfirst($other) ?>" type="text">
+                                <input name="save" type="submit" class="btn btn-primary btn-circled" value="Save">
                             </div>
                         </div>
                     </div>
                     <!-- End Input -->
-                    <?php endif; ?>
-
-                <div class="">
-                    <input name="submit" type="submit" class="btn btn-primary btn-circled" value="Submit">
                 </div>
             </form>
             <!-- End Edit Form -->
