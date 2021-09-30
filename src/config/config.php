@@ -32,7 +32,8 @@ $config = [
             'City' => 'London',
             'Postal Code' => '12345',
             'Last Name' => 'Smith',
-        ]
+        ],
+        'allowed_ext'  => ['html','htm'],
     ],
     'STORAGE' => [
         'db_host' => 'localhost',

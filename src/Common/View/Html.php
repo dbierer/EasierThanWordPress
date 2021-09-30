@@ -10,16 +10,19 @@ class Html
     const DEFAULT_LAYOUT   = 'layout.html';
     const DEFAULT_HOME     = 'index.html';
     const DEFAULT_DELIM    = '%%';
+    const DEFAULT_EXT      = ['html', 'htm'];
     public $uri    = '';
     public $htmDir = '';
     public $delim  = '';
     public $config = [];
+    public $allowed = [];   // allowed extensions
     public function __construct(array $config, string $uri, string $htmlDir)
     {
         $this->config  = $config;
         $this->uri     = $uri;
         $this->htmlDir = $htmlDir;
         $this->delim   = $config['DELIM'] ?? static::DEFAULT_DELIM;
+        $this->allowed = $config['SUPER']['allowed_ext'] ?? self::DEFAULT_EXT;
     }
     public function render(string $body = '')
     {
@@ -37,10 +40,16 @@ class Html
         }
         // work with body: if html, just read contents
         if (!$body) {
-            $bodyFn = $this->htmlDir . $this->uri . '.html';
-            if (file_exists($bodyFn)) {
-                $body = file_get_contents($bodyFn);
-            } else {
+            // try HTML and HTM extensions
+            foreach ($this->allowed as $ext) {
+                $bodyFn = $this->htmlDir . $this->uri . '.' . $ext;
+                if (file_exists($bodyFn)) {
+                    $body = file_get_contents($bodyFn);
+                    break;
+                }
+            }
+            // if $body still not populated, try PHTML
+            if (!$body) {
                 $bodyFn = $this->htmlDir . $this->uri . '.phtml';
                 // if phtml, use "include" + output buffering to grab contents
                 if (file_exists($bodyFn)) {

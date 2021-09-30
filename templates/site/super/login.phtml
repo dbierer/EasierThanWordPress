@@ -41,15 +41,11 @@ if ($_POST) {
         // store md5 of selected $_SERVER array settings
         Profile::set(Profile::build($config));
         // redirect to "super" area
-        header('Location: /super/edit');
+        header('Location: /super/choose');
         exit;
     } else {
         $msg = $config['SUPER']['message'] ?? 'Unable to login';
     }
-    $msg .= '<br />' . PHP_EOL;
-    $msg .= var_export($_POST, TRUE);
-    $msg .= '<br />' . PHP_EOL;
-    $msg .= var_export($_SESSION, TRUE);
 }
 // login attempt control
 $max      = $config['SUPER']['attempts'] ?? 3;
