@@ -3,15 +3,15 @@ use SimpleHtml\Common\Page\Edit;
 use SimpleHtml\Common\Security\Profile;
 use SimpleHtml\Common\Generic\Messages;
 // process contact post (if any)
-// $OBJ == calling instance
+// $OBJ == calling instance (usually from /public/index.php)
 if (!empty($OBJ)) {
     $uri    = $OBJ->uri;
     $config = $OBJ->config;
 }
 // check to see if authenticated
+$message  = Messages::getInstance();
 if (Profile::verify($config) === FALSE) {
     Profile::logout();
-    $message = Messages::getInstance();
     $message->addMessage('Unable to authenticate');
     header('Location: /');
     exit;
@@ -20,38 +20,65 @@ if (Profile::verify($config) === FALSE) {
 $key      = '';
 $edit     = new Edit($config);
 $contents = '';
-$message  = Messages::getInstance();
+$edit_width = $config['SUPER']['ckeditor']['width'] ?? 900;
+$edit_height = $config['SUPER']['ckeditor']['height'] ?? 500;
+// acquire key
+$key = $_REQUEST['page_key'] ?? '';
+if (empty($key)) {
+    $page_url = $_REQUEST['page_url'] ?? '';
+    $key = $edit->getKeyFromURL($page_url);
+}
 // determine action
-$action = (!empty($_POST['new_page'])) ? 'add' : 'edit';
-// if edit, get contents
-if ($action === 'edit') {
-    $key = $_POST['page_key'] ?? '';
-    // get page contents via key
-    if (!empty($_POST['save'])) {
-        $data = $_POST['page_content'] ?? '';
-        if (!$edit->save($key, $data)) {
-            $messages->addMessage(Edit::ERROR_SAVE);
+if (!empty($_POST)) {
+    // cancel option
+    if (isset($_POST['cancel'])) {
+        $message->addMessage(Edit::SUCCESS_CANCEL);
+    } elseif (isset($_POST['save']) && $_POST['save'] === 'Delete') {
+        if (isset($_POST['page_del']) && $_POST['page_del'] === 'Y') {
+            if ($edit->delete($key)) {
+                $message->addMessage(Edit::ERROR_DEL);
+            } else {
+                $message->addMessage(Edit::SUCCESS_DEL);
+            }
         } else {
-            $messages->addMessage(Edit::SUCCESS_SAVE);
+            $message->addMessage(Edit::SUCCESS_CANCEL);
         }
-    } elseif (!empty($key)) {
-        $contents = $edit->getContentsFromPage($key, HTML_DIR);
-    // get page contents via url
-    } elseif (!empty($_POST['page_url'])) {
-        $key = $edit->getKeyFromURL($_POST['page_url']);
-        $contents = $edit->getContentsFromPage($key, HTML_DIR);
-    // save data
+    } elseif (isset($_POST['choose'])) {
+        header('Location: /super/choose');
+        exit;
+    } else {
+        // save data
+        $data = $_POST['page_content'] ?? '';
+        if (empty($key)) {
+            $message->addMessage(Edit::ERROR_KEY);
+        } elseif (!$edit->save($key, $data)) {
+            $message->addMessage(Edit::ERROR_SAVE);
+        } else {
+            $message->addMessage(Edit::SUCCESS_SAVE);
+        }
     }
 }
+if (isset($_GET['choose_edit_page'])) {
+    $action = 'edit';
+} elseif (isset($_GET['choose_del_page'])) {
+    $action = 'delete';
+} elseif (empty($key)) {
+    $action = 'add';
+} else {
+    $action = 'edit';
+}
+if ($action === 'edit' || $action === 'delete') {
+    $contents = $edit->getContentsFromPage($key, HTML_DIR);
+}
 // get messages
-$msg = $message->getMessages() ?? var_export($_GET, TRUE);
+$msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when done';
 ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
     <div class="container h-100">
       <div class="row h-100 align-items-center">
         <div class="col-lg-12">
-          <h1 class="display-4 text-white mt-5 mb-2">Edit</h1>
+          <h1 class="display-4 text-white mt-5 mb-2"><?= ucfirst($action) ?></h1>
           <p class="lead mb-5 text-white-50">Use this page to edit web pages.</p>
         </div>
       </div>
@@ -60,13 +87,49 @@ $msg = $message->getMessages() ?? var_export($_GET, TRUE);
 
   <div class="container">
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-12">
             <!-- Edit Form -->
             <form class="contact_form" action="/super/edit" method="post">
-                <div class="row">
 
+                <!-- Input -->
                 <div class="row">
-                    <!-- Input -->
+                    <div class="col-sm-12 mb-12">
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                URL
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div>
+                                <input type="text" id="page_key" name="page_key" size=60 value="<?= $key ?>" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Input -->
+
+                <?php if ($action === 'delete') : ?>
+                <!-- Input -->
+                <div class="row">
+                    <div class="col-sm-12 mb-12">
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                Confirm Deletion
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div>
+                                <input type="radio" id="page_del" name="page_del" value="Y" />&nbsp; Yes
+                                <input type="radio" id="page_del" name="page_del" value="N" />&nbsp; No
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Input -->
+                <?php endif; ?>
+
+                <!-- Input -->
+                <div class="row">
                     <div class="col-sm-12 mb-12">
                         <div class="form-group">
                             <label class="h6 small d-block text-uppercase">
@@ -74,36 +137,44 @@ $msg = $message->getMessages() ?? var_export($_GET, TRUE);
                                 <span class="text-danger">*</span>
                             </label>
 
-                            <div class="input-group">
-                                <textarea id="page_content" type="textarea" name="page_content" rows="20" cols="70"><?= $contents ?></textarea>
-                                <input type="hidden" name="page_key" value="<?= $key ?>" />
+                            <div>
+                                <textarea id="page_content" type="textarea" name="page_content"><?= $contents ?></textarea>
                             </div>
                         </div>
                     </div>
-                    <!-- End Input -->
                 </div>
+                <!-- End Input -->
+
+                <!-- Input -->
                 <div class="row">
-                    <!-- Input -->
                     <div class="col-sm-12 mb-12">
                         <div class="form-group">
                             <div class="input-group">
-                                <input name="save" type="submit" class="btn btn-primary btn-circled" value="Save">
+                                <?php $label = ($action === 'delete') ? 'Delete' : 'Save'; ?>
+                                <input name="save" type="submit" class="btn btn-primary btn-circled" value="<?= $label ?>">
+                                &nbsp;&nbsp;
+                                <input name="choose" type="submit" class="btn btn-primary btn-circled" value="Choose" title="Click here to choose another page to work with">
+                                &nbsp;&nbsp;
+                                <input name="cancel" type="submit" class="btn btn-primary btn-circled" value="Cancel">
                             </div>
                         </div>
                     </div>
-                    <!-- End Input -->
                 </div>
+                <!-- End Input -->
+
             </form>
             <!-- End Edit Form -->
+
            <!-- form message -->
             <div class="row">
-                <div class="col-12">
+                <div class="col-md-12">
                     <div class="alert alert-success contact__msg">
                         <?= $msg ?>
                     </div>
                 </div>
             </div>
             <!-- end message -->
+
         </div>
 
     </div>
@@ -112,6 +183,8 @@ $msg = $message->getMessages() ?? var_export($_GET, TRUE);
     <script type="text/javascript">
     CKEDITOR.replace('page_content', {
         startupFocus: true,
-        filebrowserUploadUrl: '/super/upload'
+        filebrowserUploadUrl: '/super/upload',
+        width: '<?= $edit_width ?>',
+        height: '<?= $edit_height ?>'
     });
     </script>

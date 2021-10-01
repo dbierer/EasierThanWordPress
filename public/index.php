@@ -16,6 +16,7 @@ $config = include SRC_DIR . '/config/config.php';
 // init vars
 $body = '';
 $uri  = $_POST['uri'] ?? $_SERVER['REQUEST_URI'] ?? '';
+$uri  = parse_url($uri,  PHP_URL_PATH);
 $uri  = (strlen($uri) <= 1) ? '/home' : $uri;
 $msg  = '';
 // routes w/ forms need to do an include

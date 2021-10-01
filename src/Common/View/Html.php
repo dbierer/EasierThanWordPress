@@ -7,7 +7,7 @@ use RecursiveDirectoryIterator;
 class Html
 {
     const DEFAULT_CARD_DIR = 'cards';
-    const DEFAULT_LAYOUT   = 'layout.html';
+    const DEFAULT_LAYOUT   = BASE_DIR . '/layout.html';
     const DEFAULT_HOME     = 'index.html';
     const DEFAULT_DELIM    = '%%';
     const DEFAULT_EXT      = ['html', 'htm'];
@@ -31,7 +31,7 @@ class Html
         $output = '';
         $card   = '';
         $layout = $this->config['LAYOUT'] ?? static::DEFAULT_LAYOUT;
-        $fn     = str_replace('//', '/', $this->htmlDir . '/' . $layout);
+        $fn     = str_replace('//', '/', $layout);
         $layout = file_get_contents($fn);
         // inject meta + title tags
         $meta = $this->config['META'][$this->uri] ?? $this->config['META']['default'] ?? [];

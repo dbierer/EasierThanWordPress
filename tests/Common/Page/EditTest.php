@@ -68,4 +68,49 @@ class EditTest extends TestCase
         $actual   = $this->edit->getContentsFromPage('/test1', $this->testFileDir);
         $this->assertEquals($expected, $actual, 'Edit::getContentsFromPage() did not return expected HTML');
     }
+    public function testGetPageFromURL()
+    {
+        $expected = file_get_contents($this->testFileDir . '/test1.html');
+        $actual   = $this->edit->getPageFromURL('https://unlikelysource.com/test1', $this->testFileDir);
+        $this->assertEquals($expected, $actual, 'Edit::getPageFromURL() did not return expected HTML');
+    }
+    public function testGetListOfPagesDoesNotFindsNonExistentFile()
+    {
+        $fn = $this->testFileDir . '/testX.html';
+        if (file_exists($fn)) unlink($fn);
+        $this->edit->pages = [];
+        $pages = $this->edit->getListOfPages($this->testFileDir);
+        $expected = TRUE;
+        $actual   = (empty($pages['/textX']));
+        $this->assertEquals($expected, $actual, 'Edit::getListOfPages() listed a file that does not exist');
+    }
+    public function testGetListOfPagesFindsNewFile()
+    {
+        $fn = $this->testFileDir . '/testX.html';
+        copy($this->testFileDir . '/test1.html', $fn);
+        $this->edit->pages = [];
+        $pages = $this->edit->getListOfPages($this->testFileDir);
+        $expected = $fn;
+        $actual   = $pages['/textX'] ?? '';
+        $this->assertEquals($expected, $actual, 'Edit::getListOfPages() failed to list a new file');
+    }
+    public function testSaveOverwritesExistingSuccessfully()
+    {
+        $contents = file_get_contents($this->testFileDir . '/test1.html');
+        copy($this->testFileDir . '/test1.html', $this->testFileDir . '/testX.html');
+        $contents = str_replace('Test 1', 'Test X', $contents);
+        $expected = TRUE;
+        $actual   = $this->edit->save('/testX', $contents, $this->testFileDir);
+        $this->assertEquals($expected, $actual, 'Edit::save() did not return TRUE upon successful save');
+    }
+    public function testSaveOverwritesExistingContents()
+    {
+        $contents = file_get_contents($this->testFileDir . '/test1.html');
+        copy($this->testFileDir . '/test1.html', $this->testFileDir . '/testX.html');
+        $contents = str_replace('Test 1', 'Test X', $contents);
+        $response = $this->edit->save('/testX', $contents, $this->testFileDir);
+        $expected = $contents;
+        $actual   = file_get_contents($this->testFileDir . '/testX.html');
+        $this->assertEquals($expected, $actual, 'Edit::save() did overwrite original');
+    }
 }

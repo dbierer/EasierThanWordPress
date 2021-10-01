@@ -39,7 +39,11 @@ class Edit
 {
     const DEFAULT_EXT  = ['html', 'htm'];
     const SUCCESS_SAVE = 'SUCCESS: page saved successfully';
+    const SUCCESS_DEL  = 'SUCCESS: page deleted successfully';
+    const SUCCESS_CANCEL = 'Operation cancelled';
     const ERROR_SAVE   = 'ERROR: unable to save page';
+    const ERROR_DEL    = 'ERROR: unable to delete page';
+    const ERROR_KEY    = 'ERROR: missing, unknown or invalid URL';
     public $allowed = [];   // allowed extensions
     public $config  = [];
     public $pages   = [];
@@ -69,22 +73,7 @@ class Edit
         if ($key[0] !== '/') $key = '/' . $key;
         foreach ($this->allowed as $ext)
             $key = str_ireplace('.' . $ext, '', $key);
-        return $key;
-    }
-    /**
-     * Returns filename from key
-     *
-     * @param $key        : sanitized filename
-     * @param string $path : usually HTML_DIR
-     * @return string $fn   : filename
-     */
-    public function getFilenameFromKey(string $key, string $path)
-    {
-        $key = str_replace($path, '', $fn);
-        if ($key[0] !== '/') $key = '/' . $key;
-        foreach ($this->allowed as $ext)
-            $key = str_ireplace('.' . $ext, '', $key);
-        return $key;
+        return trim($key);
     }
     /**
      * Returns list of pages from starting point HTML_DIR
@@ -129,7 +118,7 @@ class Edit
      * If page doesn't exist, returns empty string
      *
      * @param string $url       : URL used to view page
-     * @param string $path      : starting path (if other than HTML_DIR
+     * @param string $path      : starting path (if other than HTML_DIR)
      * @return string $contents : HTML contents of page
      */
     public function getPageFromURL(string $url, string $path = HTML_DIR) : string
@@ -142,13 +131,14 @@ class Edit
      * If page doesn't exist, returns empty string
      *
      * @param string $url   : URL used to view page
-     * @param string $path  : starting path (if other than HTML_DIR
+     * @param string $path      : starting path (if other than HTML_DIR)
      * @return string $key  : key in $this->pages
      */
     public function getKeyFromURL(string $url, string $path = HTML_DIR) : string
     {
-        $key  = parse_url($url, PHP_URL_PATH) ?? ' ';
-        if ($key[0] !== '/') $key = '/' . $key;
+        $key = parse_url($url, PHP_URL_PATH) ?? '';
+        if (!empty($key))
+            if ($key[0] !== '/') $key = '/' . $key;
         return trim($key);
     }
     /**
@@ -168,7 +158,15 @@ class Edit
                 $html = file_get_contents($pages[$key]);
             return $html;
     }
-    public function save(string $key, string $contents) : bool
+    /**
+     * Saves new or revised page
+     *
+     * @param string $key : URI path
+     * @param string $contents : HTML
+     * @param string $path      : starting path (if other than HTML_DIR)
+     * @return bool TRUE if save was successful; FALSE otherwise
+     */
+    public function save(string $key, string $contents, $path = HTML_DIR) : bool
     {
         // use Tidy to sanitize
         $ok = 0;
@@ -183,7 +181,7 @@ class Edit
         $pages = $this->getListOfPages($path);
         $fn    = $pages[$key] ?? '';
         // file already exists, overwrite it
-        if (file_exists($fn)) {
+        if (!empty($fn) && file_exists($fn)) {
             $ok = file_put_contents($fn, $contents);
         } else {
             // if key doesn't exist, it's a new file
@@ -192,5 +190,21 @@ class Edit
             // save to file
         }
         return (bool) $ok;
+    }
+    /**
+     * Deletes page
+     *
+     * @param string $key : URI path
+     * @return bool TRUE if delete was successful; FALSE otherwise
+     */
+    public function delete(string $key) : bool
+    {
+        $ok    = FALSE;
+        $pages = $this->getListOfPages($path);
+        $fn    = $pages[$key] ?? FALSE;
+        if (file_exists($fn)) {
+            $ok = unlink($fn);
+        }
+        return $ok;
     }
 }

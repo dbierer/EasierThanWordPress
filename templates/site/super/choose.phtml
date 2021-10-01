@@ -45,7 +45,7 @@ $msg     = $message->getMessages() ?? 'Select page to edit or click "Add New Pag
     <div class="row">
         <div class="col-lg-6">
             <!-- Edit Form -->
-            <form class="choose_form" action="/super/edit" method="post">
+            <form class="choose_form" action="/super/edit" method="get">
 
                 <div class="row">
                     <!-- Input -->
@@ -79,8 +79,9 @@ $msg     = $message->getMessages() ?? 'Select page to edit or click "Add New Pag
                     <!-- Input -->
                     <div class="col-sm-12 mb-12">
                         <div class="form-group">
-                            <input name="edit_page" type="submit" class="btn btn-primary btn-circled" value="Edit Existing Page">
-                            <input name="new_page" type="submit" class="btn btn-primary btn-circled" value="Add New Page">
+                            <input name="choose_edit_page" type="submit" class="btn btn-primary btn-circled" value="Edit Existing Page">
+                            <input name="choose_new_page" type="submit" class="btn btn-primary btn-circled" value="Add New Page">
+                            <input name="choose_del_page" type="submit" class="btn btn-primary btn-circled" value="Delete Page">
                         </div>
                     </div>
                     <!-- End Input -->

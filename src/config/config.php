@@ -1,7 +1,7 @@
 <?php
 $config = [
     'CARDS'  => 'cards',
-    'LAYOUT' => 'layout.html',
+    'LAYOUT' => BASE_DIR . '/templates/layout/layout.html',
     'HOME'   => 'home.phtml',   // default home page
     'HOST'   => '',
     'DELIM'  => '%%',
@@ -34,6 +34,10 @@ $config = [
             'Last Name' => 'Smith',
         ],
         'allowed_ext'  => ['html','htm'],
+        'ckeditor'     => [
+            'width' => '100%',
+            'height' => 400,
+        ],
     ],
     'STORAGE' => [
         'db_host' => 'localhost',
