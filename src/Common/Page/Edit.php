@@ -161,33 +161,44 @@ class Edit
     /**
      * Saves new or revised page
      *
-     * @param string $key : URI path
-     * @param string $contents : HTML
+     * @param string $key       : URI path
+     * @param string $contents  : HTML
      * @param string $path      : starting path (if other than HTML_DIR)
+     * @param bool   $tidy      : If set TRUE, fixes using Tidy extension
      * @return bool TRUE if save was successful; FALSE otherwise
      */
-    public function save(string $key, string $contents, $path = HTML_DIR) : bool
+    public function save(string $key, string $contents, string $path = HTML_DIR, bool $tidy = FALSE) : bool
     {
         // use Tidy to sanitize
         $ok = 0;
-        if (function_exists('tidy_repair_string')) {
+        if (function_exists('tidy_repair_string') && $tidy) {
             $fixed = tidy_repair_string($contents);
             // extract content between <body>*</body> tags
+            $matches = [];
             [$first, $last] = explode('<body>', $fixed);
-            $pos   = strpos('</body>', $last);
+            $pos = strpos($last, '</body>');
             $contents = substr($last, 0, $pos);
         }
         // check to see if it's an existing file
         $pages = $this->getListOfPages($path);
         $fn    = $pages[$key] ?? '';
-        // file already exists, overwrite it
-        if (!empty($fn) && file_exists($fn)) {
+        // if we've got a filename from $this->pages, overwrite it
+        if (!empty($fn)) {
             $ok = file_put_contents($fn, $contents);
+        // if key doesn't exist, it's a new file
         } else {
-            // if key doesn't exist, it's a new file
             // split key to get directory and filename
+            $parts = explode('/', $key);
+            $fn    = array_pop($parts);
+            $dir   = '/' . implode('/', $parts);
+            $dir   = $path . '/' . $dir;
+            $dir   = str_replace('//', '/', $dir);
+            $fn    = $dir . '/' . $fn . '.html';
+            $fn    = str_replace('//', '/', $fn);
             // create directory if needed
+            if (!file_exists($dir)) mkdir($dir, 0755, TRUE);
             // save to file
+            $ok = file_put_contents($fn, $contents);
         }
         return (bool) $ok;
     }

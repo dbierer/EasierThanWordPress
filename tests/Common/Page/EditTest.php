@@ -7,11 +7,18 @@ class EditTest extends TestCase
 {
     public $edit;
     public $testFileDir = '';
+    public $new_dir = '';
     public function setUp() : void
     {
         $this->testFileDir = realpath(__DIR__ . '/../../test_files');
         $config = include __DIR__ . '/../../../src/config/config.php';
         $this->edit = new Edit($config);
+        $this->new_dir = $this->testFileDir . '/new';
+        $new = glob($this->new_dir . '/*');
+        if (!empty($new))
+            foreach ($new as $fn) unlink($fn);
+
+        if (file_exists($this->new_dir)) rmdir($this->new_dir);
     }
     public function testGetKeyFromURL()
     {
@@ -90,14 +97,14 @@ class EditTest extends TestCase
         copy($this->testFileDir . '/test1.html', $fn);
         $this->edit->pages = [];
         $pages = $this->edit->getListOfPages($this->testFileDir);
-        $expected = $fn;
-        $actual   = $pages['/textX'] ?? '';
+        $expected = $this->testFileDir . '/testX.html';
+        $actual   = $pages['/testX'] ?? '';
         $this->assertEquals($expected, $actual, 'Edit::getListOfPages() failed to list a new file');
     }
     public function testSaveOverwritesExistingSuccessfully()
     {
         $contents = file_get_contents($this->testFileDir . '/test1.html');
-        copy($this->testFileDir . '/test1.html', $this->testFileDir . '/testX.html');
+        file_put_contents($this->testFileDir . '/testX.html', $contents);
         $contents = str_replace('Test 1', 'Test X', $contents);
         $expected = TRUE;
         $actual   = $this->edit->save('/testX', $contents, $this->testFileDir);
@@ -106,11 +113,52 @@ class EditTest extends TestCase
     public function testSaveOverwritesExistingContents()
     {
         $contents = file_get_contents($this->testFileDir . '/test1.html');
-        copy($this->testFileDir . '/test1.html', $this->testFileDir . '/testX.html');
+        file_put_contents($this->testFileDir . '/testX.html', $contents);
         $contents = str_replace('Test 1', 'Test X', $contents);
         $response = $this->edit->save('/testX', $contents, $this->testFileDir);
         $expected = $contents;
         $actual   = file_get_contents($this->testFileDir . '/testX.html');
         $this->assertEquals($expected, $actual, 'Edit::save() did overwrite original');
+    }
+    public function testSaveFixesUsingTidy()
+    {
+        $contents = file_get_contents($this->testFileDir . '/test1.html');
+        file_put_contents($this->testFileDir . '/testX.html', $contents);
+        $contents = str_replace('Test 1', 'Test X', $contents);
+        $response = $this->edit->save('/testX', $contents, $this->testFileDir, TRUE);
+        $expected = '<h1>Test X</h1>';
+        $actual   = trim(file_get_contents($this->testFileDir . '/testX.html'));
+        $this->assertEquals($expected, $actual, 'Edit::save() did not fix using Tidy');
+    }
+    public function testSaveCreatesNewFile()
+    {
+        $new_fn   = $this->testFileDir . '/testY.html';
+        if (file_exists($new_fn)) unlink($new_fn);
+        $contents = file_get_contents($this->testFileDir . '/test1.html');
+        $contents = str_replace('Test 1', 'Test Y', $contents);
+        $response = $this->edit->save('/testY', $contents, $this->testFileDir);
+        $expected = $contents;
+        $actual   = (file_exists($new_fn)) ? file_get_contents($new_fn) : '';
+        $this->assertEquals($expected, $actual, 'Edit::save() did not save new file');
+    }
+    public function testSaveCreatesNewFileAndNewPath()
+    {
+        $new_fn   = $this->new_dir . '/testZ.html';
+        $contents = file_get_contents($this->testFileDir . '/test1.html');
+        $contents = str_replace('Test 1', 'Test Z', $contents);
+        $response = $this->edit->save('/new/testZ', $contents, $this->testFileDir);
+        $expected = TRUE;
+        $actual   = (file_exists($new_fn));
+        $this->assertEquals($expected, $actual, 'Edit::save() did not create new directory and save new file');
+    }
+    public function testSaveCreatesNewFileAndNewPathAndContentsMatch()
+    {
+        $new_fn   = $this->new_dir . '/testZ.html';
+        $contents = file_get_contents($this->testFileDir . '/test1.html');
+        $contents = str_replace('Test 1', 'Test Z', $contents);
+        $response = $this->edit->save('/new/testZ', $contents, $this->testFileDir);
+        $expected = $contents;
+        $actual   = (file_exists($new_fn)) ? file_get_contents($new_fn) : '';
+        $this->assertEquals($expected, $actual, 'Edit::save() did not create new file in new directory contents do not match');
     }
 }
