@@ -21,7 +21,8 @@ $edit     = new Edit($config);
 $contents = '';
 // build dropdown list of existing pages
 $pages = $edit->getListOfPages();
-$select = '<select name="page_key" class="form-control">' . PHP_EOL;
+$select = '<select name="page_key" class="form-control" placeholder="Choose">' . PHP_EOL;
+$select .= '<option>' . Edit::CHOOSE_TOP . '</option>' . PHP_EOL;
 foreach (array_keys($pages) as $key)
     $select .= '<option>' . $key . '</option>' . PHP_EOL;
 $select .= '</select>' . PHP_EOL;

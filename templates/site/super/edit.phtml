@@ -22,10 +22,16 @@ $edit     = new Edit($config);
 $contents = '';
 $edit_width = $config['SUPER']['ckeditor']['width'] ?? 900;
 $edit_height = $config['SUPER']['ckeditor']['height'] ?? 500;
-// acquire key
-$key = $_REQUEST['page_key'] ?? '';
+// acquire key and page_url
+$key      = $_REQUEST['page_key'] ?? '';
+$key      = ($key === Edit::CHOOSE_TOP) ? '' : $key;
+$page_url = $_REQUEST['page_url'] ?? '';
+// go to choose if both indicators are empty
 if (empty($key)) {
-    $page_url = $_REQUEST['page_url'] ?? '';
+    if (empty($page_url)) {
+        header('Location: /super/choose');
+        exit;
+    }
     $key = $edit->getKeyFromURL($page_url);
 }
 // determine action
@@ -35,10 +41,10 @@ if (!empty($_POST)) {
         $message->addMessage(Edit::SUCCESS_CANCEL);
     } elseif (isset($_POST['save']) && $_POST['save'] === 'Delete') {
         if (isset($_POST['page_del']) && $_POST['page_del'] === 'Y') {
-            if ($edit->delete($key)) {
-                $message->addMessage(Edit::ERROR_DEL);
-            } else {
+            if ($edit->delete($key) === TRUE) {
                 $message->addMessage(Edit::SUCCESS_DEL);
+            } else {
+                $message->addMessage(Edit::ERROR_DEL);
             }
         } else {
             $message->addMessage(Edit::SUCCESS_CANCEL);
@@ -49,21 +55,18 @@ if (!empty($_POST)) {
     } else {
         // save data
         $data = $_POST['page_content'] ?? '';
-        if (empty($key)) {
-            $message->addMessage(Edit::ERROR_KEY);
-        } elseif (!$edit->save($key, $data)) {
+        if (!$edit->save($key, $data, HTML_DIR, TRUE)) {
             $message->addMessage(Edit::ERROR_SAVE);
         } else {
             $message->addMessage(Edit::SUCCESS_SAVE);
         }
+        $action = 'edit';
     }
 }
 if (isset($_GET['choose_edit_page'])) {
     $action = 'edit';
 } elseif (isset($_GET['choose_del_page'])) {
     $action = 'delete';
-} elseif (empty($key)) {
-    $action = 'add';
 } else {
     $action = 'edit';
 }
@@ -102,6 +105,8 @@ $msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when don
 
                             <div>
                                 <input type="text" id="page_key" name="page_key" size=60 value="<?= $key ?>" />
+                                &nbsp;
+                                <a target="_blank" href="<?= $key ?>" title="This link only works after you have saved your work" />PREVIEW</a>
                             </div>
                         </div>
                     </div>
@@ -187,4 +192,5 @@ $msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when don
         width: '<?= $edit_width ?>',
         height: '<?= $edit_height ?>'
     });
+    CKEDITOR.config.allowedContent = true;
     </script>

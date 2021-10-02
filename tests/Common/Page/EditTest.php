@@ -161,4 +161,29 @@ class EditTest extends TestCase
         $actual   = (file_exists($new_fn)) ? file_get_contents($new_fn) : '';
         $this->assertEquals($expected, $actual, 'Edit::save() did not create new file in new directory contents do not match');
     }
+    public function testDeleteReturnsTrueIfFileIsDeleted()
+    {
+        $new_fn   = $this->testFileDir . '/testZ.html';
+        $contents = file_get_contents($this->testFileDir . '/test1.html');
+        $contents = file_put_contents($new_fn, $contents);
+        $expected = TRUE;
+        $actual   = $this->edit->delete('/testZ', $this->testFileDir);
+        $this->assertEquals($expected, $actual, 'Edit::delete() did not return TRUE if file is deleted');
+    }
+    public function testDeleteReturnsFalseIfFileNotDeleted()
+    {
+        $expected = FALSE;
+        $actual   = $this->edit->delete('/doesnotexist', $this->testFileDir);
+        $this->assertEquals($expected, $actual, 'Edit::delete() did not return FALSE if file not deleted');
+    }
+    public function testDeleteFileIsTrulyGone()
+    {
+        $new_fn   = $this->testFileDir . '/testQ.html';
+        $contents = file_get_contents($this->testFileDir . '/test1.html');
+        $contents = str_replace('Test 1', 'Test Q', $contents);
+        $response = $this->edit->delete('/testQ', $this->testFileDir);
+        $expected = FALSE;
+        $actual   = (file_exists($new_fn));
+        $this->assertEquals($expected, $actual, 'Edit::delete() did not delete file');
+    }
 }

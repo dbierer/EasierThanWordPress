@@ -38,6 +38,7 @@ use FilterIterator;
 class Edit
 {
     const DEFAULT_EXT  = ['html', 'htm'];
+    const CHOOSE_TOP   = '--choose--';
     const SUCCESS_SAVE = 'SUCCESS: page saved successfully';
     const SUCCESS_DEL  = 'SUCCESS: page deleted successfully';
     const SUCCESS_CANCEL = 'Operation cancelled';
@@ -206,9 +207,10 @@ class Edit
      * Deletes page
      *
      * @param string $key : URI path
+     * @param string $path      : starting path (if other than HTML_DIR)
      * @return bool TRUE if delete was successful; FALSE otherwise
      */
-    public function delete(string $key) : bool
+    public function delete(string $key, string $path = HTML_DIR) : bool
     {
         $ok    = FALSE;
         $pages = $this->getListOfPages($path);
