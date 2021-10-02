@@ -28,7 +28,7 @@ foreach (array_keys($pages) as $key)
 $select .= '</select>' . PHP_EOL;
 // get messages
 $message = Messages::getInstance();
-$msg     = $message->getMessages() ?? 'Select page to edit or click "Add New Page" button';
+$msg     = $message->getMessages() ?? 'Select page to edit or delete.  To add a new page, enter a URL and click "Add New Page" button.';
 ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
@@ -36,7 +36,7 @@ $msg     = $message->getMessages() ?? 'Select page to edit or click "Add New Pag
       <div class="row h-100 align-items-center">
         <div class="col-lg-12">
           <h1 class="display-4 text-white mt-5 mb-2">Choose</h1>
-          <p class="lead mb-5 text-white-50">Use this page choose the web page you wish to edit, or to create a new page.</p>
+          <p class="lead mb-5 text-white-50">Use this page choose the web page you wish to edit or delete. To add a new page, enter a URL and click "Add New Page" button.</p>
         </div>
       </div>
     </div>
@@ -53,7 +53,7 @@ $msg     = $message->getMessages() ?? 'Select page to edit or click "Add New Pag
                     <div class="col-sm-12 mb-12">
                         <div class="form-group">
                             <label class="h6 small d-block text-uppercase">
-                                Enter Page URL (or choose from Page List)
+                                Enter URL (or choose from Page List)
                                 <span class="text-danger">*</span>
                             </label>
                             <div class="input-group">
@@ -68,7 +68,7 @@ $msg     = $message->getMessages() ?? 'Select page to edit or click "Add New Pag
                     <div class="col-sm-12 mb-12">
                         <div class="form-group">
                             <label class="h6 small d-block text-uppercase">
-                                Choose from Page List (or Enter Page URL)
+                                Choose from Page List (or Enter URL)
                                 <span class="text-danger">*</span>
                             </label>
                             <div class="input-group"><?= $select ?></div>

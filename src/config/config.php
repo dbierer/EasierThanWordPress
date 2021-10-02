@@ -72,8 +72,8 @@ $config = [
             'smtp_secure'   => 'tls',               // Supported SMTP secure connection - 'none, 'ssl', or 'tls'
         ],
     ],
-    'MSG_MARKER'    => '<!-- %%MESSAGES%% -->',
-    'CONTACT_LOG'   => BASE_DIR . '/logs/contact.log',
+    'MSG_MARKER'  => '<!-- %%MESSAGES%% -->',
+    'CONTACT_LOG' => BASE_DIR . '/logs/contact.log',
     'CAPTCHA' => [
         'input_tag_name' => 'phrase',
         'sess_hash_key'  => 'hash',

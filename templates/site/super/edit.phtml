@@ -107,6 +107,8 @@ $msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when don
                                 <input type="text" id="page_key" name="page_key" size=60 value="<?= $key ?>" />
                                 &nbsp;
                                 <a target="_blank" href="<?= $key ?>" title="This link only works after you have saved your work" />PREVIEW</a>
+                                &nbsp;
+                                <input name="choose" type="submit" class="btn btn-primary btn-circled" value="Back" title="Click here to choose another page to work with">
                             </div>
                         </div>
                     </div>
@@ -158,7 +160,7 @@ $msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when don
                                 <?php $label = ($action === 'delete') ? 'Delete' : 'Save'; ?>
                                 <input name="save" type="submit" class="btn btn-primary btn-circled" value="<?= $label ?>">
                                 &nbsp;&nbsp;
-                                <input name="choose" type="submit" class="btn btn-primary btn-circled" value="Choose" title="Click here to choose another page to work with">
+                                <input name="choose" type="submit" class="btn btn-primary btn-circled" value="Back" title="Click here to choose another page to work with">
                                 &nbsp;&nbsp;
                                 <input name="cancel" type="submit" class="btn btn-primary btn-circled" value="Cancel">
                             </div>

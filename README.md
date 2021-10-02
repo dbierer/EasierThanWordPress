@@ -90,3 +90,58 @@ You want the cards to be loaded in the order `one.html`, `two.html`, `three.html
 ```
 %%BUNDLES=one,two,three,etc.%%
 ```
+
+## Editing Pages
+By default, if you enter the URL `/super/login` you're prompted to login as a super user.
+Configure the username, password and secondary authentication factors in: `/src/config/config.php` under the `SUPER` config key.
+
+### SUPER config key
+Example configuration for super user:
+```
+// other config not shown
+'SUPER' => [
+    'username' => 'admin',
+    'password' => 'password',
+    'attempts' => 3,
+    'message'  => 'Sorry! Unable to login.  Please contact your administrator',
+    // array of $_SERVER keys to store in session if authenticated
+    'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE','HTTP_COOKIE'],
+    // change the values to reflect the names of fiels in your login.phtml form
+    'login_fields' => [
+        'name'     => 'name',
+        'password' => 'password',
+        'other'    => 'other',
+        'phrase'   => 'phrase',     // CAPTCHA phrase
+    ],
+    'validation'   => [
+        'City' => 'London',
+        'Postal Code' => '12345',
+        'Last Name' => 'Smith',
+    ],
+    'allowed_ext'  => ['html','htm'],
+    'ckeditor'     => [
+        'width' => '100%',
+        'height' => 400,
+    ],
+],
+// other config not shown
+```
+Here's a breakdown of the `SUPER` config keys
+
+| Key | Explanation |
+| :-- | :---------- |
+| username | Super user login name |
+| password | Super user login password |
+| attempts | Maximum number of failed login attempts.  If this number is exceeded, a random third authentication field is required for login. |
+| message  | Message that displayed if login fails |
+| profile  | Array of `$_SERVER` keys that form the super user's profile once logged in |
+| login_fields | Field names drawn from your `login.phtml` login form |
+| validation   | You can specify as many of these as you want.  If the login attemp exceeds `attempts`, the SimpleHtml framework will automatically add a random field drawn from this list. |
+| allowed_ext  | Only files with an extension on this list can be edited. |
+| ckeditor     | Default width and height of the CKeditor screen |
+
+## Contact Form
+The skeleton app includes under `/templates` a file `contact.phtml` that implements an email contact form with a CAPTCHA
+* Uses the PHPMailer package
+* Configuration can be done in `/src/config/config.php` using the `COMPANY_EMAIL` key
+* CAPTCHA configuration can be done in `/src/config/config.php` using the `CAPTCHA` key
