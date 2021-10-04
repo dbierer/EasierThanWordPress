@@ -40,6 +40,8 @@ class Import
 {
     const DEFAULT_START = '<body>';
     const DEFAULT_STOP  = '</body>';
+    const ERROR_UPLOAD  = 'ERROR: unable to upload list of URLs to import';
+    public static $list = [];
     /**
      * Grabs contents, applies transforms
      *
@@ -104,5 +106,36 @@ class Import
             }
         }
         return $html;
+    }
+    /**
+     * Uploads and stores list of URLs to import
+     * Removes any URLs not on trusted list
+     *
+     * @param array $info    : uploaded file info from $_FILES
+     * @param array $trusted : array of trusted URL prefixes
+     * @return array $list   : list of URLs (or filenames) to import | empty array if upload failed
+     */
+    public static function get_upload(array $info, array $trusted)
+    {
+        $list = [];
+        // is there an upload error?
+        if ($info['upload']['error'] == UPLOAD_ERR_OK) {
+            // is this an uploaded file?
+            if (is_uploaded_file ($info['upload']['tmp_name'])) {
+                // ok, go ahead and load the file
+                $temp = file($info['upload']['tmp_name']);
+                // scan file and remove any entries not on trusted list
+                foreach ($temp as $fn) {
+                    foreach ($trusted as $prefix) {
+                        $fn = trim($fn);
+                        if (stripos($fn, $prefix) === 0) {
+                            $list[] = $fn;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return $list;
     }
 }

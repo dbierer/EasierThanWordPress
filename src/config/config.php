@@ -6,7 +6,7 @@ $config = [
     'HOST'   => '',
     'DELIM'  => '%%',
     // use '' for CACHE if you want to disable it
-    'CACHE'  => str_replace('//', '/', BASE_DIR . '/logs/cache.txt'),
+    'CACHE'  => BASE_DIR . '/logs/cache.txt',
     'META' => [
         'default' => [
             'title' => 'SimpleHtml',
@@ -29,15 +29,16 @@ $config = [
             'phrase'   => 'phrase',     // CAPTCHA phrase
         ],
         'validation'   => [
-            'City' => 'London',
-            'Postal Code' => '12345',
-            'Last Name' => 'Smith',
+            'City'        => 'London',
+            'Postal Code' => 'NW1 6XE',
+            'Last Name'   => 'Holmes',
         ],
         'allowed_ext'  => ['html','htm'],
         'ckeditor'     => [
             'width' => '100%',
             'height' => 400,
         ],
+        'super_menu' => BASE_DIR . '/templates/layout/super_menu.html',
     ],
     'STORAGE' => [
         'db_host' => 'localhost',
@@ -85,6 +86,7 @@ $config = [
         'enable' => FALSE,              // need to change this to TRUE to enable this feature!
         'delim_start'  => '<body>',     // marks beginning of contents to extract
         'delim_stop'   => '</body>',    // marks end of contents to extract
+        'trusted_src'  => ['https://unlikelysource.com'],   // array of trusted URLs
         // add as many transforms as desired
         // you can also add your own anonymous functions as transforms as long as the signature
         // matches the one specified by SimpleHtml\Transform\TransformInterface

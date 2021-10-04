@@ -3,16 +3,28 @@ use SimpleHtml\Transform\Import;
 use SimpleHtml\Common\Page\Edit;
 use SimpleHtml\Common\Security\Profile;
 use SimpleHtml\Common\Generic\Messages;
+// upload function
+function do_upload($url, $transform, $delim_start, $delim_stop, $edit, $message))
+{
+    $ok   = 0;
+    $html = Import::import($url, $transform, $delim_start, $delim_stop);
+    $key  = $edit->getKeyFromURL($url, HTML_DIR);
+    if ($edit->save($key, $html, HTML_DIR, TRUE)) {
+        $message->addMessage(Import::SUCCESS_SAVE);
+        $ok++;
+    } else {
+        $message->addMessage(Import::ERROR_SAVE);
+    }
+    return $ok;
+}
 // process contact post (if any)
 // $OBJ == calling instance
 if (!empty($OBJ)) {
     $uri    = $OBJ->uri;
     $config = $OBJ->config;
 }
-// check to see if transform is enabled
-$enabled = (isset($config['IMPORT']['enable'])
-            && $config['IMPORT']['enable'] === TRUE);
 // check to see if authenticated and feature enabled
+$enabled = (isset($config['IMPORT']['enabled'])) ? $config['IMPORT']['enabled'] : FALSE;
 if (!$enabled || Profile::verify($config) === FALSE) {
     Profile::logout();
     $message = Messages::getInstance();
@@ -21,8 +33,9 @@ if (!$enabled || Profile::verify($config) === FALSE) {
     exit;
 }
 // init vars
-$edit = new Edit($config);
-$message = Messages::getInstance();
+$total     = 0;
+$edit      = new Edit($config);
+$message   = Messages::getInstance();
 $transform = $config['IMPORT']['transform'];
 // check to see if we need to import anything
 if (!empty($_POST)) {
@@ -30,7 +43,16 @@ if (!empty($_POST)) {
     $delim_stop  = $config['IMPORT']['delim_stop'];
     // if "import_url" is set, just import from the list
     if (isset($_POST[import_url])) {
-        $html = Import::import(
+        $url  = strip_tags($_POST[import_url]);
+        $total += do_upload($url, $transform, $delim_start, $delim_stop, $edit, $message);
+    } elseif (isset($_FILES['import_file'])) {
+        $list = Import::get_upload($_FILES['import_file']);
+        if (empty($list)) {
+            $message->addMessage(Import::ERROR_UPLOAD);
+        } else {
+            foreach ($list as $url)
+                $total += do_upload($url, $transform, $delim_start, $delim_stop, $edit, $message);
+        }
     }
     // otherwise check to see if "import_file" is set
     // if neither is set, drop through
@@ -43,7 +65,7 @@ foreach ($transform as $key => $item)
     $check .= sprintf($templ, $key, $item['description']);
 $check .= '</ul>' . PHP_EOL;
 // get messages
-$msg     = $message->getMessages() ?? 'Enter a URL to import.  Alternatively you can upload a list of URLs of pages to import.';
+$msg = $message->getMessages() ?? 'Enter a URL to import.  Alternatively you can upload a list of URLs of pages to import.';
 ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
@@ -55,6 +77,7 @@ $msg     = $message->getMessages() ?? 'Enter a URL to import.  Alternatively you
           or upload a list of URLs of pages to import.
           Checkmark any transformations you wish to make on imported files.
           To expand the number of transformations you need to add to the <i>IMPORT::transform</i> configuration.</p>
+          <?php include ($config['SUPER']['super_menu'] ?? '') ?>
         </div>
       </div>
     </div>
