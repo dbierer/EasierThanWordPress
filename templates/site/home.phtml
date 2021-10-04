@@ -55,7 +55,9 @@ $msg = $message->getMessages();
     <?php if (!empty($msg)) : ?>
     <div class="row">
         <div class="col-md-12">
-            <?= $msg; ?>
+            <div class="alert alert-success contact__msg">
+                <?= $msg ?>
+            </div>
         </div>
     </div>
     <?php endif; ?>

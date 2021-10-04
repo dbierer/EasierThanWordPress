@@ -145,3 +145,22 @@ The skeleton app includes under `/templates` a file `contact.phtml` that impleme
 * Uses the PHPMailer package
 * Configuration can be done in `/src/config/config.php` using the `COMPANY_EMAIL` key
 * CAPTCHA configuration can be done in `/src/config/config.php` using the `CAPTCHA` key
+
+## Import Feature
+You can enable the import feature by setting the `IMPORT::enable` config key to `TRUE`.
+The importer itself is at `/templates/site/super/import.phtml`.
+Here are some notes on config file settings under the `IMPORT` config key:
+* `IMPORT::delim_start`
+  * tells the importer where to start cutting out content from the HTML source
+  * default: &lt;body&gt;
+* `IMPORT::delim_stop`
+  * tells the importer where to stop cutting out content from the HTML source
+  * default: &lt;/body&gt;
+* `IMPORT::transform`
+  * sub-array of transforms to make available to the importer
+  * `callback` : anything that's callable
+    * if your own PHP function or anonymous function, signature must match `SimpleHtml\Transform\TransformInterface`
+  * `params` : array of parameters the callback expects
+  * `description` : shows up when you run `/super/import`
+
+
