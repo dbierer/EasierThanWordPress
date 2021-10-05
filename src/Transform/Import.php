@@ -100,11 +100,30 @@ class Import
         return trim($html);
     }
     /**
+     * Checks to see if URL is on "trusted" list
+     *
+     * @param string $url : URL to test
+     * @param array $trusted : array of "trusted" URL prefixes
+     * @return bool TRUE if trusted; FALSE otherwise
+     */
+    public static function is_trusted(string $url, array $trusted) : bool
+    {
+        $ok = 0;
+        foreach ($trusted as $item) {
+            if (strpos($url, $item) === 0) {
+                $ok++;
+                break;
+            }
+        }
+        return (bool) $ok;
+    }
+
+    /**
      * Uploads and stores list of URLs to import
      * Removes any URLs not on trusted list
      *
      * @param string $field  : field name for uploaded file (from $_FILES)
-     * @param array $info    : uploaded file info from $_FILES
+     * @param array $info    : $_FILES
      * @param array $trusted : array of trusted URL prefixes
      * @return array $list   : list of URLs (or filenames) to import | empty array if upload failed
      */
@@ -118,15 +137,8 @@ class Import
                 // ok, go ahead and load the file
                 $temp = file($info[$field]['tmp_name']);
                 // scan file and remove any entries not on trusted list
-                foreach ($temp as $fn) {
-                    foreach ($trusted as $prefix) {
-                        $fn = trim($fn);
-                        if (stripos($fn, $prefix) === 0) {
-                            $list[] = $fn;
-                            break;
-                        }
-                    }
-                }
+                foreach ($temp as $url)
+                    if (self::is_trusted($url, $trusted)) $list[] = $url;
             }
         }
         return $list;

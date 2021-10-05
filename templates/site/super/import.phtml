@@ -4,7 +4,7 @@ use SimpleHtml\Common\Page\Edit;
 use SimpleHtml\Common\Security\Profile;
 use SimpleHtml\Common\Generic\Messages;
 // upload function
-function do_import($url, $transform, $delim_start, $delim_stop, $edit, $message))
+function do_import($url, $transform, $delim_start, $delim_stop, $edit, $message)
 {
     $ok   = 0;
     $html = Import::import($url, $transform, $delim_start, $delim_stop);
@@ -24,7 +24,7 @@ if (!empty($OBJ)) {
     $config = $OBJ->config;
 }
 // check to see if authenticated and feature enabled
-$enabled = (isset($config['IMPORT']['enabled'])) ? $config['IMPORT']['enabled'] : FALSE;
+$enabled = (isset($config['IMPORT']['enable'])) ? $config['IMPORT']['enable'] : FALSE;
 if (!$enabled || Profile::verify($config) === FALSE) {
     Profile::logout();
     $message = Messages::getInstance();
@@ -36,15 +36,17 @@ if (!$enabled || Profile::verify($config) === FALSE) {
 $total     = 0;
 $edit      = new Edit($config);
 $message   = Messages::getInstance();
-$transform = $config['IMPORT']['transform'];
+$transform = $config['IMPORT']['transform'] ?? [];
+$trusted   = $config['IMPORT']['trusted_src'] ?? [];
 // check to see if we need to import anything
 if (!empty($_POST)) {
     $delim_start = $config['IMPORT']['delim_start'];
     $delim_stop  = $config['IMPORT']['delim_stop'];
     // if "import_url" is set, just import from the list
-    if (isset($_POST[import_url])) {
-        $url  = strip_tags($_POST[import_url]);
-        $total += do_import($url, $transform, $delim_start, $delim_stop, $edit, $message);
+    if (isset($_POST['import_url'])) {
+        $url  = strip_tags($_POST['import_url']);
+        if (Import::is_trusted($url, $trusted))
+            $total += do_import($url, $transform, $delim_start, $delim_stop, $edit, $message);
     // otherwise check to see if "import_file" is set
     } elseif (isset($_FILES['import_file'])) {
         $list = Import::get_upload($_FILES['import_file']);

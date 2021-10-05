@@ -38,7 +38,7 @@ namespace SimpleHtml\Transform;
  */
 interface TransformInterface
 {
-    public const DEFAULT_ATTR_LIST = ['width','height','style','class'];
+    const DEFAULT_ATTR_LIST = ['width','height','style','class'];
     /**
      * @param string $html : HTML string to be cleaned
      * @param array $params : []

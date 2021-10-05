@@ -138,6 +138,11 @@ class Edit
     public function getKeyFromURL(string $url, string $path = HTML_DIR) : string
     {
         $key = parse_url($url, PHP_URL_PATH) ?? '';
+        // get rid of extension (if any)
+        if (strpos($key, '.') !== FALSE) {
+            $temp = explode('.', $key);
+            $key  = $temp[0] ?? $key;
+        }
         if (!empty($key))
             if ($key[0] !== '/') $key = '/' . $key;
         return trim($key);

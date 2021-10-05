@@ -27,6 +27,13 @@ class EditTest extends TestCase
         $actual   = $this->edit->getKeyFromURL($url, $this->testFileDir);
         $this->assertEquals($expected, $actual, 'Edit::getKeyFromURL() does not produce expected key');
     }
+    public function testGetKeyFromURLGetsRidOfExtension()
+    {
+        $url = 'https://unlikelysource.com/test1.html';
+        $expected = '/test1';
+        $actual   = $this->edit->getKeyFromURL($url, $this->testFileDir);
+        $this->assertEquals($expected, $actual, 'Edit::getKeyFromURL() does not remove .html extension');
+    }
     public function testGetKeyFromFilename()
     {
         $fn  = $this->testFileDir . '/test1.html';

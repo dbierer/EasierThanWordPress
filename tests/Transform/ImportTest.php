@@ -38,6 +38,22 @@ class ImportTest extends TestCase
         $actual = Import::get_delimited($text, $start, $stop);
         $this->assertEquals($expected, $actual, 'Contents from between delimiters not returned.');
     }
+    public function testIsTrustedReturnsTrueAsExpected()
+    {
+        $url = 'https://test.unlikelysource.com/test1.html';
+        $trusted = ['https://test.unlikelysource.com'];
+        $expected = TRUE;
+        $actual = Import::is_trusted($url, $trusted);
+        $this->assertEquals($expected, $actual, 'is_trusted is not working');
+    }
+    public function testIsTrustedReturnsFalseAsExpected()
+    {
+        $url = 'https://bad.com/test1.html';
+        $trusted = ['https://test.unlikelysource.com'];
+        $expected = FALSE;
+        $actual = Import::is_trusted($url, $trusted);
+        $this->assertEquals($expected, $actual, 'is_trusted is not working');
+    }
     public function testImportExtractsExpectedContentWithNoCallbacks()
     {
         $url      = 'http://test.unlikelysource.com/test1.html';
