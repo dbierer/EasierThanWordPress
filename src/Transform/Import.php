@@ -57,7 +57,7 @@ class Import
                                   string $delim_stop = self::DEFAULT_STOP)
     {
         $html = file_get_contents($url);
-        $html = self::extract($html, $delim_start, $delim_stop);
+        $html = self::get_delimited($html, $delim_start, $delim_stop);
         if (!empty($html) && !empty($callbacks)) {
             foreach ($callbacks as $item) {
                 $obj    = $item['callback'] ?? FALSE;
@@ -73,57 +73,50 @@ class Import
      * @string $contents    : HTML contents
      * string $delim_start  : where to start extraction
      * string $delim_stop   : where to end extraction; if NULL, you get contents starting with $delim_start and onwards
-     * bool $case_sensitive : set TRUE if you want case sensitive
      * @return string $html : transformed HTML
      */
-    public static function get_delimited(string $contents, string $delim_start, string $delim_stop = '', bool $case_sensitive = FALSE)
+    public static function get_delimited(string $contents,
+                                         string $delim_start,
+                                         string $delim_stop = '')
     {
-        $max   = strlen($contents);
-        $start = NULL;
-        $stop  = NULL;
         $html  = $contents;
-        if ($case_sensitive) {
-            $start = strpos($contents, $delim_start);
-        } else {
-            $start = stripos($contents, $delim_start);
-        }
+        $start = strpos($contents, $delim_start);
         // if start delim not found, just return the contents
         if ($start === FALSE) return $contents;
-        // validate start/stop
-        $start = $start + strlen($delim_start);
-        if ($start >= $max) return $contents;
-        if ($delim_stop === '') {
-            $html = substr($contents, $start);
-        } else {
-            if ($case_sensitive) {
-                $stop = strpos($contents, $delim_stop, $start);
+        $temp = explode($delim_start, $contents);
+        if (!empty($temp[1])) {
+            if ($delim_stop === '') {
+                $html = $temp[1];
             } else {
-                $stop = stripos($contents, $delim_stop, $start);
-            }
-            $length = $start - $stop;
-            if (!empty($length) && ($start + $length) <= $max) {
-                $html = substr($contents, $start, $length);
+                $stop = strpos($contents, $delim_stop);
+                if ($stop === FALSE) {
+                    $html = $temp[1];
+                } else {
+                    $again = explode($delim_stop, $temp[1]);
+                    $html  = $again[0] ?? $temp[1];
+                }
             }
         }
-        return $html;
+        return trim($html);
     }
     /**
      * Uploads and stores list of URLs to import
      * Removes any URLs not on trusted list
      *
+     * @param string $field  : field name for uploaded file (from $_FILES)
      * @param array $info    : uploaded file info from $_FILES
      * @param array $trusted : array of trusted URL prefixes
      * @return array $list   : list of URLs (or filenames) to import | empty array if upload failed
      */
-    public static function get_upload(array $info, array $trusted)
+    public static function get_upload(string $field, array $info, array $trusted)
     {
         $list = [];
         // is there an upload error?
-        if ($info['upload']['error'] == UPLOAD_ERR_OK) {
+        if ($info[$field]['error'] == UPLOAD_ERR_OK) {
             // is this an uploaded file?
-            if (is_uploaded_file ($info['upload']['tmp_name'])) {
+            if (is_uploaded_file($info[$field]['tmp_name'])) {
                 // ok, go ahead and load the file
-                $temp = file($info['upload']['tmp_name']);
+                $temp = file($info[$field]['tmp_name']);
                 // scan file and remove any entries not on trusted list
                 foreach ($temp as $fn) {
                     foreach ($trusted as $prefix) {

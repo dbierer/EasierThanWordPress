@@ -4,7 +4,7 @@ use SimpleHtml\Common\Page\Edit;
 use SimpleHtml\Common\Security\Profile;
 use SimpleHtml\Common\Generic\Messages;
 // upload function
-function do_upload($url, $transform, $delim_start, $delim_stop, $edit, $message))
+function do_import($url, $transform, $delim_start, $delim_stop, $edit, $message))
 {
     $ok   = 0;
     $html = Import::import($url, $transform, $delim_start, $delim_stop);
@@ -44,18 +44,17 @@ if (!empty($_POST)) {
     // if "import_url" is set, just import from the list
     if (isset($_POST[import_url])) {
         $url  = strip_tags($_POST[import_url]);
-        $total += do_upload($url, $transform, $delim_start, $delim_stop, $edit, $message);
+        $total += do_import($url, $transform, $delim_start, $delim_stop, $edit, $message);
+    // otherwise check to see if "import_file" is set
     } elseif (isset($_FILES['import_file'])) {
         $list = Import::get_upload($_FILES['import_file']);
         if (empty($list)) {
             $message->addMessage(Import::ERROR_UPLOAD);
         } else {
             foreach ($list as $url)
-                $total += do_upload($url, $transform, $delim_start, $delim_stop, $edit, $message);
+                $total += do_import($url, $transform, $delim_start, $delim_stop, $edit, $message);
         }
     }
-    // otherwise check to see if "import_file" is set
-    // if neither is set, drop through
 }
 // build checklist of transforms
 $apply = $edit->getListOfPages();

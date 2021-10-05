@@ -2,7 +2,8 @@
 Really simple PHP app that builds HTML files from HTML widgets.
 
 ## Initial Installation
-Use composer to install 3rd party source code
+1. Clone this repository to the project root of your new website.
+2. Use composer to install 3rd party source code (e.g. PHPMailer)
 ```
 wget https://getcomposer.org/download/latest-stable/composer.phar
 php composer.phar self-update
@@ -25,32 +26,35 @@ From this directory, run the following command:
 php -S localhost:8888 -t public
 ```
 
-## To Run Locally Using Docker-Compose
+## To Run Locally Using Docker and docker-compose
 
-Configure the management utlity `admin.sh`
-* Edit `admin.sh` and change the value of the `NAME` variable
-  * If your website is called `http://my.supersite.com/` the short name would be `supersite`
-* Edit `admin.sh` and change the value of the `EXT` variable
-  * If your website is called `http://my.supersite.com/` the ext would be `com`
-* Populate Credentials
-  * Copy security credentials file
+### Windows
+Install [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows)
+
+Open the Power Shell (some commands don't work in the regular command prompt)
+
+To bring the docker container online, run this command:
 ```
-cp security_cred.json.dist security_cred.json
+admin up
 ```
-  * Populate `security_cred.json` file with the appropriate information
-  * Any info you don't have or will not use just leave blank
-* Create customer `Dockerfile` and `docker-compose.yml` files based upon `security_creds.json`
+To stop the container do this:
 ```
-# use this if you want to be prompted
-./admin.sh creds templates/deployment
-# use this for no prompts
-./admin.sh creds templates/deployment --no-prompts
+admin down
+```
+To open a command shell into the container:
+```
+admin shell
 ```
 
-* Install Docker
-* Install Docker-Compose
+### Linux / Mac
+Install Docker + docker-compose:
+* Mac
+  * Install [Docker Desktop for Mac](https://hub.docker.com/editions/community/docker-ce-desktop-mac)
+* Linux
+  * Install [Docker](https://docs.docker.com/engine/install/)
+  * Install [docker-compose](https://docs.docker.com/compose/install/#install-compose-on-linux-systems)
 
-## Bring Container Online
+Open a terminal window (Terminal Application)
 
 To bring the docker container online, run this command:
 ```
@@ -59,6 +63,20 @@ To bring the docker container online, run this command:
 To stop the container do this:
 ```
 ./admin.sh down
+```
+To open a command shell into the container:
+```
+./admin.sh shell
+```
+
+### Browser Access
+To access from your browser:
+```
+http://localhost:8888/
+```
+* Or, if your IP addressing is working:
+```
+http://10.10.10.10/
 ```
 
 ## Templates

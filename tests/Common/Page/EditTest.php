@@ -45,6 +45,7 @@ class EditTest extends TestCase
     {
         $pages = $this->edit->getListOfPages($this->testFileDir);
         $expected = count(glob($this->testFileDir . '/*.htm*'));
+        $expected += count(glob($this->testFileDir . '/sub/*.htm*'));
         $actual   = count($pages);
         $this->assertEquals($expected, $actual, 'Edit::getListOfPages() did not find only HTML files');
     }
