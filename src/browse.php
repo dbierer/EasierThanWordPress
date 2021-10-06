@@ -1,5 +1,5 @@
 <?php
-use SimpleHtml\Common\File\Upload;
+use SimpleHtml\Common\File\Browse;
 use SimpleHtml\Common\Security\Profile;
 use SimpleHtml\Common\Generic\Messages;
 // process contact post (if any)
@@ -16,8 +16,8 @@ if (Profile::verify($config) === FALSE) {
     header('Location: /');
     exit;
 }
-$upload = new Upload($config);
-$response = $upload->handle('upload');
+$browse = new Browse($config);
+$response = $browse->handle();
 header('Content-type: application/json');
 echo json_encode($response);
 

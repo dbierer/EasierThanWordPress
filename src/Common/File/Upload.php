@@ -42,7 +42,6 @@ class Upload
 {
 
     const UPLOAD_ALERT            = 'alert("%s";';
-    const UPLOAD_FILES_KEY        = 'upload';
     const UPLOAD_SUCCESS          = 'SUCCESS: uploaded %s (%d bytes)';
     const UPLOAD_ERROR_NO_GO      = 'ERROR: homey don\'t go there!';
     const UPLOAD_ERROR_IMAGE      = 'ERROR: unable to upload image file';

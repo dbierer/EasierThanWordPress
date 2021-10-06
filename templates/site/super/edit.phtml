@@ -192,6 +192,7 @@ $msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when don
     CKEDITOR.replace('page_content', {
         startupFocus: true,
         filebrowserUploadUrl: '/super/upload',
+        filebrowserBrowseUrl: '/super/browse',
         width: '<?= $edit_width ?>',
         height: '<?= $edit_height ?>'
     });

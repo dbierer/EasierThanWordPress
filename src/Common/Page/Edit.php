@@ -97,15 +97,13 @@ class Edit
                 }
                 public function accept()
                 {
-                    $ok  = 0;
+                    $ok  = FALSE;
                     $obj = $this->current() ?? FALSE;
                     if ($obj && $obj instanceof SplFileInfo) {
                         $ext = strtolower($obj->getExtension());
-                        foreach ($this->allowed as $allowed) {
-                            $ok += (int) ($ext === $allowed);
-                        }
+                        $ok  = in_array($ext, $this->allowed);
                     }
-                    return (bool) $ok;
+                    return $ok;
                 }
             };
             foreach ($filt as $name => $obj)

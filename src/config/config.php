@@ -47,6 +47,7 @@ $config = [
         'img_size'    => 3000000,
         'allowed_ext' => ['jpg','jpeg','png','gif','bmp'],
         'upload_dir'  => BASE_DIR . '/public/images',
+        'thumb_dir'   => BASE_DIR . '/public/images/thumb',
         'url'         => '/images',
         'allowed_types' => ['image/'],
     ],
