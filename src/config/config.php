@@ -35,10 +35,20 @@ $config = [
         ],
         'allowed_ext'  => ['html','htm'],
         'ckeditor'     => [
-            'width' => '100%',
+            'width'  => '100%',
             'height' => 400,
         ],
         'super_menu' => BASE_DIR . '/templates/layout/super_menu.html',
+    ],
+    'UPLOADS' => [
+        'restrict_size' => TRUE,    // set to FALSE to ignore size restrictions
+        'img_width'   => 500,
+        'img_height'  => 500,
+        'img_size'    => 3000000,
+        'allowed_ext' => ['jpg','jpeg','png','gif','bmp'],
+        'upload_dir'  => BASE_DIR . '/public/images',
+        'url'         => '/images',
+        'allowed_types' => ['image/'],
     ],
     'STORAGE' => [
         'db_host' => 'localhost',
@@ -83,7 +93,7 @@ $config = [
         'num_bytes'      => 2,
     ],
     'IMPORT' => [
-        'enable' => FALSE,              // need to change this to TRUE to enable this feature!
+        'enable' => TRUE,               // change this to FALSE to diseable this feature
         'delim_start'  => '<body>',     // marks beginning of contents to extract
         'delim_stop'   => '</body>',    // marks end of contents to extract
         'trusted_src'  => ['https://unlikelysource.com'],   // array of trusted URLs

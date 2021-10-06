@@ -18,14 +18,13 @@ $body = '';
 $uri  = $_POST['uri'] ?? $_SERVER['REQUEST_URI'] ?? '';
 $uri  = parse_url($uri,  PHP_URL_PATH);
 $uri  = (strlen($uri) <= 1) ? '/home' : $uri;
-$msg  = '';
-// routes w/ forms need to do an include
-header('Content-Type: text/html');
-header('Content-Encoding: compress');
 
 try {
-    // add pre-processing logic in this file:
+    // pre-processing logic:
     include SRC_DIR . '/processing.php';
+    // routes w/ forms need to do an include
+    header('Content-Type: text/html');
+    header('Content-Encoding: compress');
     $html = new Html($config, $uri, HTML_DIR);
     echo $html->render();
 } catch (Throwable $t) {

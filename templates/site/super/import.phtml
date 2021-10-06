@@ -10,10 +10,10 @@ function do_import($url, $transform, $delim_start, $delim_stop, $edit, $message)
     $html = Import::import($url, $transform, $delim_start, $delim_stop);
     $key  = $edit->getKeyFromURL($url, HTML_DIR);
     if ($edit->save($key, $html, HTML_DIR, TRUE)) {
-        $message->addMessage(Import::SUCCESS_SAVE);
+        $message->addMessage(Edit::SUCCESS_SAVE);
         $ok++;
     } else {
-        $message->addMessage(Import::ERROR_SAVE);
+        $message->addMessage(Edit::ERROR_SAVE);
     }
     return $ok;
 }
@@ -60,7 +60,7 @@ if (!empty($_POST)) {
 }
 // build checklist of transforms
 $apply = $edit->getListOfPages();
-$templ = '<li><input type="checkbox" name="transform[]" value="%s" />&nbsp;%s</li>';
+$templ = '<li><input type="checkbox" name="transform[]" value="%s" checked />&nbsp;%s</li>';
 $check = '<ul>';
 foreach ($transform as $key => $item)
     $check .= sprintf($templ, $key, $item['description']);
