@@ -50,9 +50,11 @@ class RemoveAttributes implements TransformInterface
     public function __invoke(string $html, array $params = []) : string
     {
         $list  = $params['attributes'] ?? [];
-        $blank = '!\b%s=".*?"!';
+        $blank = '!\b%s=".+?"!';
         $html  = $this->doReplace($list, $blank, $html);
-        $blank = "!\b%s='.*?'!";
+        $blank = "!\b%s='.+?'!";
+        $html  = $this->doReplace($list, $blank, $html);
+        $blank = '!\b%s=.+?\b!';
         $html  = $this->doReplace($list, $blank, $html);
         return $html;
     }

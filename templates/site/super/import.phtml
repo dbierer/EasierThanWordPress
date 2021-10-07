@@ -42,11 +42,19 @@ $trusted   = $config['IMPORT']['trusted_src'] ?? [];
 if (!empty($_POST)) {
     $delim_start = $config['IMPORT']['delim_start'];
     $delim_stop  = $config['IMPORT']['delim_stop'];
+    $tmp_trans   = $transform;
+    // remove transforms not checked
+    $checked = $_POST['transform'] ?? [];
+    if (empty($checked) && is_array($checked)) {
+        foreach($tmp_trans as $key => $value)
+            if (!in_array($key, $checked))
+                unset($tmp_trans[$key]);
+    }
     // if "import_url" is set, just import from the list
     if (isset($_POST['import_url'])) {
         $url  = strip_tags($_POST['import_url']);
         if (Import::is_trusted($url, $trusted))
-            $total += do_import($url, $transform, $delim_start, $delim_stop, $edit, $message);
+            $total += do_import($url, $tmp_trans, $delim_start, $delim_stop, $edit, $message);
     // otherwise check to see if "import_file" is set
     } elseif (isset($_FILES['import_file'])) {
         $list = Import::get_upload($_FILES['import_file']);
@@ -54,7 +62,7 @@ if (!empty($_POST)) {
             $message->addMessage(Import::ERROR_UPLOAD);
         } else {
             foreach ($list as $url)
-                $total += do_import($url, $transform, $delim_start, $delim_stop, $edit, $message);
+                $total += do_import($url, $tmp_trans, $delim_start, $delim_stop, $edit, $message);
         }
     }
 }

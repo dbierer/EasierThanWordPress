@@ -22,6 +22,15 @@ class RemoveAttributesTest extends TestCase
         $actual = $obj($str, $params);
         $this->assertEquals($expected, $actual, 'Single attribute not removed');
     }
+    public function testRemovesSingleNumericAttribute()
+    {
+        $str = '<td width=300>xxx</td>';
+        $params = ['attributes' => ['width']];
+        $expected = '<td>xxx</td>';
+        $obj = new RemoveAttributes();
+        $actual = $obj($str, $params);
+        $this->assertEquals($expected, $actual, 'Single numeric attribute not removed properly');
+    }
     public function testRemovesMultipleAttributes()
     {
         $str = '<td width="150" height="20" background="../images/backgrounds/bkgnd_tandk.gif">';
