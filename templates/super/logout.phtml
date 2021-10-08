@@ -1,0 +1,8 @@
+<?php
+use SimpleHtml\Common\Security\Profile;
+use SimpleHtml\Common\Generic\Messages;
+Profile::logout();
+$message = Messages::getInstance();
+$message->addMessage('Successful logout');
+header('Location: /');
+exit;

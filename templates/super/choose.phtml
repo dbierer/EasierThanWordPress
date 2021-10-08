@@ -1,0 +1,157 @@
+<?php
+use SimpleHtml\Common\Page\Edit;
+use SimpleHtml\Common\Security\Profile;
+use SimpleHtml\Common\Generic\Messages;
+// process contact post (if any)
+// $OBJ == calling instance
+if (!empty($OBJ)) {
+    $uri    = $OBJ->uri;
+    $config = $OBJ->config;
+}
+// check to see if authenticated
+if (Profile::verify($config) === FALSE) {
+    Profile::logout();
+    $message = Messages::getInstance();
+    $message->addMessage('Unable to authenticate');
+    header('Location: /');
+    exit;
+}
+// init vars
+$edit      = new Edit($config);
+$contents  = '';
+$super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
+// build dropdown list of existing pages
+$pages = $edit->getListOfPages();
+$select = '<select name="page_key" class="form-control" placeholder="Choose">' . PHP_EOL;
+$select .= '<option>' . Edit::CHOOSE_TOP . '</option>' . PHP_EOL;
+foreach (array_keys($pages) as $key)
+    $select .= '<option>' . $key . '</option>' . PHP_EOL;
+$select .= '</select>' . PHP_EOL;
+// build checklist of transforms
+$transform = $config['IMPORT']['transform'] ?? [];
+$trusted   = $config['IMPORT']['trusted_src'] ?? [];
+$apply = $edit->getListOfPages();
+$templ = '<li><input type="checkbox" name="transform[]" value="%s" checked />&nbsp;%s</li>';
+$check = '<ul>';
+foreach ($transform as $key => $item)
+    $check .= sprintf($templ, $key, $item['description']);
+$check .= '</ul>' . PHP_EOL;
+// get messages
+$message = Messages::getInstance();
+$msg     = $message->getMessages() ?? 'Select page to edit or delete.  To add a new page, enter a URL and click "Add New Page" button.';
+?>
+  <!-- Header -->
+  <header class="bg-primary py-5 mb-5">
+    <div class="container h-100">
+      <div class="row h-100 align-items-center">
+        <div class="col-lg-12">
+          <h1 class="display-4 text-white mt-5 mb-2">Choose</h1>
+          <p class="lead mb-5 text-white-50">Use this page choose the web page from this website you wish to edit or delete.
+          To add a new page, enter a URL and click "Add New Page" button.
+          If you wish to import and/or edit a page from another website click <i>Import</i>.
+          This menu only allows you to edit pages on <i>this</i> website!</p>
+          <?php include ($config['SUPER']['super_menu'] ?? '') ?>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+
+                <div class="row">
+                    <!-- Input -->
+                    <div class="col-sm-6 mb-6">
+                        <form class="choose_form" action="<?= $super_url ?>/edit" method="get">
+                        <h2>Edit Existing Page</h2>
+                        <hr />
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                Enter URL from this Website (or choose from Page List)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" name="page_url" id="page_url" size=60 placeholder="http://company.com/page/title" type="text" />
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                Choose from Page List (or Enter URL)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group"><?= $select ?></div>
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <input name="choose_edit_page" type="submit" class="btn btn-primary btn-circled" value="Edit Existing Page">
+                            <input name="choose_new_page" type="submit" class="btn btn-primary btn-circled" value="Add New Page">
+                            <input name="choose_del_page" type="submit" class="btn btn-primary btn-circled" value="Delete Page">
+                        </div>
+                        </form>
+                    </div>
+                    <div class="col-sm-6 mb-6">
+                        <form class="choose_form" action="<?= $super_url ?>/import" method="post" enctype="multipart/form-data">
+                        <h2>Import Page from Another Website</h2>
+                        <hr />
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                Manually Enter One or More URLs to Import
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" name="import_url" id="import_url" size=60 placeholder="http://company.com/page/one,http://company.com/page/two,etc" type="text" title="Enter single URL of list of URLs separated by commas"/>
+                            </div>
+                            <p>(or upload list of URLs to automatically import)</p>
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                Upload File with List of URLs to Automatically Import
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group"><input type="file" name="import_file" /></div>
+                            <p>(or manually enter one or more URLs to import)</p>
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                Transforms to Apply
+                            </label>
+                            <div class="input-group"><?= $check ?></div>
+                        </div>
+                        <p>Expand list of transforms by adding to the <i>IMPORT::transforms</i> configuration array</p>
+                        <hr />
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                Target URL [Optional]
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" name="target_url" id="target_url" size=60 placeholder="http://company.com/page/title" type="text" />
+                            </div>
+                        </div>
+                        <p>Optional destination.  If not set, uses "path" from import URL source as destination.</p>
+                        <hr />
+                        <div class="form-group">
+                            <input name="choose_import" type="submit" class="btn btn-primary btn-circled" value="Import">
+                        </div>
+                        </form>
+                    </div>
+                    <!-- End Input -->
+                </div>
+                </div><!-- row -->
+
+           <!-- form message -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-success contact__msg">
+                        <?= $msg ?>
+                    </div>
+                </div>
+            </div>
+            <!-- end message -->
+        </div>
+
+    </div>
+  </div>

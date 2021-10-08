@@ -1,4 +1,5 @@
 <?php
+use SimpleHtml\Common\Page\Edit;
 use SimpleHtml\Common\Image\Captcha;
 use SimpleHtml\Common\Security\Profile;
 use SimpleHtml\Common\Generic\Messages;
@@ -15,6 +16,7 @@ $hashKey = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
 $message = Messages::getInstance();
 $msg     = $message->getMessages() ?? 'Enter your login information';
 $other   = [];
+$super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
 if ($_POST) {
     // capture login params
     $name   = $_POST['name']     ?? 'Default';
@@ -86,7 +88,7 @@ $_SESSION[$hashKey] = $hash;
     <div class="row">
         <div class="col-lg-6">
             <!-- Contacts Form -->
-            <form class="contact_form" action="/super/login" method="post">
+            <form class="contact_form" action="<?= $super_url ?>/login" method="post">
                 <div class="row">
                     <!-- Input -->
                     <div class="col-sm-6 mb-6">

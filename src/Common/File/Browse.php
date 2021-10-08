@@ -36,6 +36,10 @@ namespace SimpleHtml\Common\File;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use ArrayIterator;
+use FilterIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use SimpleHtml\Common\Generic\Messages;
 use InvalidArgumentException;
 class Browse
@@ -43,6 +47,8 @@ class Browse
 
     const DEFAULT_IMG_DIR   = BASE_DIR . '/public/images';
     const DEFAULT_THUMB_DIR = BASE_DIR . '/public/images/thumb';
+    const DEFAULT_THUMB_URL = '/images/thumb';
+    const DISPLAY_ROWS      = 3;
     public $errors        = [];
     public $config        = [];
     public $images        = [];
@@ -50,6 +56,7 @@ class Browse
     public $img_dir       = '';
     public $img_url       = '';
     public $thumb_dir     = '';
+    public $thumb_url     = '';
     /**
      * @param array $config : file upload information; looks for a key 'UPLOADS'
      */
@@ -57,21 +64,48 @@ class Browse
     {
         $this->config = $config['UPLOADS'] ?? [];
         if (empty($this->config))
-            throw new InvalidArgumentException(Upload::UPLOAD_ERROR_MISSING
+            throw new InvalidArgumentException(Upload::UPLOAD_ERROR_MISSING);
         $this->img_dir = $this->config['upload_dir'] ?? self::DEFAULT_IMG_DIR;
         $this->allowed = $this->config['allowed_ext'] ?? Upload::UPLOAD_DEFAULT_EXT;
         $this->img_url = $this->config['url'] ?? Upload::UPLOAD_DEFAULT_URL;
         $this->thumb_dir = $this->config['thumb_dir'] ?? self::DEFAULT_THUMB_DIR;
+        $this->thumb_url = $this->config['thumb_url'] ?? self::DEFAULT_THUMB_URL;
     }
 
     /**
      * Handles file browsing
      *
-     * @param string $field : name of the field in $_FILES containing uploaded file info
-     * @return array $response : array containing information on the upload
+     * @return string $html : HTML table with images + thumbnails
      */
-    public function handle(string $field)
+    public function handle()
     {
+        $list  = new ArrayIterator($this->getListOfImages());
+        $html  = '<table>';
+        $count = 1000;
+        while ($list->valid()) {
+            $html .= '<tr>';
+            for ($x = self::DISPLAY_ROWS; $x > 0; $x--) {
+                if ($list->valid()) {
+                    $key = $list->key();
+                    $fn  = $list->current();
+                    $list->next();
+                    $thumb_fn = $this->getThumbFnFromImageFn($fn);
+                    $thumb_url = $this->getThumbUrlFromImageUrl($key);
+                    if (!file_exists($thumb_fn))
+                        $this->makeThumbnail($fn, $thumb_fn);
+                    $id   = 'img_' . $count++;
+                    $html = '<a href="#" onclick="returnFileUrl(\'' . $id . '\')">'
+                          . '<img src="' . $thumb_url . '" alt="' . $key . '" />'
+                          . '</a>'
+                          . '<input type="hidden" id="' . $id . '" value="' . $fn . '" />';
+                } else {
+                    $html .= '<td>&nbsp;</td>';
+                }
+            }
+            $html .= '</tr>';
+        }
+        $html .= '</table>';
+        return $html;
     }
 
     /**
@@ -79,9 +113,10 @@ class Browse
      * NOTE: requires the GD extension
      *
      * @param string $fn : image filename
+     * @param string $thumb_fn : image filename for thumbnail
      * @return bool TRUE if thumbnail created OK; FALSE otherwise
      */
-    public function makeThumbnail(string $fn)
+    public function makeThumbnail(string $fn, string $thumb_fn)
     {
         // create GD image
         // scale to 50 x 50
@@ -98,6 +133,17 @@ class Browse
     public function getThumbFnFromImageFn(string $img_fn)
     {
         return str_replace($this->img_dir, $this->thumb_dir, $img_fn);
+    }
+
+    /**
+     * Returns thumbnail URL from image URL
+     *
+     * @param string $img_url    : image filename
+     * @return string $thumb_url : thumbnail filename
+     */
+    public function getThumbUrlFromImageUrl(string $img_url)
+    {
+        return str_replace($this->img_url, $this->thumb_url, $img_url);
     }
 
     /**
@@ -139,4 +185,4 @@ class Browse
         }
         return $this->images;
     }
-
+}

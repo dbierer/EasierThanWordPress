@@ -22,6 +22,7 @@ $edit     = new Edit($config);
 $contents = '';
 $edit_width = $config['SUPER']['ckeditor']['width'] ?? 900;
 $edit_height = $config['SUPER']['ckeditor']['height'] ?? 500;
+$super_url   = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
 // acquire key and page_url
 $key      = $_REQUEST['page_key'] ?? '';
 $key      = ($key === Edit::CHOOSE_TOP) ? '' : $key;
@@ -93,7 +94,7 @@ $msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when don
     <div class="row">
         <div class="col-lg-12">
             <!-- Edit Form -->
-            <form class="contact_form" action="/super/edit" method="post">
+            <form class="contact_form" action="<?= $super_url ?>/edit" method="post">
 
                 <!-- Input -->
                 <div class="row">
@@ -191,8 +192,10 @@ $msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when don
     <script type="text/javascript">
     CKEDITOR.replace('page_content', {
         startupFocus: true,
-        filebrowserUploadUrl: '/super/upload',
-        filebrowserBrowseUrl: '/super/browse',
+        filebrowserImageUploadUrl: '/super/upload',
+        filebrowserImageBrowseUrl: '/super/browse',
+        filebrowserWindowWidth: '640',
+        filebrowserWindowHeight: '480',
         width: '<?= $edit_width ?>',
         height: '<?= $edit_height ?>'
     });

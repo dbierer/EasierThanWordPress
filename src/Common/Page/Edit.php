@@ -37,10 +37,11 @@ use RecursiveIteratorIterator;
 use FilterIterator;
 class Edit
 {
-    const DEFAULT_EXT  = ['html', 'htm'];
-    const CHOOSE_TOP   = '--choose--';
-    const SUCCESS_SAVE = 'SUCCESS: page saved successfully';
-    const SUCCESS_DEL  = 'SUCCESS: page deleted successfully';
+    const DEFAULT_EXT    = ['html', 'htm'];
+    const DEFAULT_SUPER  = '/super';
+    const CHOOSE_TOP     = '--choose--';
+    const SUCCESS_SAVE   = 'SUCCESS: page saved successfully';
+    const SUCCESS_DEL    = 'SUCCESS: page deleted successfully';
     const SUCCESS_CANCEL = 'Operation cancelled';
     const ERROR_SAVE   = 'ERROR: unable to save page';
     const ERROR_DEL    = 'ERROR: unable to delete page';

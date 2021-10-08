@@ -15,10 +15,12 @@ $config = [
         ],
     ],
     'SUPER' => [
-        'username' => 'admin',
-        'password' => 'password',
-        'attempts' => 3,
-        'message'  => 'Sorry! Unable to login.  Please contact your administrator',
+        'super_url' => '/super',                // IMPORTANT: needs to be a subdir off the "super_dir" setting
+        'super_dir' => BASE_DIR . '/templates', // IMPORTANT: needs to have a subdir === "super_url" setting
+        'username'  => 'admin',
+        'password'  => 'password',
+        'attempts'  => 3,
+        'message'   => 'Sorry! Unable to login.  Please contact your administrator',
         // array of $_SERVER keys to store in session if authenticated
         'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE','HTTP_COOKIE'],
         // change the values to reflect the names of fiels in your login.phtml form
@@ -47,8 +49,9 @@ $config = [
         'img_size'    => 3000000,
         'allowed_ext' => ['jpg','jpeg','png','gif','bmp'],
         'upload_dir'  => BASE_DIR . '/public/images',
-        'thumb_dir'   => BASE_DIR . '/public/images/thumb',
+        'thumb_dir'   => BASE_DIR . '/public/thumb',
         'url'         => '/images',
+        'thumb_url'   => '/thumb',
         'allowed_types' => ['image/'],
     ],
     'STORAGE' => [
@@ -97,7 +100,7 @@ $config = [
         'enable' => TRUE,               // change this to FALSE to diseable this feature
         'delim_start'  => '<body>',     // marks beginning of contents to extract
         'delim_stop'   => '</body>',    // marks end of contents to extract
-        'trusted_src'  => ['https://unlikelysource.com'],   // array of trusted URLs
+        'trusted_src'  => ['https://test.unlikelysource.com'],   // array of trusted URLs
         // add as many transforms as desired
         // you can also add your own anonymous functions as transforms as long as the signature
         // matches the one specified by SimpleHtml\Transform\TransformInterface

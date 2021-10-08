@@ -6,16 +6,16 @@ use SimpleHtml\Common\Generic\Messages;
 // upload function
 function do_import($url, $transform, $delim_start, $delim_stop, $edit, $message)
 {
-    $ok   = 0;
+    $ok   = FALSE;
     $html = Import::import($url, $transform, $delim_start, $delim_stop);
     $key  = $edit->getKeyFromURL($url, HTML_DIR);
     if ($edit->save($key, $html, HTML_DIR, TRUE)) {
         $message->addMessage(Edit::SUCCESS_SAVE);
-        $ok++;
+        $ok = TRUE;
     } else {
         $message->addMessage(Edit::ERROR_SAVE);
     }
-    return $ok;
+    return ($ok) ? $key : FALSE;
 }
 // process contact post (if any)
 // $OBJ == calling instance
@@ -34,10 +34,12 @@ if (!$enabled || Profile::verify($config) === FALSE) {
 }
 // init vars
 $total     = 0;
+$key       = '';
 $edit      = new Edit($config);
 $message   = Messages::getInstance();
 $transform = $config['IMPORT']['transform'] ?? [];
 $trusted   = $config['IMPORT']['trusted_src'] ?? [];
+$super_url  = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
 // check to see if we need to import anything
 if (!empty($_POST)) {
     $delim_start = $config['IMPORT']['delim_start'];
@@ -54,7 +56,11 @@ if (!empty($_POST)) {
     if (isset($_POST['import_url'])) {
         $url  = strip_tags($_POST['import_url']);
         if (Import::is_trusted($url, $trusted))
-            $total += do_import($url, $tmp_trans, $delim_start, $delim_stop, $edit, $message);
+            $key = do_import($url, $tmp_trans, $delim_start, $delim_stop, $edit, $message);
+        if (!empty($key)) {
+            header('Location: ' . $super_url . '/edit?page_key=' . $key);
+            exit;
+        }
     // otherwise check to see if "import_file" is set
     } elseif (isset($_FILES['import_file'])) {
         $list = Import::get_upload($_FILES['import_file']);
@@ -96,7 +102,7 @@ $msg = $message->getMessages() ?? 'Enter a URL to import.  Alternatively you can
     <div class="row">
         <div class="col-lg-6">
             <!-- Edit Form -->
-            <form class="choose_form" action="/super/import" method="post" enctype="multipart/form-data">
+            <form class="choose_form" action="<?= $super_url ?>/import" method="post" enctype="multipart/form-data">
 
                 <div class="row">
                     <!-- Input -->
