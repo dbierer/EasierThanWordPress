@@ -1,6 +1,7 @@
 <?php
 namespace SimpleHtmlTest\Common\File;
 
+use FilterIterator;
 use InvalidArgumentException;
 use SimpleHtml\Common\File\Browse;
 use PHPUnit\Framework\TestCase;
@@ -37,14 +38,77 @@ class BrowseTest extends TestCase
         $actual = $browse->getThumbUrlFromImageUrl($img_url);
         $this->assertEquals($expected, $actual, 'Thumb image URL not created correctly');
     }
-    public function testGetListOfImagesReturnsCorrectCount()
+    public function testGetFilterIteratorReturnsFilterIterator()
     {
         $img_dir = $this->testFileDir . '/images';
-        $this->config['UPLOADS']['upload_dir'] = $img_dir;
         $browse = new Browse($this->config);
+        $browse->upload_dir = $img_dir;
+        $images = $browse->getFilterIterator($img_dir);
+        $expected = TRUE;
+        $actual = ($images instanceof FilterIterator);
+        $this->assertEquals($expected, $actual, 'Browse::getFilterIterator() did not return FilterIterator instance');
+    }
+    public function testGetFilterIteratorReturnsCorrectCount()
+    {
+        $img_dir = $this->testFileDir . '/images';
+        $browse = new Browse($this->config);
+        $browse->upload_dir = $img_dir;
+        $browse->allowed    = ['jpg'];
         $expected = count(glob($img_dir . '/*'));
+        $images = $browse->getFilterIterator($img_dir);
+        $actual = count(iterator_to_array($images));
+        $this->assertEquals($expected, $actual, 'Browse::getFilterIterator() did not return correct count');
+    }
+    public function testGetListOfImagesReturnsArrayIterator()
+    {
+        $img_dir = $this->testFileDir . '/images';
+        $browse = new Browse($this->config);
+        $browse->upload_dir = $img_dir;
         $images = $browse->getListOfImages($img_dir);
-        $actual = count($images);
-        $this->assertEquals($expected, $actual, 'Browse::getListOfImages() did not return correct count');
+        $expected = 'ArrayIterator';
+        $actual = get_class($images);
+        $this->assertEquals($expected, $actual, 'Browse::getListOfImages() did not return ArrayIterator instance');
+    }
+    public function testGetListOfImagesReturnsCorrectKey()
+    {
+        $img_dir = $this->testFileDir . '/images';
+        $browse = new Browse($this->config);
+        $browse->upload_dir = $img_dir;
+        $browse->allowed    = ['jpg'];
+        $images = $browse->getListOfImages($img_dir);
+        $images->rewind();
+        $expected = '/images/blog-1.jpg';
+        $actual = $images->key();
+        $this->assertEquals($expected, $actual, 'Browse::getListOfImages() did not return expected key');
+    }
+    public function testGetListOfImagesReturnsCorrectValue()
+    {
+        $img_dir = $this->testFileDir . '/images';
+        $browse = new Browse($this->config);
+        $browse->upload_dir = $img_dir;
+        $browse->allowed    = ['jpg'];
+        $images = $browse->getListOfImages($img_dir);
+        $images->rewind();
+        $expected = $img_dir . '/blog-1.jpg';
+        $actual = $images->current();
+        $this->assertEquals($expected, $actual, 'Browse::getListOfImages() did not return expected value');
+    }
+    public function testMakeThumbnailCreatesImage()
+    {
+        $img_base = '/blog-1.jpg';
+        $img_dir = $this->testFileDir . '/images';
+        $img_fn  = $img_dir . $img_base;
+        $thumb_dir = $this->testFileDir . '/thumb';
+        $thumb_fn  = $thumb_dir . $img_base;
+        if (file_exists($thumb_fn)) unlink($thumb_fn);
+        $browse = new Browse($this->config);
+        $browse->upload_dir = $img_dir;
+        $browse->thumb_dir  = $thumb_dir;
+        $browse->allowed    = ['jpg'];
+        $browse->makeThumbnail($img_fn);
+        $list = glob($thumb_fn);
+        $expected = $thumb_fn;
+        $actual = $list[0] ?? '';
+        $this->assertEquals($expected, $actual, 'Browse::makeThumbnail() did not create file');
     }
 }

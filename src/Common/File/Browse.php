@@ -38,6 +38,7 @@ namespace SimpleHtml\Common\File;
  */
 use ArrayIterator;
 use FilterIterator;
+use OuterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SimpleHtml\Common\Generic\Messages;
@@ -49,9 +50,10 @@ class Browse
     const DEFAULT_THUMB_DIR = BASE_DIR . '/public/images/thumb';
     const DEFAULT_THUMB_URL = '/images/thumb';
     const DISPLAY_ROWS      = 3;
+    const GD_MAP            = ['jpg' => 'jpeg', 'jpeg' => 'jpeg', 'png' => 'png', 'bmp' => 'bmp', 'gif' => 'gif'];
     public $errors        = [];
     public $config        = [];
-    public $images        = [];
+    public $images        = NULL;
     public $allowed       = [];
     public $img_dir       = '';
     public $img_url       = '';
@@ -65,9 +67,9 @@ class Browse
         $this->config = $config['UPLOADS'] ?? [];
         if (empty($this->config))
             throw new InvalidArgumentException(Upload::UPLOAD_ERROR_MISSING);
-        $this->img_dir = $this->config['upload_dir'] ?? self::DEFAULT_IMG_DIR;
         $this->allowed = $this->config['allowed_ext'] ?? Upload::UPLOAD_DEFAULT_EXT;
-        $this->img_url = $this->config['url'] ?? Upload::UPLOAD_DEFAULT_URL;
+        $this->img_dir = $this->config['upload_dir'] ?? self::DEFAULT_IMG_DIR;
+        $this->img_url = $this->config['img_url'] ?? Upload::UPLOAD_DEFAULT_URL;
         $this->thumb_dir = $this->config['thumb_dir'] ?? self::DEFAULT_THUMB_DIR;
         $this->thumb_url = $this->config['thumb_url'] ?? self::DEFAULT_THUMB_URL;
     }
@@ -79,7 +81,7 @@ class Browse
      */
     public function handle()
     {
-        $list  = new ArrayIterator($this->getListOfImages());
+        $list  = $this->getListOfImages();
         $html  = '<table>';
         $count = 1000;
         while ($list->valid()) {
@@ -94,10 +96,10 @@ class Browse
                     if (!file_exists($thumb_fn))
                         $this->makeThumbnail($fn, $thumb_fn);
                     $id   = 'img_' . $count++;
-                    $html = '<a href="#" onclick="returnFileUrl(\'' . $id . '\')">'
+                    $html = '<a name="' . $id . '" onclick="returnFileUrl(\'' . $id . '\')">'
                           . '<img src="' . $thumb_url . '" alt="' . $key . '" />'
                           . '</a>'
-                          . '<input type="hidden" id="' . $id . '" value="' . $fn . '" />';
+                          . '<input type="hidden" id="' . $id . '" value="' . $key . '" />';
                 } else {
                     $html .= '<td>&nbsp;</td>';
                 }
@@ -113,15 +115,23 @@ class Browse
      * NOTE: requires the GD extension
      *
      * @param string $fn : image filename
-     * @param string $thumb_fn : image filename for thumbnail
      * @return bool TRUE if thumbnail created OK; FALSE otherwise
      */
-    public function makeThumbnail(string $fn, string $thumb_fn)
+    public function makeThumbnail(string $fn)
     {
+        if (!file_exists($fn)) return FALSE;
+        // grab extension
+        $ext = pathinfo($fn, PATHINFO_EXTENSION);
         // create GD image
+        $func = 'imagecreatefrom' . (self::GD_MAP[strtolower($ext)] ?? 'jpeg');
+        $image = $func($fn);
         // scale to 50 x 50
+        $thumb = imagescale($image, 100);
         // get thumb FN
+        $thumb_fn = $this->getThumbFnFromImageFn($fn);
         // save
+        $save = 'image' . (self::GD_MAP[strtolower($ext)] ?? 'jpeg');
+        return $save($thumb, $thumb_fn);
     }
 
     /**
@@ -147,41 +157,55 @@ class Browse
     }
 
     /**
+     * Returns FilterIterator instance that only accepts allowed file extensions
+     *
+     * @param string $path  : starting path (if other than HTML_DIR
+     * @return FilterIterator $filter : instance of FilterIterator
+     */
+    public function getFilterIterator(string $path = NULL)
+    {
+        $path = $path ?? $this->img_dir;
+        $iter = new RecursiveDirectoryIterator($path);
+        $itIt = new RecursiveIteratorIterator($iter);
+        return new class ($itIt, $this->allowed) extends FilterIterator {
+            public $allowed = [];
+            public function __construct($itIt, $allowed)
+            {
+                parent::__construct($itIt);
+                $this->allowed = $allowed;
+            }
+            public function accept()
+            {
+                $ok  = FALSE;
+                $obj = $this->current() ?? FALSE;
+                if (!empty($obj)) {
+                    $ext = strtolower($obj->getExtension());
+                    $ok  = in_array($ext, $this->allowed);
+                }
+                return $ok;
+            }
+        };
+    }
+
+    /**
      * Returns list of pages from starting point HTML_DIR
      * Note: HTML_DIR is a global constant defined in /public/index.php
      *
      * @param string $path  : starting path (if other than HTML_DIR
-     * @return array $pages : [URL key => full path, URL key => full path]
+     * @return ArrayIterator $pages : [URL key => full path, URL key => full path]
      */
     public function getListOfImages(string $path = NULL)
     {
         $path = $path ?? $this->img_dir;
         if (empty($this->images)) {
-            $iter = new RecursiveDirectoryIterator($path);
-            $itIt = new RecursiveIteratorIterator($iter);
-            $filt = new class ($itIt, $this->allowed) extends FilterIterator {
-                public $allowed = [];
-                public function __construct($iter, $allowed)
-                {
-                    parent::__construct($iter);
-                    $this->allowed = $allowed;
-                }
-                public function accept()
-                {
-                    $ok  = FALSE;
-                    $obj = $this->current() ?? FALSE;
-                    if ($obj && $obj instanceof SplFileInfo) {
-                        $ext = strtolower($obj->getExtension());
-                        $ok  = in_array($ext, $this->allowed);
-                    }
-                    return $ok;
-                }
-            };
+            $this->images = new ArrayIterator();
+            $filt = $this->getFilterIterator($path);
             foreach ($filt as $name => $obj) {
                 $url = $this->img_url . '/' . str_replace($path, '', $name);
-                $this->images[$url] = $name;
+                $url = str_replace('//', '/', $url);
+                $this->images->offsetSet($url, $name);
             }
-            ksort($this->images);
+            $this->images->ksort();
         }
         return $this->images;
     }
