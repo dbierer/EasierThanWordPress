@@ -81,8 +81,9 @@ class UploadTest extends TestCase
         $upload->config['img_size'] = 1;
         $expected = 'ERROR: maximum file size';
         $response = $upload->checkImageSize($this->testFileDir . '/fon.png');
-        $error    = $upload->errors[1] ?? '';
+        $error    = $upload->errors[0] ?? '';
         $actual   = substr($error, 0, strlen($expected));
+        $this->assertEquals(FALSE, $response, 'Did not return FALSE error response if invalid size');
         $this->assertEquals($expected, $actual, 'Did not return correct error response if invalid size');
     }
     public function testUploadReturnsErrorResponseIfInvalidType()

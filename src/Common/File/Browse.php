@@ -50,7 +50,14 @@ class Browse
     const DEFAULT_THUMB_DIR = BASE_DIR . '/public/images/thumb';
     const DEFAULT_THUMB_URL = '/images/thumb';
     const THUMB_WIDTH       = 75;
-    const DISPLAY_STYLE     = 'background-color:#E5E5E5;margin=10px;width:100px;height:100px;text-align:center;vertical-align:center;';
+    const DISPLAY_STYLE     = 'background-color:#E5E5E5;'
+                            . 'margin=10px;'
+                            . 'width:100px;'
+                            . 'height:100px;'
+                            . 'text-align:center;'
+                            . 'vertical-align:center;'
+                            . 'border:thin solid black;'
+                            . 'float:left;';
     const GD_MAP            = ['jpg' => 'jpeg', 'jpeg' => 'jpeg', 'png' => 'png', 'bmp' => 'bmp', 'gif' => 'gif'];
     public $errors        = [];
     public $config        = [];
@@ -69,7 +76,7 @@ class Browse
         if (empty($this->config))
             throw new InvalidArgumentException(Upload::UPLOAD_ERROR_MISSING);
         $this->allowed = $this->config['allowed_ext'] ?? Upload::UPLOAD_DEFAULT_EXT;
-        $this->img_dir = $this->config['upload_dir'] ?? self::DEFAULT_IMG_DIR;
+        $this->img_dir = $this->config['img_dir'] ?? self::DEFAULT_IMG_DIR;
         $this->img_url = $this->config['img_url'] ?? Upload::UPLOAD_DEFAULT_URL;
         $this->thumb_dir = $this->config['thumb_dir'] ?? self::DEFAULT_THUMB_DIR;
         $this->thumb_url = $this->config['thumb_url'] ?? self::DEFAULT_THUMB_URL;
@@ -85,21 +92,23 @@ class Browse
         $list  = $this->getListOfImages();
         $html  = '';
         $count = 1000;
+        $list->rewind();
         while ($list->valid()) {
             $key = $list->key();
             $fn  = $list->current();
-            $list->next();
             $thumb_fn = $this->getThumbFnFromImageFn($fn);
             $thumb_url = $this->getThumbUrlFromImageUrl($key);
             if (!file_exists($thumb_fn))
                 $this->makeThumbnail($fn, $thumb_fn);
             $id   = 'img_' . $count++;
-            $html = '<div style="' . self::DISPLAY_STYLE . '">'
+            $html .= '<div style="' . self::DISPLAY_STYLE . '">'
                   . '<a style="cursor:pointer;" name="' . $id . '" onclick="returnFileUrl(\'' . $id . '\')">'
                   . '<img src="' . $thumb_url . '" alt="' . $key . '" />'
                   . '</a>'
                   . '<input type="hidden" id="' . $id . '" value="' . $key . '" />'
-                  . '</div>';
+                  . '</div>'
+                  . '&nbsp;';
+            $list->next();
         }
         return $html;
     }
@@ -123,6 +132,10 @@ class Browse
         $thumb = imagescale($image, self::THUMB_WIDTH);
         // get thumb FN
         $thumb_fn = $this->getThumbFnFromImageFn($fn);
+        // make sure underlying directory is created
+        $thumb_dir = dirname($thumb_fn);
+        if (!file_exists($thumb_dir))
+            mkdir($thumb_dir, 0644, TRUE);
         // save
         $save = 'image' . (self::GD_MAP[strtolower($ext)] ?? 'jpeg');
         return $save($thumb, $thumb_fn);

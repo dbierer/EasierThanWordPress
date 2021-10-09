@@ -22,7 +22,7 @@ class BrowseTest extends TestCase
     }
     public function testGetThumbFnFromImageFn()
     {
-        $this->config['UPLOADS']['upload_dir'] = $this->testFileDir . '/images';
+        $this->config['UPLOADS']['img_dir'] = $this->testFileDir . '/images';
         $this->config['UPLOADS']['thumb_dir']  = $this->testFileDir . '/thumb';
         $browse = new Browse($this->config);
         $img_fn = $this->testFileDir . '/images/blog-1.jpg';
@@ -42,7 +42,7 @@ class BrowseTest extends TestCase
     {
         $img_dir = $this->testFileDir . '/images';
         $browse = new Browse($this->config);
-        $browse->upload_dir = $img_dir;
+        $browse->img_dir = $img_dir;
         $images = $browse->getFilterIterator($img_dir);
         $expected = TRUE;
         $actual = ($images instanceof FilterIterator);
@@ -52,8 +52,7 @@ class BrowseTest extends TestCase
     {
         $img_dir = $this->testFileDir . '/images';
         $browse = new Browse($this->config);
-        $browse->upload_dir = $img_dir;
-        $browse->allowed    = ['jpg'];
+        $browse->img_dir = $img_dir;
         $expected = count(glob($img_dir . '/*'));
         $images = $browse->getFilterIterator($img_dir);
         $actual = count(iterator_to_array($images));
@@ -63,7 +62,7 @@ class BrowseTest extends TestCase
     {
         $img_dir = $this->testFileDir . '/images';
         $browse = new Browse($this->config);
-        $browse->upload_dir = $img_dir;
+        $browse->img_dir = $img_dir;
         $images = $browse->getListOfImages($img_dir);
         $expected = 'ArrayIterator';
         $actual = get_class($images);
@@ -73,7 +72,7 @@ class BrowseTest extends TestCase
     {
         $img_dir = $this->testFileDir . '/images';
         $browse = new Browse($this->config);
-        $browse->upload_dir = $img_dir;
+        $browse->img_dir = $img_dir;
         $browse->allowed    = ['jpg'];
         $images = $browse->getListOfImages($img_dir);
         $images->rewind();
@@ -85,7 +84,7 @@ class BrowseTest extends TestCase
     {
         $img_dir = $this->testFileDir . '/images';
         $browse = new Browse($this->config);
-        $browse->upload_dir = $img_dir;
+        $browse->img_dir = $img_dir;
         $browse->allowed    = ['jpg'];
         $images = $browse->getListOfImages($img_dir);
         $images->rewind();
@@ -93,13 +92,34 @@ class BrowseTest extends TestCase
         $actual = $images->current();
         $this->assertEquals($expected, $actual, 'Browse::getListOfImages() did not return expected value');
     }
+    public function testGetListOfImagesReturnsCorrectCount()
+    {
+        $img_dir = $this->testFileDir . '/images';
+        $browse = new Browse($this->config);
+        $browse->img_dir = $img_dir;
+        $images = $browse->getListOfImages($img_dir);
+        $expected = count(glob($img_dir . '/*'));
+        $actual = count(iterator_to_array($images));
+        $this->assertEquals($expected, $actual, 'Browse::getListOfImages() did not return expected count');
+    }
+    public function testGetListOfImagesReturnsCorrectCountIfOnlyPngAllowed()
+    {
+        $img_dir = $this->testFileDir . '/images';
+        $browse = new Browse($this->config);
+        $browse->img_dir = $img_dir;
+        $browse->allowed    = ['png'];
+        $images = $browse->getListOfImages($img_dir);
+        $expected = count(glob($img_dir . '/*.png'));
+        $actual = count(iterator_to_array($images));
+        $this->assertEquals($expected, $actual, 'Browse::getListOfImages() did not return expected value when only PNG allowed');
+    }
     public function testMakeThumbnailCreatesImageReturnsFaleIfImageDoesntExist()
     {
         $img_base = '/doesnt_exist.jpg';
         $img_dir = $this->testFileDir . '/images';
         $img_fn  = $img_dir . $img_base;
         $browse = new Browse($this->config);
-        $browse->upload_dir = $img_dir;
+        $browse->img_dir = $img_dir;
         $browse->allowed    = ['jpg'];
         $result = $browse->makeThumbnail($img_fn);
         $expected = FALSE;
@@ -125,5 +145,38 @@ class BrowseTest extends TestCase
         $expected = $thumb_fn;
         $actual   = $list[0] ?? '';
         $this->assertEquals($expected, $actual, 'Browse::makeThumbnail() did not create thumbnail image');
+    }
+    public function testMakeThumbnailCreatesImageSubdir()
+    {
+        ini_set('error_reporting', E_ALL);
+        ini_set('display_errors', 1);
+        $img_base = '/test/test.jpg';
+        $img_dir = $this->testFileDir . '/images';
+        $thumb_dir = $this->testFileDir . '/thumb';
+        $img_fn  = $img_dir . $img_base;
+        $thumb_fn  = $thumb_dir . $img_base;
+        $thumb_sub = dirname($thumb_fn);
+        if (file_exists($thumb_fn)) unlink($thumb_fn);
+        if (file_exists($thumb_sub)) rmdir($thumb_sub);
+        $browse = new Browse($this->config);
+        $browse->img_dir = $img_dir;
+        $browse->thumb_dir  = $thumb_dir;
+        $result = $browse->makeThumbnail($img_fn);
+        $list   = glob($thumb_fn);
+        $expected = $thumb_fn;
+        $actual   = $list[0] ?? '';
+        $this->assertEquals(TRUE, file_exists($thumb_sub), 'Browse::makeThumbnail() did not create thumbnail subdirectory');
+        $this->assertEquals($expected, $actual, 'Browse::makeThumbnail() did not create thumbnail image in subdirectory');
+    }
+    public function testHandleReturnsSameCountAsNumberOfImages()
+    {
+        $img_dir = $this->testFileDir . '/images';
+        $browse = new Browse($this->config);
+        $browse->img_dir = $img_dir;
+        $browse->allowed    = ['png'];
+        $html = $browse->handle();
+        $expected = count(glob($img_dir . '/*.png'));
+        $actual = substr_count($html, 'input');
+        $this->assertEquals($expected, $actual, 'Browse::handle() did not return expected number of image references when only PNG allowed');
     }
 }
