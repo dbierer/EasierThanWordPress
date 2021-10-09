@@ -131,33 +131,44 @@ class Upload
      */
     public function checkImageSize(string $tmp_file)
     {
-        $info = getimagesize($tmp_file);
-        $valid  = 4;
-        $actual = 0;
+        $valid  = TRUE;
+        $info   = getimagesize($tmp_file);
         $width  = $info[0] ?? PHP_INT_MAX;
         $height = $info[1] ?? PHP_INT_MAX;
-        $type   = $info['mime'] ?? 'unknown';
         $max_w  = $this->config['img_width'] ?? self::UPLOAD_DEFAULT_WIDTH;
         $max_h  = $this->config['img_height'] ?? self::UPLOAD_DEFAULT_HEIGHT;
         $max_sz = $this->config['img_size'] ?? self::UPLOAD_DEFAULT_WIDTH;
-        if (!empty($info) && is_array($info) && count($info) == 6) {
-            $types  = $this->config['allowed_types'] ?? self::UPLOAD_DEFAULT_TYPES;
+        $types  = $this->config['allowed_types'] ?? self::UPLOAD_DEFAULT_TYPES;
+        // check width and height
+        if (!empty($info[0]) && !empty($info[1])) {
+            $expected = 2;
+            $actual   = 0;
             $actual += (int) $width <= $max_w;
             $actual += (int) $height <= $max_h;
-            $actual += filesize($tmp_file) <= $max_sz;
-            foreach ($types as $item) {
-                if (stripos($type, $item) === 0) {
-                    $actual++;
-                    break;
-                }
+            if ($actual !== $expected) {
+                $valid = FALSE;
+                $this->errors[] = sprintf(self::UPLOAD_ERROR_IMAGE_SIZE, $width, $height, $max_w, $max_h);
             }
         }
-        $ok = ($valid === $actual);
-        if (!$ok) {
-            $this->errors[] = sprintf(self::UPLOAD_ERROR_IMAGE_SIZE, $width, $height, $max_w, $max_h);
+        // check image size
+        if (filesize($tmp_file) > $max_sz) {
+            $valid = FALSE;
             $this->errors[] = sprintf(self::UPLOAD_ERROR_FILE_SIZE, $max_sz);
         }
-        return $ok;
+        // check type
+        $found = 0;
+        $type = mime_content_type($tmp_file);
+        foreach ($types as $allowed) {
+            if (stripos($type, $allowed) === 0) {
+                $found++;
+                break;
+            }
+        }
+        if ($found === 0) {
+            $valid = FALSE;
+            $this->errors[] = sprintf(self::UPLOAD_ERROR_TYPE, $type);
+        }
+        return $valid;
     }
     /**
      * Returns an error response

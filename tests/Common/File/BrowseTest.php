@@ -93,8 +93,23 @@ class BrowseTest extends TestCase
         $actual = $images->current();
         $this->assertEquals($expected, $actual, 'Browse::getListOfImages() did not return expected value');
     }
+    public function testMakeThumbnailCreatesImageReturnsFaleIfImageDoesntExist()
+    {
+        $img_base = '/doesnt_exist.jpg';
+        $img_dir = $this->testFileDir . '/images';
+        $img_fn  = $img_dir . $img_base;
+        $browse = new Browse($this->config);
+        $browse->upload_dir = $img_dir;
+        $browse->allowed    = ['jpg'];
+        $result = $browse->makeThumbnail($img_fn);
+        $expected = FALSE;
+        $actual   = $result;
+        $this->assertEquals($expected, $actual, 'Browse::makeThumbnail() does not return FALSE if image file does not exist');
+    }
     public function testMakeThumbnailCreatesImage()
     {
+        ini_set('error_reporting', E_ALL);
+        ini_set('display_errors', 1);
         $img_base = '/blog-1.jpg';
         $img_dir = $this->testFileDir . '/images';
         $img_fn  = $img_dir . $img_base;
@@ -102,13 +117,13 @@ class BrowseTest extends TestCase
         $thumb_fn  = $thumb_dir . $img_base;
         if (file_exists($thumb_fn)) unlink($thumb_fn);
         $browse = new Browse($this->config);
-        $browse->upload_dir = $img_dir;
+        $browse->img_dir = $img_dir;
         $browse->thumb_dir  = $thumb_dir;
         $browse->allowed    = ['jpg'];
-        $browse->makeThumbnail($img_fn);
-        $list = glob($thumb_fn);
+        $result = $browse->makeThumbnail($img_fn);
+        $list   = glob($thumb_fn);
         $expected = $thumb_fn;
-        $actual = $list[0] ?? '';
-        $this->assertEquals($expected, $actual, 'Browse::makeThumbnail() did not create file');
+        $actual   = $list[0] ?? '';
+        $this->assertEquals($expected, $actual, 'Browse::makeThumbnail() did not create thumbnail image');
     }
 }

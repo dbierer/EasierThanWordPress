@@ -89,7 +89,7 @@ class UploadTest extends TestCase
     {
         $upload = new Upload($this->config);
         $upload->config['restrict_size'] = TRUE;
-        $expected = 'ERROR: existing width x height';
+        $expected = 'ERROR: invalid file type: text';
         $response = $upload->checkImageSize($this->testFileDir . '/fake.png');
         $error    = $upload->errors[0] ?? '';
         $actual   = substr($error, 0, strlen($expected));
