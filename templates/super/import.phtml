@@ -35,11 +35,13 @@ if (!$enabled || Profile::verify($config) === FALSE) {
 // init vars
 $total     = 0;
 $key       = '';
+$bulk      = [];
 $edit      = new Edit($config);
 $message   = Messages::getInstance();
 $transform = $config['IMPORT']['transform'] ?? [];
 $trusted   = $config['IMPORT']['trusted_src'] ?? [];
 $super_url  = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
+$import_file_field = $config['IMPORT']['import_file_field'] ?? 'import_file';
 // check to see if we need to import anything
 if (!empty($_POST)) {
     $delim_start = $config['IMPORT']['delim_start'];
@@ -53,7 +55,7 @@ if (!empty($_POST)) {
                 unset($tmp_trans[$key]);
     }
     // if "import_url" is set, just import from the list
-    if (isset($_POST['import_url'])) {
+    if (!empty($_POST['import_url'])) {
         $url  = strip_tags($_POST['import_url']);
         if (Import::is_trusted($url, $trusted))
             $key = do_import($url, $tmp_trans, $delim_start, $delim_stop, $edit, $message);
@@ -62,13 +64,15 @@ if (!empty($_POST)) {
             exit;
         }
     // otherwise check to see if "import_file" is set
-    } elseif (isset($_FILES['import_file'])) {
-        $list = Import::get_upload($_FILES['import_file']);
+    } elseif (!empty($_FILES['import_file'])) {
+        $list = Import::get_upload($import_file_field, $_FILES, $trusted);
         if (empty($list)) {
             $message->addMessage(Import::ERROR_UPLOAD);
         } else {
-            foreach ($list as $url)
-                $total += do_import($url, $tmp_trans, $delim_start, $delim_stop, $edit, $message);
+            foreach ($list as $url) {
+                $key = do_import($url, $tmp_trans, $delim_start, $delim_stop, $edit, $message);
+                if ($key !== FALSE) $bulk[] = $key;
+            }
         }
     }
 }
@@ -81,6 +85,9 @@ foreach ($transform as $key => $item)
 $check .= '</ul>' . PHP_EOL;
 // get messages
 $msg = $message->getMessages() ?? 'Enter a URL to import.  Alternatively you can upload a list of URLs of pages to import.';
+if (!empty($bulk))
+    foreach ($bulk as $key)
+        $msg .= '<br /><a href="/super/edit?page_key=' . $key . '">' . $key . '</a>';
 ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
@@ -113,7 +120,7 @@ $msg = $message->getMessages() ?? 'Enter a URL to import.  Alternatively you can
                                 <span class="text-danger">*</span>
                             </label>
                             <div class="input-group">
-                                <input class="form-control" name="import_url" id="import_url" size=60 placeholder="http://company.com/page/one,http://company.com/page/two,etc" type="text" title="Enter single URL of list of URLs separated by commas"/>
+                                <input class="form-control" name="import_url" id="import_url" size=60 placeholder="http://company.com/page/one,http://company.com/page/two,etc" type="text" title="Enter single URL of list of URLs separated by commas" value="" />
                             </div>
                             <p>(or upload list of URLs to automatically import)</p>
                         </div>
@@ -128,7 +135,7 @@ $msg = $message->getMessages() ?? 'Enter a URL to import.  Alternatively you can
                                 Upload File with List of URLs to Automatically Import
                                 <span class="text-danger">*</span>
                             </label>
-                            <div class="input-group"><input type="file" name="import_file" /></div>
+                            <div class="input-group"><input type="file" name="<?= $import_file_field ?>" /></div>
                             <p>(or manually enter one or more URLs to import)</p>
                         </div>
                     </div>

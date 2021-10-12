@@ -42,19 +42,6 @@ $config = [
         'super_dir'  => BASE_DIR . '/templates', // IMPORTANT: needs to have a subdir === "super_url" setting
         'super_menu' => BASE_DIR . '/templates/layout/super_menu.html',
     ],
-    'UPLOADS' => [
-        'restrict_size' => TRUE,    // set to FALSE to ignore size restrictions
-        'create_thumbs' => FALSE,     // set TRUE to enable automatic thumbnail creation
-        'img_width'   => 500,
-        'img_height'  => 500,
-        'img_size'    => 3000000,
-        'allowed_ext' => ['jpg','jpeg','png','gif','bmp'],
-        'img_dir'  => BASE_DIR . '/public/images',
-        'img_url'     => '/images',
-        'thumb_dir'   => BASE_DIR . '/public/thumb',
-        'thumb_url'   => '/thumb',
-        'allowed_types' => ['image/'],
-    ],
     'STORAGE' => [
         'db_host' => 'localhost',
         'db_name' => 'REPL_DB_NAME',
@@ -97,11 +84,26 @@ $config = [
         'img_dir'        => BASE_DIR . '/public/img/captcha',
         'num_bytes'      => 2,
     ],
+    'UPLOADS' => [
+        'restrict_size' => TRUE,    // set to FALSE to ignore size restrictions
+        'create_thumbs' => FALSE,     // set TRUE to enable automatic thumbnail creation
+        'img_width'   => 500,
+        'img_height'  => 500,
+        'img_size'    => 3000000,
+        'allowed_ext' => ['jpg','jpeg','png','gif','bmp'],
+        'img_dir'  => BASE_DIR . '/public/images',
+        'img_url'     => '/images',
+        'thumb_dir'   => BASE_DIR . '/public/thumb',
+        'thumb_url'   => '/thumb',
+        'allowed_types' => ['image/'],
+    ],
     'IMPORT' => [
-        'enable' => TRUE,               // change this to FALSE to diseable this feature
-        'delim_start'  => '<body>',     // marks beginning of contents to extract
-        'delim_stop'   => '</body>',    // marks end of contents to extract
-        'trusted_src'  => ['https://test.unlikelysource.com'],   // array of trusted URLs
+        'enable' => TRUE,                      // change this to FALSE to diseable this feature
+        'delim_start'  => '<body>',            // marks beginning of contents to extract
+        'delim_stop'   => '</body>',           // marks end of contents to extract
+        'import_file_field' => 'import_file',  // IMPORTANT: the form must use this name
+        // array of trusted URLs
+        'trusted_src' => ['https://test.unlikelysource.com'],
         // add as many transforms as desired
         // you can also add your own anonymous functions as transforms as long as the signature
         // matches the one specified by SimpleHtml\Transform\TransformInterface
