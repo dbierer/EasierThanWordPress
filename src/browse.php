@@ -17,7 +17,7 @@ if (Profile::verify($config) === FALSE) {
     exit;
 }
 $browse = new Browse($config);
-$html   = $browse->handle();
+$generator = $browse->handle();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,7 +26,7 @@ $html   = $browse->handle();
     <title>Browsing Files</title>
 </head>
 <body>
-    <?= $html ?>
+    <?php foreach ($generator as $html) echo $html; ?>
     <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
     <script>
         // Helper function to get parameters from the query string.

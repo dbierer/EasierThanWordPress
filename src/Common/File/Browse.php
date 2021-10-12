@@ -58,7 +58,8 @@ class Browse
                             . 'vertical-align:center;'
                             . 'border:thin solid black;'
                             . 'float:left;';
-    const GD_MAP            = ['jpg' => 'jpeg', 'jpeg' => 'jpeg', 'png' => 'png', 'bmp' => 'bmp', 'gif' => 'gif'];
+    const DISP_IMG_STYLE  = 'width:80%;height:80%;';
+    const GD_MAP          = ['jpg' => 'jpeg', 'jpeg' => 'jpeg', 'png' => 'png', 'bmp' => 'bmp', 'gif' => 'gif'];
     public $errors        = [];
     public $config        = [];
     public $images        = NULL;
@@ -67,6 +68,8 @@ class Browse
     public $img_url       = '';
     public $thumb_dir     = '';
     public $thumb_url     = '';
+    public $create_thumbs = FALSE;
+    public $queue         = []; // files queued to make thumbnail images
     /**
      * @param array $config : file upload information; looks for a key 'UPLOADS'
      */
@@ -80,12 +83,13 @@ class Browse
         $this->img_url = $this->config['img_url'] ?? Upload::UPLOAD_DEFAULT_URL;
         $this->thumb_dir = $this->config['thumb_dir'] ?? self::DEFAULT_THUMB_DIR;
         $this->thumb_url = $this->config['thumb_url'] ?? self::DEFAULT_THUMB_URL;
+        $this->create_thumbs = $this->config['create_thumbs'] ?? FALSE;
     }
 
     /**
      * Handles file browsing
      *
-     * @return string $html : HTML table with images + thumbnails
+     * @return Generator : iteration of HTML <div> tags
      */
     public function handle()
     {
@@ -98,19 +102,18 @@ class Browse
             $fn  = $list->current();
             $thumb_fn = $this->getThumbFnFromImageFn($fn);
             $thumb_url = $this->getThumbUrlFromImageUrl($key);
-            if (!file_exists($thumb_fn))
-                $this->makeThumbnail($fn, $thumb_fn);
+            if (!file_exists($thumb_fn)) $this->queue[] = $fn;
             $id   = 'img_' . $count++;
-            $html .= '<div style="' . self::DISPLAY_STYLE . '">'
+            $html = '<div style="' . self::DISPLAY_STYLE . '">'
                   . '<a style="cursor:pointer;" name="' . $id . '" onclick="returnFileUrl(\'' . $id . '\')">'
-                  . '<img src="' . $thumb_url . '" alt="' . $key . '" />'
+                  . '<img src="' . $thumb_url . '" alt="' . $key . '" style="' . self::DISP_IMG_STYLE . '"/>'
                   . '</a>'
                   . '<input type="hidden" id="' . $id . '" value="' . $key . '" />'
                   . '</div>'
                   . '&nbsp;';
+            yield $html;
             $list->next();
         }
-        return $html;
     }
 
     /**
@@ -124,21 +127,25 @@ class Browse
     {
         if (!file_exists($fn)) return FALSE;
         // grab extension
+        $result = FALSE;
         $ext = pathinfo($fn, PATHINFO_EXTENSION);
         // create GD image
         $func = 'imagecreatefrom' . (self::GD_MAP[strtolower($ext)] ?? 'jpeg');
         $image = $func($fn);
-        // scale to THUMB_WIDTH
-        $thumb = imagescale($image, self::THUMB_WIDTH);
-        // get thumb FN
-        $thumb_fn = $this->getThumbFnFromImageFn($fn);
-        // make sure underlying directory is created
-        $thumb_dir = dirname($thumb_fn);
-        if (!file_exists($thumb_dir))
-            mkdir($thumb_dir, 0644, TRUE);
-        // save
-        $save = 'image' . (self::GD_MAP[strtolower($ext)] ?? 'jpeg');
-        return $save($thumb, $thumb_fn);
+        if ($image !== FALSE) {
+            // scale to THUMB_WIDTH
+            $thumb = imagescale($image, self::THUMB_WIDTH);
+            // get thumb FN
+            $thumb_fn = $this->getThumbFnFromImageFn($fn);
+            // make sure underlying directory is created
+            $thumb_dir = dirname($thumb_fn);
+            if (!file_exists($thumb_dir))
+                mkdir($thumb_dir, 0664, TRUE);
+            // save
+            $save = 'image' . (self::GD_MAP[strtolower($ext)] ?? 'jpeg');
+            $result = $save($thumb, $thumb_fn);
+        }
+        return $result;
     }
 
     /**
@@ -215,5 +222,17 @@ class Browse
             $this->images->ksort();
         }
         return $this->images;
+    }
+    /**
+     * Create thumbnails when everything is all over
+     *
+     */
+    public function __destruct()
+    {
+        $create = $this->create_thumbs ?? FALSE;
+        if (!empty($this->queue) && $create) {
+            foreach ($this->queue as $fn)
+                $this->makeThumbnail($fn);
+        }
     }
 }

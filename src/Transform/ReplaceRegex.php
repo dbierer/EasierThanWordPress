@@ -38,6 +38,7 @@ namespace SimpleHtml\Transform;
  */
 class ReplaceRegex implements TransformInterface
 {
+    const REPLACE_EOL = '--XXX--';
     const DESCRIPTION = 'Perform search and replace using preg_replace() based upon config settings';
     /**
      * Performs search and replace
@@ -50,6 +51,12 @@ class ReplaceRegex implements TransformInterface
     {
         $regex = $params['regex'] ?? '';
         $replace = $params['replace'] ?? '';
-        return (!empty($regex)) ? preg_replace($regex, $replace, $html) : $html;
+        if (!empty($regex)) {
+            $html = str_replace(PHP_EOL, self::REPLACE_EOL, $html);
+            $html = preg_replace($regex, $replace, $html);
+            $html = str_replace(self::REPLACE_EOL, PHP_EOL, $html);
+        }
+        return $html;
+
     }
 }

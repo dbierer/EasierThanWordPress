@@ -43,7 +43,6 @@ class Html
             // try HTML and HTM extensions
             foreach ($this->allowed as $ext) {
                 $bodyFn = $this->htmlDir . $this->uri . '.' . $ext;
-                error_log(__METHOD__ . ':' . __LINE__ . ':' . $bodyFn);
                 if (file_exists($bodyFn)) {
                     $body = file_get_contents($bodyFn);
                     break;
@@ -52,7 +51,6 @@ class Html
             // if $body still not populated, try PHTML
             if (!$body) {
                 $bodyFn = $this->htmlDir . $this->uri . '.phtml';
-                error_log(__METHOD__ . ':' . __LINE__ . ':' . $bodyFn);
                 // if phtml, use "include" + output buffering to grab contents
                 if (file_exists($bodyFn)) {
                     $body = $this->runPhpFile($bodyFn);

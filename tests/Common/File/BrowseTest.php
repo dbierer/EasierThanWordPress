@@ -174,9 +174,11 @@ class BrowseTest extends TestCase
         $browse = new Browse($this->config);
         $browse->img_dir = $img_dir;
         $browse->allowed    = ['png'];
-        $html = $browse->handle();
+        $generator = $browse->handle();
         $expected = count(glob($img_dir . '/*.png'));
-        $actual = substr_count($html, 'input');
+        $actual = 0;
+        foreach ($generator as $item)
+            $actual += (strpos($item, 'input')) ? 1 : 0;
         $this->assertEquals($expected, $actual, 'Browse::handle() did not return expected number of image references when only PNG allowed');
     }
 }

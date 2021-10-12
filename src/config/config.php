@@ -15,8 +15,6 @@ $config = [
         ],
     ],
     'SUPER' => [
-        'super_url' => '/super',                // IMPORTANT: needs to be a subdir off the "super_dir" setting
-        'super_dir' => BASE_DIR . '/templates', // IMPORTANT: needs to have a subdir === "super_url" setting
         'username'  => 'admin',
         'password'  => 'password',
         'attempts'  => 3,
@@ -40,10 +38,13 @@ $config = [
             'width'  => '100%',
             'height' => 400,
         ],
+        'super_url'  => '/super',                // IMPORTANT: needs to be a subdir off the "super_dir" setting
+        'super_dir'  => BASE_DIR . '/templates', // IMPORTANT: needs to have a subdir === "super_url" setting
         'super_menu' => BASE_DIR . '/templates/layout/super_menu.html',
     ],
     'UPLOADS' => [
         'restrict_size' => TRUE,    // set to FALSE to ignore size restrictions
+        'create_thumbs' => FALSE,     // set TRUE to enable automatic thumbnail creation
         'img_width'   => 500,
         'img_height'  => 500,
         'img_size'    => 3000000,

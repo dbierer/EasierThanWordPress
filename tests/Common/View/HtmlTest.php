@@ -83,7 +83,7 @@ EOT;
         $body     = '<html><body>%%BLOG=one,two,three%%</body></html>';
         $dir      = BASE_DIR . '/templates/site/blog';
         $body     = $this->html->injectCards($body, $dir, 'cards');
-        $expected = ['Card One','Card Two','Card Three'];
+        $expected = ['<a href="/blog/one">Card One</a>','Card Two','Card Three'];
         $pattern  = '!>(.*?)</h3>!';
         $matches  = [];
         preg_match_all($pattern, $body, $matches);

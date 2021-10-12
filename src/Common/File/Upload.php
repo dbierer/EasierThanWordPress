@@ -43,7 +43,7 @@ class Upload
 
     const UPLOAD_ALERT            = 'alert("%s";';
     const UPLOAD_SUCCESS          = 'SUCCESS: uploaded %s (%d bytes)';
-    const UPLOAD_ERROR_NO_GO      = 'ERROR: homey don\'t go there!';
+    const UPLOAD_ERROR_NO_GO      = 'ERROR: unable to access uploaded file';
     const UPLOAD_ERROR_IMAGE      = 'ERROR: unable to upload image file';
     const UPLOAD_ERROR_TOKEN      = 'ERROR: token error';
     const UPLOAD_ERROR_UPLOAD     = 'ERROR: invalid uploaded file';
@@ -126,21 +126,27 @@ class Upload
     /**
      * Checks image for size
      *
-     * @param string $tmp_file : filename of the image (from $_FILES['tmp_name'])
+     * @param string $tmp_file : $_FILES['tmp_name']
      * @return bool TRUE if image matches restrictions; FALSE otherwise
      */
     public function checkImageSize(string $tmp_file)
     {
         $valid  = TRUE;
+        if (empty($tmp_file) || !file_exists($tmp_file)) {
+            $this->errors[] = self::UPLOAD_ERROR_NO_GO;
+            return FALSE;
+        }
         $info   = getimagesize($tmp_file);
-        $width  = $info[0] ?? PHP_INT_MAX;
-        $height = $info[1] ?? PHP_INT_MAX;
+        $width  = $info[0] ?? 0;
+        $height = $info[1] ?? 0;
         $max_w  = $this->config['img_width'] ?? self::UPLOAD_DEFAULT_WIDTH;
         $max_h  = $this->config['img_height'] ?? self::UPLOAD_DEFAULT_HEIGHT;
         $max_sz = $this->config['img_size'] ?? self::UPLOAD_DEFAULT_WIDTH;
         $types  = $this->config['allowed_types'] ?? self::UPLOAD_DEFAULT_TYPES;
         // check width and height
         if (!empty($info[0]) && !empty($info[1])) {
+            $width  = $info[0];
+            $height = $info[1];
             $expected = 2;
             $actual   = 0;
             $actual += (int) $width <= $max_w;
@@ -151,7 +157,8 @@ class Upload
             }
         }
         // check image size
-        if (filesize($tmp_file) > $max_sz) {
+        $size = filesize($tmp_file);
+        if ($size > $max_sz) {
             $valid = FALSE;
             $this->errors[] = sprintf(self::UPLOAD_ERROR_FILE_SIZE, $max_sz);
         }
