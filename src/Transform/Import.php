@@ -56,10 +56,11 @@ class Import
                                   string $delim_start = self::DEFAULT_START,
                                   string $delim_stop = self::DEFAULT_STOP)
     {
-        $html = file_get_contents($url);
+        $html = file_get_contents("$url");
         $html = self::get_delimited($html, $delim_start, $delim_stop);
+        $html = str_replace(PHP_EOL, ' ', trim($html));
         if (!empty($html) && !empty($callbacks)) {
-            foreach ($callbacks as $item) {
+            foreach ($callbacks as $key => $item) {
                 $obj    = $item['callback'] ?? FALSE;
                 $params = $item['params'] ?? [];
                 $html   = (!empty($obj)) ? $obj($html, $params) : $html;

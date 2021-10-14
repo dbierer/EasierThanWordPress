@@ -24,14 +24,14 @@ class EditTest extends TestCase
     {
         $url = 'https://unlikelysource.com/test1';
         $expected = '/test1';
-        $actual   = $this->edit->getKeyFromURL($url, $this->testFileDir);
+        $actual   = $this->edit->getKeyFromURL($url);
         $this->assertEquals($expected, $actual, 'Edit::getKeyFromURL() does not produce expected key');
     }
     public function testGetKeyFromURLGetsRidOfExtension()
     {
         $url = 'https://unlikelysource.com/test1.html';
         $expected = '/test1';
-        $actual   = $this->edit->getKeyFromURL($url, $this->testFileDir);
+        $actual   = $this->edit->getKeyFromURL($url);
         $this->assertEquals($expected, $actual, 'Edit::getKeyFromURL() does not remove .html extension');
     }
     public function testGetKeyFromFilename()
@@ -53,6 +53,7 @@ class EditTest extends TestCase
         $pages = $this->edit->getListOfPages($this->testFileDir);
         $expected = count(glob($this->testFileDir . '/*.htm*'));
         $expected += count(glob($this->testFileDir . '/sub/*.htm*'));
+        $expected += count(glob($this->testFileDir . '/bulk/*.htm*'));
         $actual   = count($pages);
         $this->assertEquals($expected, $actual, 'Edit::getListOfPages() did not find only HTML files');
     }

@@ -131,10 +131,9 @@ class Edit
      * If page doesn't exist, returns empty string
      *
      * @param string $url   : URL used to view page
-     * @param string $path      : starting path (if other than HTML_DIR)
      * @return string $key  : key in $this->pages
      */
-    public function getKeyFromURL(string $url, string $path = HTML_DIR) : string
+    public function getKeyFromURL(string $url) : string
     {
         $key = parse_url($url, PHP_URL_PATH) ?? '';
         // get rid of extension (if any)
@@ -183,6 +182,7 @@ class Edit
             [$first, $last] = explode('<body>', $fixed);
             $pos = strpos($last, '</body>');
             $contents = substr($last, 0, $pos);
+            $contents = trim($contents);
         }
         // check to see if it's an existing file
         $pages = $this->getListOfPages($path);

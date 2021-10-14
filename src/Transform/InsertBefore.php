@@ -2,9 +2,9 @@
 namespace SimpleHtml\Transform;
 
 /*
- * Unlikely\Import\Transform\Replace
+ * Unlikely\Import\Transform\InsertBefore
  *
- * @description performs search and replace using preg_replace()
+ * @description inserts given text before any other text
  * @author doug@unlikelysource.com
  * @date 2021-10-04
  * Copyright 2021 unlikelysource.com
@@ -36,25 +36,19 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class ReplaceRegex implements TransformInterface
+class InsertBefore implements TransformInterface
 {
-    const REPLACE_EOL = '--XXX--';
-    const DESCRIPTION = 'Perform search and replace using preg_replace() based upon config settings';
+    const DESCRIPTION = 'Inserts given text before any other text';
     /**
      * Performs search and replace
      *
      * @param string $html  : HTML string to be cleaned
-     * @param array $params : ['regex' => search regex, 'replace' => replace with this]
+     * @param array $params : ['text' => text to insert]
      * @return string $html : transformed HTML
      */
     public function __invoke(string $html, array $params = []) : string
     {
-        $regex = $params['regex'] ?? '';
-        $replace = $params['replace'] ?? '';
-        $html = (!empty($regex))
-              ? preg_replace($regex, $replace, $html)
-              : $html;
-        return $html;
-
+        $text = $params['text'] ?? '';
+        return $text . $html;
     }
 }
