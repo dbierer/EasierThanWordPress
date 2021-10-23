@@ -36,9 +36,8 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class ReplaceRegex implements TransformInterface
+class ReplaceRegex extends Base
 {
-    const REPLACE_EOL = '--XXX--';
     const DESCRIPTION = 'Perform search and replace using preg_replace() based upon config settings';
     /**
      * Performs search and replace

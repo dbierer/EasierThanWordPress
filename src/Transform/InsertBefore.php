@@ -36,7 +36,7 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class InsertBefore implements TransformInterface
+class InsertBefore extends Base
 {
     const DESCRIPTION = 'Inserts given text before any other text';
     /**

@@ -4,19 +4,47 @@ use SimpleHtml\Common\Page\Edit;
 use SimpleHtml\Common\Security\Profile;
 use SimpleHtml\Common\Generic\Messages;
 // upload function
-function do_import($url, $transform, $delim_start, $delim_stop, $edit, $message)
+function do_import(string $url,
+                   array $trusted,
+                   array $transform,
+                   string $delim_start,
+                   string $delim_stop,
+                   Edit $edit,
+                   Messages $message)
 {
+    if (!Import::is_trusted($url, $trusted)) return FALSE;
     set_time_limit(30);
     $ok   = FALSE;
     $html = Import::import($url, $transform, $delim_start, $delim_stop);
-    $key  = $edit->getKeyFromURL($url);
-    if ($edit->save($key, $html, HTML_DIR, TRUE)) {
-        $message->addMessage(Edit::SUCCESS_SAVE);
-        $ok = TRUE;
+    if (empty($html)) {
+        $message->addMessage(Import::ERROR_URL_EMPTY);
     } else {
-        $message->addMessage(Edit::ERROR_SAVE);
+        $key  = $edit->getKeyFromURL($url, HTML_DIR);
+        if ($edit->save($key, $html, HTML_DIR, TRUE)) {
+            $message->addMessage(Edit::SUCCESS_SAVE);
+            $ok = TRUE;
+        } else {
+            $message->addMessage(Edit::ERROR_SAVE);
+        }
     }
     return ($ok) ? $key : FALSE;
+}
+// process multiple imports
+function do_bulk_import(array $list,
+                        array $trusted,
+                        array $transform,
+                        string $delim_start,
+                        string $delim_stop,
+                        Edit $edit,
+                        Messages $message)
+{
+    $bulk = [];
+    foreach ($list as $url) {
+        $url  = strip_tags(trim($url));
+        $key = do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message);
+        if ($key !== FALSE) $bulk[] = $key;
+    }
+    return $bulk;
 }
 // process contact post (if any)
 // $OBJ == calling instance
@@ -41,22 +69,17 @@ $edit      = new Edit($config);
 $message   = Messages::getInstance();
 $transform = $config['IMPORT']['transform'] ?? [];
 $trusted   = $config['IMPORT']['trusted_src'] ?? [];
-$super_url  = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
+$super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
+$delim_start = $_POST['delim_start'] ?? $config['IMPORT']['delim_start'] ?? Import::DEFAULT_START;
+$delim_stop  = $_POST['delim_stop']  ?? $config['IMPORT']['delim_stop']  ?? Import::DEFAULT_STOP;
 $import_file_field = $config['IMPORT']['import_file_field'] ?? 'import_file';
 // check to see if we need to import anything
 if (!empty($_POST)) {
-    $delim_start = $config['IMPORT']['delim_start'];
-    $delim_stop  = $config['IMPORT']['delim_stop'];
     $tmp_trans   = [];
-    // only add checked tranform filters
-    $checked = $_POST['transform'] ?? [];
-    foreach($transform as $key => $value)
-        if (in_array($key, $checked)) $tmp_trans[$key] = $value;
     // if "import_url" is set, just import from the list
     if (!empty($_POST['import_url'])) {
         $url  = strip_tags($_POST['import_url']);
-        if (Import::is_trusted($url, $trusted))
-            $key = do_import($url, $tmp_trans, $delim_start, $delim_stop, $edit, $message);
+        $key = do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message);
         if (!empty($key)) {
             header('Location: ' . $super_url . '/edit?page_key=' . $key);
             exit;
@@ -69,13 +92,7 @@ if (!empty($_POST)) {
         if (empty($list)) {
             $message->addMessage(Import::ERROR_UPLOAD);
         } else {
-            foreach ($list as $url) {
-                $url  = strip_tags($url);
-                if (Import::is_trusted($url, $trusted)) {
-                    $key = do_import($url, $tmp_trans, $delim_start, $delim_stop, $edit, $message);
-                    if ($key !== FALSE) $bulk[] = $key;
-                }
-            }
+            $bulk = do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message);
         }
     // check to see if "import_file" is set
     } elseif (!empty($_FILES['import_file'])) {
@@ -83,25 +100,15 @@ if (!empty($_POST)) {
         if (empty($list)) {
             $message->addMessage(Import::ERROR_UPLOAD);
         } else {
-            foreach ($list as $url) {
-                $key = do_import($url, $tmp_trans, $delim_start, $delim_stop, $edit, $message);
-                if ($key !== FALSE) $bulk[] = $key;
-            }
+            $bulk = do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message);
         }
     }
 }
-// build checklist of transforms
-$apply = $edit->getListOfPages();
-$templ = '<li><input type="checkbox" name="transform[]" value="%s" checked />&nbsp;%s</li>';
-$check = '<ul>';
-foreach ($transform as $key => $item)
-    $check .= sprintf($templ, $key, $item['description']);
-$check .= '</ul>' . PHP_EOL;
 // get messages
 $msg = $message->getMessages() ?? 'Enter a URL to import.  Alternatively you can upload a list of URLs of pages to import.';
 if (!empty($bulk))
     foreach ($bulk as $key)
-        $msg .= '<br /><a href="/super/edit?page_key=' . $key . '">' . $key . '</a>';
+        $msg .= '<br /><a target="_blank" href="/super/edit?page_key=' . $key . '">' . $key . '</a>';
 ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
@@ -158,6 +165,18 @@ if (!empty($bulk))
                             <p>(or manually enter one or more URLs to import)</p>
                             <hr />
                         </div>
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
+                                Start / Stop Delimiters
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" name="delim_start" id="delim_start" size=40 placeholder="&lt;body&gt;" type="text" title="Delimiter that tells import where to start extracting HTML content" value="<?= htmlspecialchars($delim_start); ?>" />
+                                <input class="form-control" name="delim_stop" id="delim_stop" size=40 placeholder="&lt;/body&gt;" type="text" title="Delimiter that tells import where to stop extracting HTML content" value="<?= htmlspecialchars($delim_stop); ?>" />
+                            </div>
+                            <p>(or enter bulk list of URLs to automatically import)</p>
+                            <hr />
+                        </div>
                     </div>
                     <div class="col-sm-6 mb-6">
                         <div class="form-group">
@@ -167,6 +186,12 @@ if (!empty($bulk))
                             <div class="input-group"><?= $check ?></div>
                             <p>Expand list of transform filters by adding to the <i>IMPORT::transforms</i> configuration array</p>
                             <hr />
+                            <?php foreach ($transform as $key => $item) :
+                                    $callback = $item['callback'] ?? NULL;
+                                    echo '<br /><b>' . $key . '</b><br />';
+                                    echo (empty($callback)) ? 'ERROR' : $callback->getDescription();
+                                  endforeach;
+                            ?>
                         </div>
                     </div>
                 </div>

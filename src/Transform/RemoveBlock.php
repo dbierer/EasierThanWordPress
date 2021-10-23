@@ -38,7 +38,7 @@ namespace SimpleHtml\Transform;
  *
  */
 use InvalidArgumentException;
-class RemoveBlock implements TransformInterface
+class RemoveBlock extends Base
 {
     const DESCRIPTION = 'Remove blocks based up search criteria, start and stop strings';
     public $start = NULL;  // starting string

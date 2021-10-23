@@ -37,7 +37,7 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class RemoveAttributes implements TransformInterface
+class RemoveAttributes extends Base
 {
     const DESCRIPTION = 'Remove listed attributes as per config settings';
     /**
@@ -50,26 +50,13 @@ class RemoveAttributes implements TransformInterface
     public function __invoke(string $html, array $params = []) : string
     {
         $list  = $params['attributes'] ?? [];
-        $blank = '!\b%s=".+?"!';
-        $html  = $this->doReplace($list, $blank, $html);
-        $blank = "!\b%s='.+?'!";
-        $html  = $this->doReplace($list, $blank, $html);
-        $blank = '!\b%s=.+?\b!';
-        $html  = $this->doReplace($list, $blank, $html);
-        return $html;
-    }
-    /**
-     * Performs actual replacements
-     *
-     * @param array  $list    : array of attributes to be scrubbed
-     * @param string $pattern : regex to be used
-     * @param string $html    : HTML to be cleaned
-     * @return string $html   : cleaned HTML
-     */
-    protected function doReplace(array $list, string $pattern, string $html)
-    {
+        if (empty($list)) return $html;
+        $search = ['!\b%s=".+?"!',"!\b%s='.+?'!",'!\b%s=.+?\b!'];
         foreach ($list as $attrib) {
-            $patt = sprintf($pattern, $attrib);
+            $attrib = trim($attrib);
+            $patt = [];
+            foreach ($search as $blank)
+                $patt[] = sprintf($blank, $attrib);
             $html = preg_replace($patt, ' ', $html);
             $html = str_replace('  ',' ',$html);
         }

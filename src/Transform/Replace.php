@@ -36,7 +36,7 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class Replace implements TransformInterface
+class Replace extends Base
 {
     const DESCRIPTION = 'Perform search and replace based upon config settings using str_replace() or str_ireplace()';
     /**

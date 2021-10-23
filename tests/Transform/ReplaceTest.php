@@ -37,4 +37,12 @@ class ReplaceTest extends TestCase
         $actual = (new Replace())($text, $params);
         $this->assertEquals($expected, $actual, 'Replacement was not case-sensitive');
     }
+    public function testInvokeReplacesMultiple()
+    {
+        $text = '<img src="https://my.web.site.com/images/test1.jpg" /><img src="images/test2.jpg" />';
+        $expected = '<img src="/images/test1.jpg" /><img src="/images/test2.jpg" />';
+        $params = ['search' => ['https://my.web.site.com','src="images'], 'replace' => ['','src="/images'], 'case-sensitive' => FALSE];
+        $actual = (new Replace())($text, $params);
+        $this->assertEquals($expected, $actual, 'Text was not replaced.');
+    }
 }

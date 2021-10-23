@@ -2,9 +2,9 @@
 namespace SimpleHtml\Transform;
 
 /*
- * Unlikely\Import\Transform\CleanAttributes
+ * Unlikely\Import\Transform\Replace
  *
- * @description Removes "\n" in front of listed attributes
+ * @description performs search and replace using preg_replace()
  * @author doug@unlikelysource.com
  * @date 2021-10-04
  * Copyright 2021 unlikelysource.com
@@ -36,25 +36,34 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class CleanAttributes extends Base
+class ReplaceCallbackArray extends Base
 {
-    const DESCRIPTION = 'Remove "\n" in front of listed attributes';
     /**
-     * Removes "\n" in front of listed attributes
+     * Replaces description
+     */
+    public function __construct(array $arr = [])
+    {
+        if (!empty($arr)) {
+            $this->description = 'Runs preg_replace_callback_array() using this set of patterns:';
+            $this->description .= '<ul>';
+            foreach ($arr as $key => $val)
+                $this->description .= '<li>' . htmlspecialchars($key) . '</li>';
+            $this->description .= '</ul>';
+        }
+    }
+    /**
+     * Performs search and replace
      *
-     * @param string $html : HTML string to be cleaned
-     * @param array $params : ['attributes' => [array,of,attributes,to,remove]]
-     * @return string $html : HTML with "\n" removed from in front of attribute
+     * @param string $html  : HTML string to be cleaned
+     * @param array $params : ['regex' => search regex, 'replace' => replace with this]
+     * @return string $html : transformed HTML
      */
     public function __invoke(string $html, array $params = []) : string
     {
-        $list = $params['attributes'] ?? [];
-        foreach ($list as $attrib) {
-            $search = "\n" . $attrib . '=';
-            $replace = ' ' . $attrib . '=';
-            $html = str_replace($search, $replace, $html);
-        }
-        $html = str_replace('  ', ' ', $html);
+        $arr = $params['callback_array'] ?? '';
+        $html = (!empty($arr))
+              ? preg_replace_callback_array($arr, $html)
+              : $html;
         return $html;
     }
 }

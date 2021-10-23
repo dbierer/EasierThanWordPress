@@ -38,7 +38,7 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class Clean implements TransformInterface
+class Clean extends Base
 {
     const DESCRIPTION = 'Use Tidy extension to clean up HTML fragment';
     /**

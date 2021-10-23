@@ -2,9 +2,9 @@
 namespace SimpleHtml\Transform;
 
 /*
- * Unlikely\Import\Transform\CleanAttributes
+ * Unlikely\Import\Transform\Replace
  *
- * @description Removes "\n" in front of listed attributes
+ * @description performs search and replace using str_replace() or str_ireplace()
  * @author doug@unlikelysource.com
  * @date 2021-10-04
  * Copyright 2021 unlikelysource.com
@@ -36,25 +36,25 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class CleanAttributes extends Base
+class ReplaceRepeat extends Base
 {
-    const DESCRIPTION = 'Remove "\n" in front of listed attributes';
+    const DESCRIPTION = 'Perform repeated search and replace based upon config settings using str_replace() until only a single search text item remains';
     /**
-     * Removes "\n" in front of listed attributes
+     * Performs search and replace
      *
-     * @param string $html : HTML string to be cleaned
-     * @param array $params : ['attributes' => [array,of,attributes,to,remove]]
-     * @return string $html : HTML with "\n" removed from in front of attribute
+     * @param string $html  : HTML string to be cleaned
+     * @param array $params : ['search' => search for this, 'replace' => replace with this]
+     * @return string $html : transformed HTML
      */
     public function __invoke(string $html, array $params = []) : string
     {
-        $list = $params['attributes'] ?? [];
-        foreach ($list as $attrib) {
-            $search = "\n" . $attrib . '=';
-            $replace = ' ' . $attrib . '=';
-            $html = str_replace($search, $replace, $html);
+        $search = $params['search'] ?? '';
+        $replace = $params['replace'] ?? '';
+        if (!empty($search)) {
+            while(strpos($html, $search) !== FALSE) {
+                $html = str_replace($search, $replace, $html);
+            }
         }
-        $html = str_replace('  ', ' ', $html);
         return $html;
     }
 }

@@ -2,11 +2,11 @@
 namespace SimpleHtml\Transform;
 
 /*
- * Unlikely\Import\Transform\CleanAttributes
+ * Unlikely\Import\Transform\Base
  *
- * @description Removes "\n" in front of listed attributes
+ * @description base class for transformations
  * @author doug@unlikelysource.com
- * @date 2021-10-04
+ * @date 2021-10-23
  * Copyright 2021 unlikelysource.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,25 +36,17 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class CleanAttributes extends Base
+abstract class Base implements TransformInterface
 {
-    const DESCRIPTION = 'Remove "\n" in front of listed attributes';
+    const DESCRIPTION = 'Transformations';
+    public $description = NULL;
     /**
-     * Removes "\n" in front of listed attributes
+     * Returns description
      *
-     * @param string $html : HTML string to be cleaned
-     * @param array $params : ['attributes' => [array,of,attributes,to,remove]]
-     * @return string $html : HTML with "\n" removed from in front of attribute
+     * @return string $description : defaults to self::DESCRIPTION
      */
-    public function __invoke(string $html, array $params = []) : string
+    public function getDescription()
     {
-        $list = $params['attributes'] ?? [];
-        foreach ($list as $attrib) {
-            $search = "\n" . $attrib . '=';
-            $replace = ' ' . $attrib . '=';
-            $html = str_replace($search, $replace, $html);
-        }
-        $html = str_replace('  ', ' ', $html);
-        return $html;
+        return $this->description ?? static::DESCRIPTION;
     }
 }

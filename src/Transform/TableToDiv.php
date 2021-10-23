@@ -37,7 +37,7 @@ namespace SimpleHtml\Transform;
  *
  */
 use InvalidArgumentException;
-class TableToDiv implements TransformInterface
+class TableToDiv extends Base
 {
     const DESCRIPTION = 'Convert HTML &lt;table&gt;&lt;tr&gt;&lt;td&gt;|&lt;th&gt; to &lt;div class="row"&gt;&lt;div class="col-xxx"&gt;';
     public $tr = '';  // row class (default == "row")

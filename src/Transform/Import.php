@@ -41,6 +41,7 @@ class Import
     const DEFAULT_START = '<body>';
     const DEFAULT_STOP  = '</body>';
     const ERROR_UPLOAD  = 'ERROR: unable to upload list of URLs to import';
+    const ERROR_URL_EMPTY = 'ERROR: no data returned from this URL. Check HTTP status on this URL.';
     public static $list = [];
     /**
      * Grabs contents, applies transforms
@@ -49,13 +50,18 @@ class Import
      * @array  $callbacks   : array of transform callbacks; expects key "callback"
      * @string $delim_start : where to start contents extraction
      * @string $delim_stop  : where to end contents extraction
-     * @return string $html : transformed HTML
+     * @return string $html : transformed HTML or ''
      */
     public static function import(string $url,
                                   array $callbacks = [],
                                   string $delim_start = self::DEFAULT_START,
                                   string $delim_stop = self::DEFAULT_STOP)
     {
+        // make sure URL is reachable
+        $url = trim($url);
+        $headers = implode(' ', get_headers($url));
+        error_log(__METHOD__ . ':' . var_export($headers, TRUE));
+        if (stripos($headers, '200 OK') === FALSE) return '';
         $html = file_get_contents("$url");
         $html = self::get_delimited($html, $delim_start, $delim_stop);
         $html = str_replace(PHP_EOL, ' ', trim($html));
@@ -78,7 +84,7 @@ class Import
      */
     public static function get_delimited(string $contents,
                                          string $delim_start,
-                                         string $delim_stop = '')
+                                         $delim_stop = NULL)
     {
         $html  = $contents;
         $start = strpos($contents, $delim_start);
@@ -86,15 +92,23 @@ class Import
         if ($start === FALSE) return $contents;
         $temp = explode($delim_start, $contents);
         if (!empty($temp[1])) {
-            if ($delim_stop === '') {
-                $html = $temp[1];
-            } else {
-                $stop = strpos($contents, $delim_stop);
-                if ($stop === FALSE) {
-                    $html = $temp[1];
-                } else {
-                    $again = explode($delim_stop, $temp[1]);
-                    $html  = $again[0] ?? $temp[1];
+            $html = $temp[1];
+            if (!empty($delim_stop)) {
+                if (is_string($delim_stop)) {
+                    $stop = strpos($html, $delim_stop);
+                    if ($stop !== FALSE) {
+                        $again = explode($delim_stop, $html);
+                        $html  = $again[0] ?? $html;
+                    }
+                } elseif (is_array($delim_stop)) {
+                    foreach ($delim_stop as $marker) {
+                        $stop = strpos($html, $marker);
+                        if ($stop !== FALSE) {
+                            $again = explode($marker, $html);
+                            if (count($again) > 1) array_pop($again);
+                            $html  = implode('', $again);
+                        }
+                    }
                 }
             }
         }

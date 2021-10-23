@@ -174,15 +174,22 @@ class Edit
     public function save(string $key, string $contents, string $path = HTML_DIR, bool $tidy = FALSE) : bool
     {
         // use Tidy to sanitize
+        $contents = trim($contents);
+        if (empty($contents)) return FALSE;
         $ok = 0;
         if (function_exists('tidy_repair_string') && $tidy) {
             $fixed = tidy_repair_string($contents);
             // extract content between <body>*</body> tags
-            $matches = [];
-            [$first, $last] = explode('<body>', $fixed);
+            $temp = preg_split('!<body.*?>!', $fixed);
+            if (empty($temp[1])) {
+                $last = '';
+            } else {
+                $last = $temp[1];
+            }
             $pos = strpos($last, '</body>');
-            $contents = substr($last, 0, $pos);
+            $contents = ($pos !== FALSE) ? substr($last, 0, $pos) : '';
             $contents = trim($contents);
+            if (empty($contents)) return FALSE;
         }
         // check to see if it's an existing file
         $pages = $this->getListOfPages($path);

@@ -29,6 +29,15 @@ class ImportTest extends TestCase
         $actual = Import::get_delimited($text, $start);
         $this->assertEquals($expected, $actual, 'Contents from between delimiters not returned with no stop');
     }
+    public function testGetDelimitedArray()
+    {
+        $text     = '<html><body><p>xxx</p><p>yyy</p><p>zzz</p><div align="center">footer</div></body></div></html>';
+        $start    = '<body>';
+        $stop     = ['</body>','<div align="center">'];
+        $expected = '<p>xxx</p><p>yyy</p><p>zzz</p>';
+        $actual = Import::get_delimited($text, $start, $stop);
+        $this->assertEquals($expected, $actual, 'Contents from between delimiters not returned with stop delim as array');
+    }
     public function testGetDelimitedExtractsExpectedContent()
     {
         $text     = "<html>\n<body>\n<div class='xxx'><p>xxx</p>\n</div>\n</body>\n</html>\n";

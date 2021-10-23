@@ -125,7 +125,7 @@ class EditTest extends TestCase
         file_put_contents($this->testFileDir . '/testX.html', $contents);
         $contents = str_replace('Test 1', 'Test X', $contents);
         $response = $this->edit->save('/testX', $contents, $this->testFileDir);
-        $expected = $contents;
+        $expected = trim($contents);
         $actual   = file_get_contents($this->testFileDir . '/testX.html');
         $this->assertEquals($expected, $actual, 'Edit::save() did overwrite original');
     }
@@ -146,7 +146,7 @@ class EditTest extends TestCase
         $contents = file_get_contents($this->testFileDir . '/test1.html');
         $contents = str_replace('Test 1', 'Test Y', $contents);
         $response = $this->edit->save('/testY', $contents, $this->testFileDir);
-        $expected = $contents;
+        $expected = trim($contents);
         $actual   = (file_exists($new_fn)) ? file_get_contents($new_fn) : '';
         $this->assertEquals($expected, $actual, 'Edit::save() did not save new file');
     }
@@ -166,7 +166,7 @@ class EditTest extends TestCase
         $contents = file_get_contents($this->testFileDir . '/test1.html');
         $contents = str_replace('Test 1', 'Test Z', $contents);
         $response = $this->edit->save('/new/testZ', $contents, $this->testFileDir);
-        $expected = $contents;
+        $expected = trim($contents);
         $actual   = (file_exists($new_fn)) ? file_get_contents($new_fn) : '';
         $this->assertEquals($expected, $actual, 'Edit::save() did not create new file in new directory contents do not match');
     }
