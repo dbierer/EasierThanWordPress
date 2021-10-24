@@ -8,7 +8,7 @@ function do_import(string $url,
                    array $trusted,
                    array $transform,
                    string $delim_start,
-                   string $delim_stop,
+                   $delim_stop,
                    Edit $edit,
                    Messages $message)
 {
@@ -71,7 +71,18 @@ $transform = $config['IMPORT']['transform'] ?? [];
 $trusted   = $config['IMPORT']['trusted_src'] ?? [];
 $super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
 $delim_start = $_POST['delim_start'] ?? $config['IMPORT']['delim_start'] ?? Import::DEFAULT_START;
-$delim_stop  = $_POST['delim_stop']  ?? $config['IMPORT']['delim_stop']  ?? Import::DEFAULT_STOP;
+// grab stop delimiter
+if (!empty($_POST['delim_stop'])) {
+    // if there's a comma, we need to produce an array of stops
+    if (strpos($_POST['delim_stop'], ',') !== FALSE) {
+        $delim_stop = explode(',', $_POST['delim_stop']);
+    } else {
+        $delim_stop = $_POST['delim_stop'];
+    }
+} else {
+    // otherwise grab stop delim from config or use default
+    $delim_stop = $config['IMPORT']['delim_stop']  ?? Import::DEFAULT_STOP;
+}
 $import_file_field = $config['IMPORT']['import_file_field'] ?? 'import_file';
 // check to see if we need to import anything
 if (!empty($_POST)) {
@@ -172,7 +183,7 @@ if (!empty($bulk))
                             </label>
                             <div class="input-group">
                                 <input class="form-control" name="delim_start" id="delim_start" size=40 placeholder="&lt;body&gt;" type="text" title="Delimiter that tells import where to start extracting HTML content" value="<?= htmlspecialchars($delim_start); ?>" />
-                                <input class="form-control" name="delim_stop" id="delim_stop" size=40 placeholder="&lt;/body&gt;" type="text" title="Delimiter that tells import where to stop extracting HTML content" value="<?= htmlspecialchars($delim_stop); ?>" />
+                                <input class="form-control" name="delim_stop" id="delim_stop" size=40 placeholder="&lt;/body&gt;" type="text" title="Delimiter that tells import where to stop extracting HTML content" value="<?= htmlspecialchars((is_array($delim_stop)) ? implode(',', $delim_stop) : $delim_stop); ?>" />
                             </div>
                             <p>(or enter bulk list of URLs to automatically import)</p>
                             <hr />

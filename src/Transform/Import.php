@@ -45,17 +45,21 @@ class Import
     public static $list = [];
     /**
      * Grabs contents, applies transforms
+     * If $delim_stop is an array:
+     * 1. Splits text with the last occurance of the first item in the array
+     * 2. Splits remaining text with the last occurance of the next item in the array
+     * 3. Keeps going until all $delim_stop markers have been processed
      *
-     * @string $url         : source URL
-     * @array  $callbacks   : array of transform callbacks; expects key "callback"
-     * @string $delim_start : where to start contents extraction
-     * @string $delim_stop  : where to end contents extraction
+     * @param string $url         : source URL
+     * @param array  $callbacks   : array of transform callbacks; expects key "callback"
+     * @param string $delim_start : where to start contents extraction
+     * @param string|array $delim_stop  : where to end contents extraction
      * @return string $html : transformed HTML or ''
      */
     public static function import(string $url,
                                   array $callbacks = [],
                                   string $delim_start = self::DEFAULT_START,
-                                  string $delim_stop = self::DEFAULT_STOP)
+                                  $delim_stop = self::DEFAULT_STOP)
     {
         // make sure URL is reachable
         $url = trim($url);

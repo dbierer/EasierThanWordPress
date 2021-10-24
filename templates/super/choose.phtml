@@ -9,9 +9,9 @@ if (!empty($OBJ)) {
     $config = $OBJ->config;
 }
 // check to see if authenticated
+$message = Messages::getInstance();
 if (Profile::verify($config) === FALSE) {
     Profile::logout();
-    $message = Messages::getInstance();
     $message->addMessage('Unable to authenticate');
     header('Location: /');
     exit;
@@ -34,10 +34,9 @@ $apply = $edit->getListOfPages();
 $templ = '<li><input type="checkbox" name="transform[]" value="%s" checked />&nbsp;%s</li>';
 $check = '<ul>';
 foreach ($transform as $key => $item)
-    $check .= sprintf($templ, $key, $item['description']);
+    $check .= sprintf($templ, $key, $item->getDescription());
 $check .= '</ul>' . PHP_EOL;
 // get messages
-$message = Messages::getInstance();
 $msg     = $message->getMessages() ?? 'Select page to edit or delete.  To add a new page, enter a URL and click "Add New Page" button.';
 ?>
   <!-- Header -->
