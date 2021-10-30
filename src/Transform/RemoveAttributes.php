@@ -40,6 +40,7 @@ namespace SimpleHtml\Transform;
 class RemoveAttributes extends Base
 {
     const DESCRIPTION = 'Remove listed attributes as per config settings';
+    public $attributes = [];
     /**
      * Removes listed attributes
      *
@@ -49,10 +50,12 @@ class RemoveAttributes extends Base
      */
     public function __invoke(string $html, array $params = []) : string
     {
-        $list  = $params['attributes'] ?? [];
-        if (empty($list)) return $html;
+        $this->attributes  = $params['attributes'] ?? [];
+        if (empty($this->attributes)) return $html;
+        // clean attributes before removal
+        $html = (new CleanAttributes())($html, $this->attributes);
         $search = ['!\b%s=".+?"!',"!\b%s='.+?'!",'!\b%s=.+?\b!'];
-        foreach ($list as $attrib) {
+        foreach ($this->attributes as $attrib) {
             $attrib = trim($attrib);
             $patt = [];
             foreach ($search as $blank)

@@ -2,6 +2,7 @@
 use SimpleHtml\Common\Page\Edit;
 use SimpleHtml\Common\Security\Profile;
 use SimpleHtml\Common\Generic\Messages;
+use SimpleHtml\Transform\TransformInterface;
 // process contact post (if any)
 // $OBJ == calling instance
 if (!empty($OBJ)) {
@@ -12,7 +13,7 @@ if (!empty($OBJ)) {
 $message = Messages::getInstance();
 if (Profile::verify($config) === FALSE) {
     Profile::logout();
-    $message->addMessage('Unable to authenticate');
+    $message->addMessage(Messages::ERROR_AUTH);
     header('Location: /');
     exit;
 }
@@ -27,17 +28,8 @@ $select .= '<option>' . Edit::CHOOSE_TOP . '</option>' . PHP_EOL;
 foreach (array_keys($pages) as $key)
     $select .= '<option>' . $key . '</option>' . PHP_EOL;
 $select .= '</select>' . PHP_EOL;
-// build checklist of transforms
-$transform = $config['IMPORT']['transform'] ?? [];
-$trusted   = $config['IMPORT']['trusted_src'] ?? [];
-$apply = $edit->getListOfPages();
-$templ = '<li><input type="checkbox" name="transform[]" value="%s" checked />&nbsp;%s</li>';
-$check = '<ul>';
-foreach ($transform as $key => $item)
-    $check .= sprintf($templ, $key, $item->getDescription());
-$check .= '</ul>' . PHP_EOL;
 // get messages
-$msg     = $message->getMessages() ?? 'Select page to edit or delete.  To add a new page, enter a URL and click "Add New Page" button.';
+$msg     = $message->getMessages() ?? Messages::CHOOSE;
 ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">

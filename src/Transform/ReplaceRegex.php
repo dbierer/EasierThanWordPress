@@ -39,6 +39,8 @@ namespace SimpleHtml\Transform;
 class ReplaceRegex extends Base
 {
     const DESCRIPTION = 'Perform search and replace using preg_replace() based upon config settings';
+    public $regex = '';
+    public $replace = '';
     /**
      * Performs search and replace
      *
@@ -48,12 +50,11 @@ class ReplaceRegex extends Base
      */
     public function __invoke(string $html, array $params = []) : string
     {
-        $regex = $params['regex'] ?? '';
-        $replace = $params['replace'] ?? '';
-        $html = (!empty($regex))
-              ? preg_replace($regex, $replace, $html)
+        $this->regex = $params['regex'] ?? '';
+        $this->replace = $params['replace'] ?? '';
+        $text = (!empty($this->regex))
+              ? preg_replace($this->regex, $this->replace, $html)
               : $html;
-        return $html;
-
+        return $text ?? $html;
     }
 }

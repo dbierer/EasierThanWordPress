@@ -65,7 +65,7 @@ class ImportTest extends TestCase
     }
     public function testImportExtractsExpectedContentWithNoCallbacks()
     {
-        $url      = 'http://test.unlikelysource.com/test1.html';
+        $url      = 'https://test.unlikelysource.com/test1.html';
         $callbax  = [];
         $start    = '<body>';
         $stop     = '</body>';
@@ -74,14 +74,13 @@ class ImportTest extends TestCase
         $actual = Import::import($url, $callbax, $start, $stop);
         $this->assertEquals($expected, $actual, 'Contents from between delimiters not returned.');
     }
-    public function testImportExtractsExpectedContentWithStrToUpperCallback()
+    public function testImportExtractsExpectedContentWithAppendTransform()
     {
-        $func     = function ($txt, $args) { return strtoupper($txt); };
-        $url      = 'http://test.unlikelysource.com/test1.html';
-        $callbax  = ['upper' => ['callback' => $func, 'params' => []]];
+        $url      = 'https://test.unlikelysource.com/test1.html';
+        $callbax  = ['append' => ['callback' => 'SimpleHtml\Transform\Append', 'params' => ['text' => '<p>TEST</p>']]];
         $start    = '<body>';
         $stop     = '</body>';
-        $expected = '<H1>TEST 1</H1>';
+        $expected = '<h1>Test 1</h1><p>TEST</p>';
         echo "\nMaking request to $url\n";
         $actual = Import::import($url, $callbax, $start, $stop);
         $this->assertEquals($expected, $actual, 'Callback not invoked properly');

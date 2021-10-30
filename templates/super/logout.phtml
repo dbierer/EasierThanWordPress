@@ -3,6 +3,6 @@ use SimpleHtml\Common\Security\Profile;
 use SimpleHtml\Common\Generic\Messages;
 Profile::logout();
 $message = Messages::getInstance();
-$message->addMessage('Successful logout');
+$message->addMessage(Messages::SUCCESS_LOGOUT);
 header('Location: /');
 exit;

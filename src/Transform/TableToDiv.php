@@ -40,12 +40,12 @@ use InvalidArgumentException;
 class TableToDiv extends Base
 {
     const DESCRIPTION = 'Convert HTML &lt;table&gt;&lt;tr&gt;&lt;td&gt;|&lt;th&gt; to &lt;div class="row"&gt;&lt;div class="col-xxx"&gt;';
+    const DEFAULT_TR = 'row';
+    const DEFAULT_TD = 'col';
+    const DEFAULT_TH = 'col bold';
     public $tr = '';  // row class (default == "row")
     public $td = '';  // column class (default == "col")
     public $th = '';  // header column class (default == "col bold")
-    public const DEFAULT_TR = 'row';
-    public const DEFAULT_TD = 'col';
-    public const DEFAULT_TH = 'col bold';
     /**
      * Converts HTML <table><tr><td>|<th> to <div class="row"><div class="col">
      *

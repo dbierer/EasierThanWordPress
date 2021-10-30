@@ -39,7 +39,7 @@ namespace SimpleHtml\Transform;
 abstract class Base implements TransformInterface
 {
     const DESCRIPTION = 'Transformations';
-    public $description = NULL;
+    public static $description = NULL;
     /**
      * Returns description
      *
@@ -47,6 +47,6 @@ abstract class Base implements TransformInterface
      */
     public function getDescription()
     {
-        return $this->description ?? static::DESCRIPTION;
+        return static::$description ?? static::DESCRIPTION;
     }
 }

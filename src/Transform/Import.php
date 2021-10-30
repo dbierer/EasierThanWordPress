@@ -2,7 +2,7 @@
 namespace SimpleHtml\Transform;
 
 /*
- * Unlikely\Import\Transform\Replace
+ * Unlikely\Import\Transform\Import
  *
  * @description performs search and replace using str_replace() or str_ireplace()
  * @author doug@unlikelysource.com
@@ -36,13 +36,19 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use SimpleHtml\Common\Page\Edit;
+use SimpleHtml\Common\Generic\Messages;
 class Import
 {
     const DEFAULT_START = '<body>';
     const DEFAULT_STOP  = '</body>';
     const ERROR_UPLOAD  = 'ERROR: unable to upload list of URLs to import';
     const ERROR_URL_EMPTY = 'ERROR: no data returned from this URL. Check HTTP status on this URL.';
+    const URLS_KEY = 'URLS';
+    const CONFIG_KEY = 'IMPORT';
     public static $list = [];
+    public static $config = [];
+    public static $container = [];
     /**
      * Grabs contents, applies transforms
      * If $delim_stop is an array:
@@ -63,20 +69,37 @@ class Import
     {
         // make sure URL is reachable
         $url = trim($url);
-        $headers = implode(' ', get_headers($url));
-        error_log(__METHOD__ . ':' . var_export($headers, TRUE));
-        if (stripos($headers, '200 OK') === FALSE) return '';
         $html = file_get_contents("$url");
         $html = self::get_delimited($html, $delim_start, $delim_stop);
         $html = str_replace(PHP_EOL, ' ', trim($html));
         if (!empty($html) && !empty($callbacks)) {
             foreach ($callbacks as $key => $item) {
-                $obj    = $item['callback'] ?? FALSE;
+                $class  = $item['callback'] ?? '';
                 $params = $item['params'] ?? [];
+                $obj    = self::get_instance($class, $params);
                 $html   = (!empty($obj)) ? $obj($html, $params) : $html;
             }
         }
         return $html;
+    }
+    /**
+     * Gets instance of callback from self::$container
+     *
+     * @param string $class : class to be instantiated
+     * @param array  $params : params (if any)
+     * @return TransformInterface $obj | NULL
+     */
+    public static function get_instance(string $class, array $params)
+    {
+        if ($class === '') return NULL;
+        if (empty(self::$container[$class])) {
+            if (empty($params['__construct'])) {
+                self::$container[$class] = new $class();
+            } else {
+                self::$container[$class] = new $class($params['__construct']);
+            }
+        }
+        return self::$container[$class] ?? NULL;
     }
     /**
      * Grabs contents from between start/stop delimiters
@@ -139,27 +162,108 @@ class Import
 
     /**
      * Uploads and stores list of URLs to import
-     * Removes any URLs not on trusted list
+     * Must be in JSON format:
+     * {
+     *   "self::CONFIG" : { "param" : "value", "param" : "value", etc. },
+     *   "self::URLS"   : [ "url", "url", "url", etc. ]
+     * }
      *
      * @param string $field  : field name for uploaded file (from $_FILES)
      * @param array $info    : $_FILES
-     * @param array $trusted : array of trusted URL prefixes
      * @return array $list   : list of URLs (or filenames) to import | empty array if upload failed
      */
-    public static function get_upload(string $field, array $info, array $trusted)
+    public static function get_upload(string $field, array $info)
     {
-        $list = [];
+        self::$list = [];
         // is there an upload error?
         if ($info[$field]['error'] == UPLOAD_ERR_OK) {
             // is this an uploaded file?
             if (is_uploaded_file($info[$field]['tmp_name'])) {
                 // ok, go ahead and load the file
-                $temp = file($info[$field]['tmp_name']);
-                // scan file and remove any entries not on trusted list
-                foreach ($temp as $url)
-                    if (self::is_trusted($url, $trusted)) $list[] = $url;
+                $text = file_get_contents($info[$field]['tmp_name']);
+                if ($bytes !== FALSE) {
+                    $data = json_decode($text, TRUE);
+                    if ($data !== NULL) {
+                        self::$config = $data[self::CONFIG_KEY] ?? [];
+                        self::$list   = $data[self::URLS_KEY] ?? [];
+                    }
+                }
             }
         }
-        return $list;
+        return self::$list;
+    }
+    /**
+     * Performs actual import
+     *
+     * @param string $url
+     * @param array $trusted : prefixes of URLs from which to allow import
+     * @param array $transform : tranformation filter rules
+     * @param string $delim_start : starting delimiter
+     * @param string|array $delim_stop : ending delimiter(s)
+     * @param Edit $edit : used to save
+     * @param Messages $message
+     * @param string $path : where to save files; default === HTML_DIR
+     * @param bool $tidy : set TRUE to use Tidy extension to cleanup upon save
+     * @return boolean TRUE if OK; FALSE otherwise
+     */
+    public static function do_import(string $url,
+                       array $trusted,
+                       array $transform,
+                       string $delim_start,
+                       $delim_stop,
+                       Edit $edit,
+                       Messages $message,
+                       string $path = HTML_DIR,
+                       bool $tidy = TRUE)
+    {
+        if (!Import::is_trusted($url, $trusted)) return FALSE;
+        set_time_limit(30);
+        $ok   = FALSE;
+        $html = self::import($url, $transform, $delim_start, $delim_stop);
+        if (empty($html)) {
+            $message->addMessage(Import::ERROR_URL_EMPTY);
+        } else {
+            $key  = $edit->getKeyFromURL($url, $path);
+            if ($edit->save($key, $html, $path, $tidy)) {
+                $message->addMessage(Edit::SUCCESS_SAVE);
+                $ok = TRUE;
+            } else {
+                $message->addMessage(Edit::ERROR_SAVE);
+            }
+        }
+        return ($ok) ? $key : FALSE;
+    }
+    /**
+     * Process bulk imports
+     *
+     * @param array $list : list of URLs to be imported
+     * @param array $trusted : prefixes of URLs from which to allow import
+     * @param array $transform : tranformation filter rules
+     * @param string $delim_start : starting delimiter
+     * @param string|array $delim_stop : ending delimiter(s)
+     * @param Edit $edit : used to save
+     * @param Messages $message
+     * @param string $path : where to save files; default === HTML_DIR
+     * @param bool $tidy : set TRUE to use Tidy extension to cleanup upon save
+     * @return array $bulk : list of URLs that were imported
+     */
+    public static function do_bulk_import(
+        array $list,
+        array $trusted,
+        array $transform,
+        string $delim_start,
+        $delim_stop,
+        Edit $edit,
+        Messages $message,
+        string $path = HTML_DIR,
+        bool $tidy = TRUE)
+    {
+        $bulk = [];
+        foreach ($list as $url) {
+            $url  = strip_tags(trim($url));
+            $key = self::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $path, $tidy);
+            if ($key !== FALSE) $bulk[] = $key;
+        }
+        return $bulk;
     }
 }

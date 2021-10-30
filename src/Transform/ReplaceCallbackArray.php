@@ -38,19 +38,8 @@ namespace SimpleHtml\Transform;
  */
 class ReplaceCallbackArray extends Base
 {
-    /**
-     * Replaces description
-     */
-    public function __construct(array $arr = [])
-    {
-        if (!empty($arr)) {
-            $this->description = 'Runs preg_replace_callback_array() using this set of patterns:';
-            $this->description .= '<ul>';
-            foreach ($arr as $key => $val)
-                $this->description .= '<li>' . htmlspecialchars($key) . '</li>';
-            $this->description .= '</ul>';
-        }
-    }
+    const DESCRIPTION = 'Runs preg_replace_callback_array() using the set of patterns supplied in the callback array file.';
+    public $callback_array_file = '';
     /**
      * Performs search and replace
      *
@@ -60,10 +49,12 @@ class ReplaceCallbackArray extends Base
      */
     public function __invoke(string $html, array $params = []) : string
     {
-        $arr = $params['callback_array'] ?? '';
-        $html = (!empty($arr))
+        $arr = [];
+        $fn = $params['callback_array_file'] ?? '';
+        if (!empty($fn) && file_exists($fn)) $arr = require $fn;
+        $text = (!empty($arr))
               ? preg_replace_callback_array($arr, $html)
               : $html;
-        return $html;
+        return $text ?? $html;
     }
 }

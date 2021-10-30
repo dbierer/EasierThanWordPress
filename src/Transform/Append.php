@@ -2,9 +2,9 @@
 namespace SimpleHtml\Transform;
 
 /*
- * Unlikely\Import\Transform\InsertBefore
+ * Unlikely\Import\Transform\Append
  *
- * @description inserts given text before any other text
+ * @description appends supplied text to the end of current HTML
  * @author doug@unlikelysource.com
  * @date 2021-10-04
  * Copyright 2021 unlikelysource.com
@@ -36,19 +36,20 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class InsertBefore extends Base
+class Append extends Base
 {
-    const DESCRIPTION = 'Inserts given text before any other text';
+    const DESCRIPTION = 'Appends supplied text to existing HTML text';
+    public $text = '';
     /**
-     * Performs search and replace
+     * Appends
      *
-     * @param string $html  : HTML string to be cleaned
-     * @param array $params : ['text' => text to insert]
+     * @param string $html  : HTML string to be altered
+     * @param array $params : ['text' => "text to be appended"]
      * @return string $html : transformed HTML
      */
     public function __invoke(string $html, array $params = []) : string
     {
-        $text = $params['text'] ?? '';
-        return $text . $html;
+        $this->text = $params['text'] ?? '';
+        return $html . $this->text;
     }
 }

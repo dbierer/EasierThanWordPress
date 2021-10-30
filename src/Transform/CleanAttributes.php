@@ -39,6 +39,7 @@ namespace SimpleHtml\Transform;
 class CleanAttributes extends Base
 {
     const DESCRIPTION = 'Remove "\n" in front of listed attributes';
+    public $attributes = [];
     /**
      * Removes "\n" in front of listed attributes
      *
@@ -48,8 +49,9 @@ class CleanAttributes extends Base
      */
     public function __invoke(string $html, array $params = []) : string
     {
-        $list = $params['attributes'] ?? [];
-        foreach ($list as $attrib) {
+        $this->attributes  = $params['attributes'] ?? [];
+        if (empty($this->attributes)) return $html;
+        foreach ($this->attributes as $attrib) {
             $search = "\n" . $attrib . '=';
             $replace = ' ' . $attrib . '=';
             $html = str_replace($search, $replace, $html);

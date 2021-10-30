@@ -12,7 +12,7 @@ if (!empty($OBJ)) {
 $message  = Messages::getInstance();
 if (Profile::verify($config) === FALSE) {
     Profile::logout();
-    $message->addMessage('Unable to authenticate');
+    $message->addMessage(Messages::ERROR_AUTH);
     header('Location: /');
     exit;
 }
@@ -75,7 +75,7 @@ if ($action === 'edit' || $action === 'delete') {
     $contents = $edit->getContentsFromPage($key, HTML_DIR);
 }
 // get messages
-$msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when done';
+$msg = $message->getMessages() ?? Messages::EDIT;
 ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
@@ -188,7 +188,7 @@ $msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when don
 
     </div>
   </div>
-    <script src="https://cdn.ckeditor.com/4.16.1/standard/ckeditor.js"></script>
+    <script src="//cdn.ckeditor.com/4.16.2/full/ckeditor.js"></script>
     <script type="text/javascript">
     CKEDITOR.replace('page_content', {
         startupFocus: true,
@@ -201,3 +201,22 @@ $msg = $message->getMessages() ?? 'Edit as appropriate and click "Save" when don
     });
     CKEDITOR.config.allowedContent = true;
     </script>
+    <?php /*
+        CKEDITOR.config.toolbar = [
+        { name: 'document', items: [ 'Save', 'NewPage', 'Preview', 'Print', '-', 'Templates' ] },
+        { name: 'clipboard', items: [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord' ] },
+        { name: 'editing', items: [ 'Find', 'Replace', '-', 'SelectAll', '-', 'Scayt' ] },
+        '/',
+        { name: 'justify', items: [ 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+        { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', 'Blockquote'] },
+        { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
+        { name: 'links', items: [ 'Link', 'Unlink', 'Anchor' ] },
+        '/',
+        { name: 'insert', items: [ 'Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', '-', 'Undo', 'Redo' ] },
+        { name: 'source', items: [ 'Source' ] },
+        '/',
+        { name: 'styles', items: [ 'Styles', 'Format', 'Font', 'FontSize' ] },
+        { name: 'colors', items: [ 'TextColor', 'BGColor' ] },
+        { name: 'tools', items: [ 'Maximize', 'ShowBlocks' ] },
+    ];
+    */ ?>

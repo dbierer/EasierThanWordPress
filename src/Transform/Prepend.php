@@ -2,9 +2,9 @@
 namespace SimpleHtml\Transform;
 
 /*
- * Unlikely\Import\Transform\Replace
+ * Unlikely\Import\Transform\InsertBefore
  *
- * @description performs search and replace using str_replace() or str_ireplace()
+ * @description inserts given text before any other text
  * @author doug@unlikelysource.com
  * @date 2021-10-04
  * Copyright 2021 unlikelysource.com
@@ -36,27 +36,20 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-class ReplaceRepeat extends Base
+class Prepend extends Base
 {
-    const DESCRIPTION = 'Perform repeated search and replace based upon config settings using str_replace() until only a single search text item remains';
-    public $search = '';
-    public $replace = '';
+    const DESCRIPTION = 'Inserts given text before any other text';
+    public $text = '';
     /**
      * Performs search and replace
      *
      * @param string $html  : HTML string to be cleaned
-     * @param array $params : ['search' => search for this, 'replace' => replace with this]
+     * @param array $params : ['text' => text to insert]
      * @return string $html : transformed HTML
      */
     public function __invoke(string $html, array $params = []) : string
     {
-        $this->search = $params['search'] ?? '';
-        $this->replace = $params['replace'] ?? '';
-        if (!empty($this->search)) {
-            while(strpos($html, $this->search) !== FALSE) {
-                $html = str_replace($this->search, $this->replace, $html);
-            }
-        }
-        return $html;
+        $this->text = $params['text'] ?? '';
+        return $this->text . $html;
     }
 }

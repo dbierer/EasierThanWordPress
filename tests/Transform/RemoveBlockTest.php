@@ -54,7 +54,8 @@ class RemoveBlockTest extends TestCase
         $transform->init($params);
         $expected = [13, 21];
         $transform->getStartAndStop($html);
-        $actual = [$transform->beg_pos, $transform->end_pos];
+        $vars   = $transform->getArrayCopy();
+        $actual = [$vars['beg_pos'], $vars['end_pos']];
         $this->assertEquals($expected, $actual, 'Does not identifiy correct begin/end positions');
     }
     public function testConfirmIdentifiesInternalItems()

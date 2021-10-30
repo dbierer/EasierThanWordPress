@@ -38,23 +38,26 @@ namespace SimpleHtml\Transform;
  */
 class Replace extends Base
 {
-    const DESCRIPTION = 'Perform search and replace based upon config settings using str_replace() or str_ireplace()';
+    const DESCRIPTION = 'Perform search and replace based upon config settings using str_replace() or str_ireplace(). If $case is TRUE, performs case-sensitive replacement; case-insensitive is the default.';
+    public $case = FALSE;
+    public $search = '';
+    public $replace = '';
     /**
      * Performs search and replace
      *
      * @param string $html  : HTML string to be cleaned
-     * @param array $params : ['search' => search for this, 'replace' => replace with this, 'case-sensitive' => bool]
+     * @param array $params : ['search' => search for this, 'replace' => replace with this, 'case' => bool]
      * @return string $html : transformed HTML
      */
     public function __invoke(string $html, array $params = []) : string
     {
-        $search = $params['search'] ?? '';
-        $replace = $params['replace'] ?? '';
-        $case = (bool) ($params['case-sensitive'] ?? FALSE);
-        if (!empty($search)) {
-            $html = ($case)
-                  ? str_replace($search, $replace, $html)
-                  : str_ireplace($search, $replace, $html);
+        $this->search = $params['search'] ?? '';
+        $this->replace = $params['replace'] ?? '';
+        $this->case = (bool) ($params['case'] ?? FALSE);
+        if (!empty($this->search)) {
+            $html = ($this->case)
+                  ? str_replace($this->search, $this->replace, $html)
+                  : str_ireplace($this->search, $this->replace, $html);
         }
         return $html;
     }

@@ -3,49 +3,6 @@ use SimpleHtml\Transform\Import;
 use SimpleHtml\Common\Page\Edit;
 use SimpleHtml\Common\Security\Profile;
 use SimpleHtml\Common\Generic\Messages;
-// upload function
-function do_import(string $url,
-                   array $trusted,
-                   array $transform,
-                   string $delim_start,
-                   $delim_stop,
-                   Edit $edit,
-                   Messages $message)
-{
-    if (!Import::is_trusted($url, $trusted)) return FALSE;
-    set_time_limit(30);
-    $ok   = FALSE;
-    $html = Import::import($url, $transform, $delim_start, $delim_stop);
-    if (empty($html)) {
-        $message->addMessage(Import::ERROR_URL_EMPTY);
-    } else {
-        $key  = $edit->getKeyFromURL($url, HTML_DIR);
-        if ($edit->save($key, $html, HTML_DIR, TRUE)) {
-            $message->addMessage(Edit::SUCCESS_SAVE);
-            $ok = TRUE;
-        } else {
-            $message->addMessage(Edit::ERROR_SAVE);
-        }
-    }
-    return ($ok) ? $key : FALSE;
-}
-// process multiple imports
-function do_bulk_import(array $list,
-                        array $trusted,
-                        array $transform,
-                        string $delim_start,
-                        string $delim_stop,
-                        Edit $edit,
-                        Messages $message)
-{
-    $bulk = [];
-    foreach ($list as $url) {
-        $url  = strip_tags(trim($url));
-        $key = do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message);
-        if ($key !== FALSE) $bulk[] = $key;
-    }
-    return $bulk;
-}
 // process contact post (if any)
 // $OBJ == calling instance
 if (!empty($OBJ)) {
@@ -69,6 +26,7 @@ $edit      = new Edit($config);
 $message   = Messages::getInstance();
 $transform = $config['IMPORT']['transform'] ?? [];
 $trusted   = $config['IMPORT']['trusted_src'] ?? [];
+$tidy      = $config['IMPORT']['use_tidy'] ?? [];
 $super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
 $delim_start = $_POST['delim_start'] ?? $config['IMPORT']['delim_start'] ?? Import::DEFAULT_START;
 // grab stop delimiter
@@ -90,7 +48,7 @@ if (!empty($_POST)) {
     // if "import_url" is set, just import from the list
     if (!empty($_POST['import_url'])) {
         $url  = strip_tags($_POST['import_url']);
-        $key = do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message);
+        $key = Import::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $tidy);
         if (!empty($key)) {
             header('Location: ' . $super_url . '/edit?page_key=' . $key);
             exit;
@@ -103,15 +61,23 @@ if (!empty($_POST)) {
         if (empty($list)) {
             $message->addMessage(Import::ERROR_UPLOAD);
         } else {
-            $bulk = do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message);
+            $bulk = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $tidy);
         }
     // check to see if "import_file" is set
     } elseif (!empty($_FILES['import_file'])) {
-        $list = Import::get_upload($import_file_field, $_FILES, $trusted);
+        $list = Import::get_upload($import_file_field, $_FILES);
         if (empty($list)) {
             $message->addMessage(Import::ERROR_UPLOAD);
         } else {
-            $bulk = do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message);
+            // overwrite config params
+            if (!empty(Import::$config)) {
+                $delim_start = Import::$config['delim_start'] ?? $delim_start;
+                $delim_stop  = Import::$config['delim_stop']  ?? $delim_stop;
+                $trusted     = Import::$config['trusted_src'] ?? $trusted;
+                $transform   = Import::$config['transform']   ?? $transform;
+                $tidy        = Import::$config['use_tidy']    ?? $tidy;
+            }
+            $bulk = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $tidy);
         }
     }
 }
@@ -194,13 +160,12 @@ if (!empty($bulk))
                             <label class="h6 small d-block text-uppercase">
                                 Transform Filters to Apply
                             </label>
-                            <div class="input-group"><?= $check ?></div>
                             <p>Expand list of transform filters by adding to the <i>IMPORT::transforms</i> configuration array</p>
                             <hr />
                             <?php foreach ($transform as $key => $item) :
                                     $callback = $item['callback'] ?? NULL;
                                     echo '<br /><b>' . $key . '</b><br />';
-                                    echo (empty($callback)) ? 'ERROR' : $callback->getDescription();
+                                    echo (empty($callback)) ? Messages::NO_DESCRIPTION : $callback::DESCRIPTION;
                                   endforeach;
                             ?>
                         </div>

@@ -41,12 +41,12 @@ use InvalidArgumentException;
 class RemoveBlock extends Base
 {
     const DESCRIPTION = 'Remove blocks based up search criteria, start and stop strings';
+    const ERR_PARAMS = 'ERROR: parameter array must contain the keys "start", "stop" and "items"';
     public $start = NULL;  // starting string
     public $stop  = NULL;  // ending string
     public $items = [];    // array of search items used to confirm block to be removed
-    public $beg_pos = NULL;  // start pos of block to be removed
-    public $end_pos = NULL;  // end pos of block to be removed
-    public const ERR_PARAMS = 'ERROR: parameter array must contain the keys "start", "stop" and "items"';
+    protected $beg_pos = NULL;  // start pos of block to be removed
+    protected $end_pos = NULL;  // end pos of block to be removed
     /**
      * Removes blocks based up search criteria, start and stop strings
      *
@@ -132,5 +132,14 @@ class RemoveBlock extends Base
         $last  = substr($contents, $end);
         $contents = $first . $last;
         return $contents;
+    }
+    /**
+     * Returns all object vars
+     *
+     * @return array : key/value pairs, all object variables
+     */
+    public function getArrayCopy()
+    {
+        return get_object_vars($this);
     }
 }

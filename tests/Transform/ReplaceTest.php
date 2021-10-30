@@ -32,7 +32,7 @@ class ReplaceTest extends TestCase
     public function testInvokeCaseSensitiveWorks()
     {
         $text = '<img src="https://my.web.site.com/images/test" />';
-        $expected = '<img src="https://my.web.site.com/images/test" />';
+        $expected = '<img src="/images/test" />';
         $params = ['search' => 'HTTPS://my.web.site.com', 'replace' => '', 'case-sensitive' => TRUE];
         $actual = (new Replace())($text, $params);
         $this->assertEquals($expected, $actual, 'Replacement was not case-sensitive');

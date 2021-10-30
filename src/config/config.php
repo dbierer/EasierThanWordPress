@@ -109,27 +109,27 @@ $config = [
         // matches the one specified by SimpleHtml\Transform\TransformInterface
         'transform' => [
             'clean' => [
-                'callback' => new \SimpleHtml\Transform\Clean(),
+                'callback' => 'SimpleHtml\Transform\Clean',
                 'params' => ['bodyOnly' => TRUE],
                 'description' => 'Use Tidy extension to clean HTML',
             ],
             'remove_block' => [
-                'callback' => new \SimpleHtml\Transform\RemoveBlock(),
+                'callback' => 'SimpleHtml\Transform\RemoveBlock',
                 'params' => ['start' => '<tr height="20">','stop' => '</tr>','items' => ['bkgnd_tandk.gif','trans_spacer50.gif','bkgnd_tanlt.gif']],
                 'description' => 'Remove block starting with &lt;tr height="20"&gt;',
             ],
             'table_to_row_col_div' => [
-                'callback' => new \SimpleHtml\Transform\TableToDiv(),
+                'callback' => 'SimpleHtml\Transform\TableToDiv',
                 'params' => ['td' => 'col', 'th' => 'col bold', 'row' => 'row', 'width' => 12],
                 'description' => 'Convert HTML table tags to div row/col classes',
             ],
             'attribs_remove' => [
-                'callback' => new \SimpleHtml\Transform\RemoveAttributes(),
+                'callback' => 'SimpleHtml\Transform\RemoveAttributes',
                 'params' => ['attributes' => \SimpleHtml\Transform\TransformInterface::DEFAULT_ATTR_LIST],
                 'description' => 'Remove these attributes: width,height,style,class',
             ],
             'replace_dentalwellness' => [
-                'callback' => new \SimpleHtml\Transform\ReplaceRegex(),
+                'callback' => 'SimpleHtml\Transform\ReplaceRegex',
                 'params'   => ['regex' => ['!https://test.com(.*?).html!','!https://www.test.com(.*?).html!'], 'replace' => '$1'],
                 'description' => 'replace "https://test.com/xxx" with "/xxx"',
             ],

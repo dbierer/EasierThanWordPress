@@ -14,7 +14,7 @@ if (!empty($OBJ)) {
 Profile::logout();
 $hashKey = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
 $message = Messages::getInstance();
-$msg     = $message->getMessages() ?? 'Enter your login information';
+$msg     = $message->getMessages() ?? Messages::LOGIN;
 $other   = [];
 $super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
 if ($_POST) {
@@ -46,7 +46,7 @@ if ($_POST) {
         header('Location: /super/choose');
         exit;
     } else {
-        $msg = $config['SUPER']['message'] ?? 'Unable to login';
+        $msg = $config['SUPER']['message'] ?? Messages::ERROR_LOGIN;
     }
 }
 // login attempt control
