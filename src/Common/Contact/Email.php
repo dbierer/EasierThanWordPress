@@ -1,5 +1,5 @@
 <?php
-namespace SimpleHtml\Common\Contact;
+namespace EasierThanWordPress\Common\Contact;
 
 use PHPMailer\PHPMailer\PHPMailer;
 class Email extends Base

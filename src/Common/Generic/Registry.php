@@ -1,5 +1,5 @@
 <?php
-namespace SimpleHtml\Common\Generic;
+namespace EasierThanWordPress\Common\Generic;
 
 use ArrayObject;
 class Registry

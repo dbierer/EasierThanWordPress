@@ -1,5 +1,5 @@
 <?php
-namespace SimpleHtml\Common\Security;
+namespace EasierThanWordPress\Common\Security;
 /*
  * Author: doug@unlikelysource.com
  * License: BSD

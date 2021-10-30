@@ -1,7 +1,7 @@
 <?php
-namespace SimpleHtmlTest\Common\View;
+namespace EasierThanWordPressTest\Common\View;
 
-use SimpleHtml\Common\View\Html;
+use EasierThanWordPress\Common\View\Html;
 use PHPUnit\Framework\TestCase;
 class HtmlTest extends TestCase
 {
@@ -34,10 +34,10 @@ class HtmlTest extends TestCase
 EOT;
         $expected = <<<EOT
 <head>
-  <title>SimpleHtml</title>
+  <title>EasierThanWordPress</title>
 </head>
 EOT;
-        $this->html->injectMeta($body, 'title', 'SimpleHtml');
+        $this->html->injectMeta($body, 'title', 'EasierThanWordPress');
         $actual = $body;;
         $this->assertEquals($expected, $actual, 'Meta tag not injected');
     }

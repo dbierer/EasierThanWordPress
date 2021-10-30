@@ -1,7 +1,7 @@
 <?php
-namespace SimpleHtmlTest\Transform;
+namespace EasierThanWordPressTest\Transform;
 
-use SimpleHtml\Transform\{RemoveBlock,TransformInterface};
+use EasierThanWordPress\Transform\{RemoveBlock,TransformInterface};
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 class RemoveBlockTest extends TestCase

@@ -1,7 +1,7 @@
 <?php
-use SimpleHtml\Common\File\Browse;
-use SimpleHtml\Common\Security\Profile;
-use SimpleHtml\Common\Generic\Messages;
+use EasierThanWordPress\Common\File\Browse;
+use EasierThanWordPress\Common\Security\Profile;
+use EasierThanWordPress\Common\Generic\Messages;
 // process contact post (if any)
 // $OBJ == calling instance (usually from /public/index.php)
 if (!empty($OBJ)) {

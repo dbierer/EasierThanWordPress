@@ -1,7 +1,7 @@
 <?php
-namespace SimpleHtmlTest\Common\View;
+namespace EasierThanWordPressTest\Common\View;
 
-use SimpleHtml\Common\Generic\Registry;
+use EasierThanWordPress\Common\Generic\Registry;
 use PHPUnit\Framework\TestCase;
 class RegistryTest extends TestCase
 {

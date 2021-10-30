@@ -1,5 +1,5 @@
 <?php
-namespace SimpleHtml\Transform;
+namespace EasierThanWordPress\Transform;
 
 /*
  * Unlikely\Import\Transform\Import
@@ -36,8 +36,8 @@ namespace SimpleHtml\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-use SimpleHtml\Common\Page\Edit;
-use SimpleHtml\Common\Generic\Messages;
+use EasierThanWordPress\Common\Page\Edit;
+use EasierThanWordPress\Common\Generic\Messages;
 class Import
 {
     const DEFAULT_START = '<body>';

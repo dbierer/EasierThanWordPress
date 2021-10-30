@@ -1,7 +1,7 @@
 <?php
-namespace SimpleHtmlTest\Transform;
+namespace EasierThanWordPressTest\Transform;
 
-use SimpleHtml\Transform\{CleanAttributes,TransformInterface};
+use EasierThanWordPress\Transform\{CleanAttributes,TransformInterface};
 use PHPUnit\Framework\TestCase;
 class CleanAttributesTest extends TestCase
 {

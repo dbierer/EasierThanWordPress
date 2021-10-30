@@ -1,5 +1,5 @@
 <?php
-namespace SimpleHtml\Common\Contact;
+namespace EasierThanWordPress\Common\Contact;
 
 use PDO;
 use PDOStatement;

@@ -1,10 +1,10 @@
 <?php
-namespace SimpleHtml\Common\Image\Strategy;
+namespace EasierThanWordPress\Common\Image\Strategy;
 // https://www.php.net/manual/en/function.imagettftext.php
 /**
  * Fills image
  */
-use SimpleHtml\Common\Image\SingleChar;
+use EasierThanWordPress\Common\Image\SingleChar;
 class PlainFill
 {
     /**

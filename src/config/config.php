@@ -9,7 +9,7 @@ $config = [
     'CACHE'  => BASE_DIR . '/logs/cache.txt',
     'META' => [
         'default' => [
-            'title' => 'SimpleHtml',
+            'title' => 'EasierThanWordPress',
             'keywords' => 'php, html, simple',
             'description'  => 'Once installed all you need to do is to upload HTML snippets into the site templates folder',
         ],
@@ -106,30 +106,30 @@ $config = [
         'trusted_src' => ['https://test.unlikelysource.com'],
         // add as many transforms as desired
         // you can also add your own anonymous functions as transforms as long as the signature
-        // matches the one specified by SimpleHtml\Transform\TransformInterface
+        // matches the one specified by EasierThanWordPress\Transform\TransformInterface
         'transform' => [
             'clean' => [
-                'callback' => 'SimpleHtml\Transform\Clean',
+                'callback' => 'EasierThanWordPress\Transform\Clean',
                 'params' => ['bodyOnly' => TRUE],
                 'description' => 'Use Tidy extension to clean HTML',
             ],
             'remove_block' => [
-                'callback' => 'SimpleHtml\Transform\RemoveBlock',
+                'callback' => 'EasierThanWordPress\Transform\RemoveBlock',
                 'params' => ['start' => '<tr height="20">','stop' => '</tr>','items' => ['bkgnd_tandk.gif','trans_spacer50.gif','bkgnd_tanlt.gif']],
                 'description' => 'Remove block starting with &lt;tr height="20"&gt;',
             ],
             'table_to_row_col_div' => [
-                'callback' => 'SimpleHtml\Transform\TableToDiv',
+                'callback' => 'EasierThanWordPress\Transform\TableToDiv',
                 'params' => ['td' => 'col', 'th' => 'col bold', 'row' => 'row', 'width' => 12],
                 'description' => 'Convert HTML table tags to div row/col classes',
             ],
             'attribs_remove' => [
-                'callback' => 'SimpleHtml\Transform\RemoveAttributes',
-                'params' => ['attributes' => \SimpleHtml\Transform\TransformInterface::DEFAULT_ATTR_LIST],
+                'callback' => 'EasierThanWordPress\Transform\RemoveAttributes',
+                'params' => ['attributes' => \EasierThanWordPress\Transform\TransformInterface::DEFAULT_ATTR_LIST],
                 'description' => 'Remove these attributes: width,height,style,class',
             ],
             'replace_dentalwellness' => [
-                'callback' => 'SimpleHtml\Transform\ReplaceRegex',
+                'callback' => 'EasierThanWordPress\Transform\ReplaceRegex',
                 'params'   => ['regex' => ['!https://test.com(.*?).html!','!https://www.test.com(.*?).html!'], 'replace' => '$1'],
                 'description' => 'replace "https://test.com/xxx" with "/xxx"',
             ],

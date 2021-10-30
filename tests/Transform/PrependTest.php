@@ -1,7 +1,7 @@
 <?php
-namespace SimpleHtmlTest\Transform;
+namespace EasierThanWordPressTest\Transform;
 
-use SimpleHtml\Transform\{Prepend,TransformInterface};
+use EasierThanWordPress\Transform\{Prepend,TransformInterface};
 use PHPUnit\Framework\TestCase;
 class PrependTest extends TestCase
 {

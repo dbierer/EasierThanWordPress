@@ -1,5 +1,5 @@
 <?php
-namespace SimpleHtml\Common\View;
+namespace EasierThanWordPress\Common\View;
 
 use ArrayIterator;
 use LimitIterator;

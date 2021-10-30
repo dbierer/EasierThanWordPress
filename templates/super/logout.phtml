@@ -1,6 +1,6 @@
 <?php
-use SimpleHtml\Common\Security\Profile;
-use SimpleHtml\Common\Generic\Messages;
+use EasierThanWordPress\Common\Security\Profile;
+use EasierThanWordPress\Common\Generic\Messages;
 Profile::logout();
 $message = Messages::getInstance();
 $message->addMessage(Messages::SUCCESS_LOGOUT);

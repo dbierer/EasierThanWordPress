@@ -4,7 +4,7 @@
     },
     "autoload" : {
         "psr-4" : {
-            "SimpleHtml\\" : "src/"
+            "EasierThanWordPress\\" : "src/"
         }
     },
     "require-dev": {
@@ -12,7 +12,7 @@
     },
     "autoload-dev" : {
         "psr-4" : {
-            "SimpleHtmlTest\\" : "tests/"
+            "EasierThanWordPressTest\\" : "tests/"
         }
     }
 }

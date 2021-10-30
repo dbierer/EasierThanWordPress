@@ -1,5 +1,5 @@
 <?php
-namespace SimpleHtml\Transform;
+namespace EasierThanWordPress\Transform;
 
 /*
  * Unlikely\Import\Transform\Replace

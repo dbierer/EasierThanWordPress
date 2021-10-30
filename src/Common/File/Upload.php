@@ -1,5 +1,5 @@
 <?php
-namespace SimpleHtml\Common\File;
+namespace EasierThanWordPress\Common\File;
 
 /*
  * Handles generic files uploads
@@ -36,7 +36,7 @@ namespace SimpleHtml\Common\File;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-use SimpleHtml\Common\Generic\Messages;
+use EasierThanWordPress\Common\Generic\Messages;
 use InvalidArgumentException;
 class Upload
 {

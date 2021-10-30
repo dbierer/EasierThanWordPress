@@ -6,7 +6,7 @@ $config = [
     'DELIM'  => '%%',
     'META' => [
         'default' => [
-            'title' => 'SimpleHtml',
+            'title' => 'EasierThanWordPress',
             'keywords' => 'php, php 8, cloud services, lfphpclout',
             'description'  => 'My super fantastic website',
         ],

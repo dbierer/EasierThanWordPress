@@ -1,5 +1,5 @@
 <?php
-namespace SimpleHtml\Common\File;
+namespace EasierThanWordPress\Common\File;
 
 /*
  * Handles file browsing
@@ -41,7 +41,7 @@ use FilterIterator;
 use OuterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use SimpleHtml\Common\Generic\Messages;
+use EasierThanWordPress\Common\Generic\Messages;
 use InvalidArgumentException;
 class Browse
 {

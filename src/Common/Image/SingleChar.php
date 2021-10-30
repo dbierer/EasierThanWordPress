@@ -1,10 +1,10 @@
 <?php
-namespace SimpleHtml\Common\Image;
+namespace EasierThanWordPress\Common\Image;
 /**
  * Creates a single image, by default black on white
  */
 use Exception;
-use SimpleHtml\Common\Image\Strategy\ {PlainText,PlainFill};
+use EasierThanWordPress\Common\Image\Strategy\ {PlainText,PlainFill};
 class SingleChar
 {
     const MARGIN     = 3;

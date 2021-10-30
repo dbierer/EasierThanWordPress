@@ -1,5 +1,5 @@
 <?php
-namespace SimpleHtml\Common\Page;
+namespace EasierThanWordPress\Common\Page;
 /*
  * Author: doug@unlikelysource.com
  * License: BSD

@@ -1,10 +1,10 @@
 <?php
-namespace SimpleHtml\Common\Image\Strategy;
+namespace EasierThanWordPress\Common\Image\Strategy;
 // https://www.php.net/manual/en/function.imagettftext.php
 /**
  * Writes plain text to image
  */
-use SimpleHtml\Common\Image\SingleChar;
+use EasierThanWordPress\Common\Image\SingleChar;
 class RotateText
 {
     const MIN_ANGLE = -20;

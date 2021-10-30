@@ -1,9 +1,9 @@
 <?php
-namespace SimpleHtmlTest\Common\File;
+namespace EasierThanWordPressTest\Common\File;
 
 use FilterIterator;
 use InvalidArgumentException;
-use SimpleHtml\Common\File\Browse;
+use EasierThanWordPress\Common\File\Browse;
 use PHPUnit\Framework\TestCase;
 class BrowseTest extends TestCase
 {

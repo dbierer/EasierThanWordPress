@@ -1,7 +1,7 @@
 <?php
-namespace SimpleHtmlTest\Transform;
+namespace EasierThanWordPressTest\Transform;
 
-use SimpleHtml\Transform\{ReplaceRegex,TransformInterface};
+use EasierThanWordPress\Transform\{ReplaceRegex,TransformInterface};
 use PHPUnit\Framework\TestCase;
 class ReplaceRegexTest extends TestCase
 {

@@ -1,6 +1,6 @@
 <?php
 // add pre-processing logic based on URL here:
-use SimpleHtml\Common\View\Html;
+use EasierThanWordPress\Common\View\Html;
 $super_url = $config['SUPER']['super_url'] ?? '/super';
 $super_dir = $config['SUPER']['super_dir'] ?? BASE_DIR . '/templates/super';
 if (strpos($uri, $super_url) === 0) {
