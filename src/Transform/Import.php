@@ -1,5 +1,5 @@
 <?php
-namespace EasierThanWordPress\Transform;
+namespace FileCMS\Transform;
 
 /*
  * Unlikely\Import\Transform\Import
@@ -36,8 +36,8 @@ namespace EasierThanWordPress\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-use EasierThanWordPress\Common\Page\Edit;
-use EasierThanWordPress\Common\Generic\Messages;
+use FileCMS\Common\Page\Edit;
+use FileCMS\Common\Generic\Messages;
 class Import
 {
     const DEFAULT_START = '<body>';

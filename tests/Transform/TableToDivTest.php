@@ -1,7 +1,7 @@
 <?php
-namespace EasierThanWordPressTest\Transform;
+namespace FileCMSTest\Transform;
 
-use EasierThanWordPress\Transform\{TableToDiv,TransformInterface};
+use FileCMS\Transform\{TableToDiv,TransformInterface};
 use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 class TableToDivTest extends TestCase

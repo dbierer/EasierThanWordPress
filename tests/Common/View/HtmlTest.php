@@ -1,7 +1,7 @@
 <?php
-namespace EasierThanWordPressTest\Common\View;
+namespace FileCMSTest\Common\View;
 
-use EasierThanWordPress\Common\View\Html;
+use FileCMS\Common\View\Html;
 use PHPUnit\Framework\TestCase;
 class HtmlTest extends TestCase
 {
@@ -34,10 +34,10 @@ class HtmlTest extends TestCase
 EOT;
         $expected = <<<EOT
 <head>
-  <title>EasierThanWordPress</title>
+  <title>FileCMS</title>
 </head>
 EOT;
-        $this->html->injectMeta($body, 'title', 'EasierThanWordPress');
+        $this->html->injectMeta($body, 'title', 'FileCMS');
         $actual = $body;;
         $this->assertEquals($expected, $actual, 'Meta tag not injected');
     }

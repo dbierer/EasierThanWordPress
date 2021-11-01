@@ -1,7 +1,7 @@
 <?php
-namespace EasierThanWordPressTest\Transform;
+namespace FileCMSTest\Transform;
 
-use EasierThanWordPress\Transform\{RemoveAttributes,TransformInterface};
+use FileCMS\Transform\{RemoveAttributes,TransformInterface};
 use PHPUnit\Framework\TestCase;
 class RemoveAttributesTest extends TestCase
 {

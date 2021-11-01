@@ -1,9 +1,9 @@
 <?php
-namespace EasierThanWordPressTest\Transform;
+namespace FileCMSTest\Transform;
 
-use EasierThanWordPress\Common\Generic\Messages;
-use EasierThanWordPress\Transform\Import;
-use EasierThanWordPress\Common\Page\Edit;
+use FileCMS\Common\Generic\Messages;
+use FileCMS\Transform\Import;
+use FileCMS\Common\Page\Edit;
 use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 class BulkImportTest extends TestCase

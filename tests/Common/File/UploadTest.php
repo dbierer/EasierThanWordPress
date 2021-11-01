@@ -1,8 +1,8 @@
 <?php
-namespace EasierThanWordPressTest\Common\File;
+namespace FileCMSTest\Common\File;
 
 use InvalidArgumentException;
-use EasierThanWordPress\Common\File\Upload;
+use FileCMS\Common\File\Upload;
 use PHPUnit\Framework\TestCase;
 class UploadTest extends TestCase
 {

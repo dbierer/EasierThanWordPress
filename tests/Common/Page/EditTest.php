@@ -1,7 +1,7 @@
 <?php
-namespace EasierThanWordPressTest\Common\Page;
+namespace FileCMSTest\Common\Page;
 
-use EasierThanWordPress\Common\Page\Edit;
+use FileCMS\Common\Page\Edit;
 use PHPUnit\Framework\TestCase;
 class EditTest extends TestCase
 {

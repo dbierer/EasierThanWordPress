@@ -1,10 +1,10 @@
 <?php
-namespace EasierThanWordPress\Common\Image\Strategy;
+namespace FileCMS\Common\Image\Strategy;
 // https://www.php.net/manual/en/function.imagettftext.php
 /**
  * Adds lines to image background
  */
-use EasierThanWordPress\Common\Image\SingleChar;
+use FileCMS\Common\Image\SingleChar;
 class DotFill
 {
     /**

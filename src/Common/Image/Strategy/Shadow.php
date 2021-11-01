@@ -1,10 +1,10 @@
 <?php
-namespace EasierThanWordPress\Common\Image\Strategy;
+namespace FileCMS\Common\Image\Strategy;
 // https://www.php.net/manual/en/function.imagettftext.php
 /**
  * Casts a shadow behind the character
  */
-use EasierThanWordPress\Common\Image\SingleChar;
+use FileCMS\Common\Image\SingleChar;
 class Shadow
 {
     /**

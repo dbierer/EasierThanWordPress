@@ -1,12 +1,12 @@
 <?php
-namespace EasierThanWordPress\Common\Image;
+namespace FileCMS\Common\Image;
 /**
  * Creates a CAPTCHA
  */
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use EasierThanWordPress\Common\Image\SingleChar;
-use EasierThanWordPress\Common\Image\Strategy\ {LineFill,DotFill,Shadow,RotateText};
+use FileCMS\Common\Image\SingleChar;
+use FileCMS\Common\Image\Strategy\ {LineFill,DotFill,Shadow,RotateText};
 class Captcha
 {
     public const DEFAULT_FONT_FILE = __DIR__ . '/../../fonts/FreeSansBold.ttf';

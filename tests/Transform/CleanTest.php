@@ -1,7 +1,7 @@
 <?php
-namespace EasierThanWordPressTest\Transform;
+namespace FileCMSTest\Transform;
 
-use EasierThanWordPress\Transform\{Clean,TransformInterface};
+use FileCMS\Transform\{Clean,TransformInterface};
 use PHPUnit\Framework\TestCase;
 class CleanTest extends TestCase
 {

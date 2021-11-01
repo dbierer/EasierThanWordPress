@@ -1,9 +1,9 @@
 <?php
-namespace EasierThanWordPressTest\Transform;
+namespace FileCMSTest\Transform;
 
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use EasierThanWordPress\Transform\Import;
+use FileCMS\Transform\Import;
 use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 class ImportTest extends TestCase
@@ -77,7 +77,7 @@ class ImportTest extends TestCase
     public function testImportExtractsExpectedContentWithAppendTransform()
     {
         $url      = 'https://test.unlikelysource.com/test1.html';
-        $callbax  = ['append' => ['callback' => 'EasierThanWordPress\Transform\Append', 'params' => ['text' => '<p>TEST</p>']]];
+        $callbax  = ['append' => ['callback' => 'FileCMS\Transform\Append', 'params' => ['text' => '<p>TEST</p>']]];
         $start    = '<body>';
         $stop     = '</body>';
         $expected = '<h1>Test 1</h1><p>TEST</p>';

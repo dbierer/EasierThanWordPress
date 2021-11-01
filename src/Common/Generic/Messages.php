@@ -1,5 +1,5 @@
 <?php
-namespace EasierThanWordPress\Common\Generic;
+namespace FileCMS\Common\Generic;
 
 class Messages
 {

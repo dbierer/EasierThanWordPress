@@ -1,5 +1,5 @@
 <?php
-namespace EasierThanWordPress\Transform;
+namespace FileCMS\Transform;
 
 /*
  * Unlikely\Import\Transform\RemoveAttributes

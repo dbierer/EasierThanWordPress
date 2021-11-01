@@ -1,7 +1,7 @@
 <?php
-use EasierThanWordPress\Common\File\Upload;
-use EasierThanWordPress\Common\Security\Profile;
-use EasierThanWordPress\Common\Generic\Messages;
+use FileCMS\Common\File\Upload;
+use FileCMS\Common\Security\Profile;
+use FileCMS\Common\Generic\Messages;
 // process contact post (if any)
 // $OBJ == calling instance (usually from /public/index.php)
 if (!empty($OBJ)) {

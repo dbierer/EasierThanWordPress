@@ -7,8 +7,8 @@ define('SRC_DIR', BASE_DIR . '/src');
 
 // autoloader
 include __DIR__ . '/../vendor/autoload.php';
-use EasierThanWordPress\Common\View\Html;
-use EasierThanWordPress\Common\Generic\Messages;
+use FileCMS\Common\View\Html;
+use FileCMS\Common\Generic\Messages;
 
 // grab config
 $config = include SRC_DIR . '/config/config.php';

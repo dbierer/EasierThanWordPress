@@ -1,7 +1,7 @@
 <?php
-namespace EasierThanWordPressTest\Transform;
+namespace FileCMSTest\Transform;
 
-use EasierThanWordPress\Transform\{Append,TransformInterface};
+use FileCMS\Transform\{Append,TransformInterface};
 use PHPUnit\Framework\TestCase;
 class AppendTest extends TestCase
 {

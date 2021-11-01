@@ -1,7 +1,7 @@
 <?php
-namespace EasierThanWordPressTest\Transform;
+namespace FileCMSTest\Transform;
 
-use EasierThanWordPress\Transform\{Replace,TransformInterface};
+use FileCMS\Transform\{Replace,TransformInterface};
 use PHPUnit\Framework\TestCase;
 class ReplaceTest extends TestCase
 {
