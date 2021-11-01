@@ -8,6 +8,7 @@ if (strpos($uri, $super_url) === 0) {
         case ($uri === $super_url . '/choose') :
         case ($uri === $super_url . '/edit')   :
         case ($uri === $super_url . '/import') :
+        case ($uri === $super_url . '/transform') :
         case ($uri === $super_url . '/login') :
             header('Content-Type: text/html');
             header('Content-Encoding: compress');
