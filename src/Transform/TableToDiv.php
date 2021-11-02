@@ -2,7 +2,7 @@
 namespace FileCMS\Transform;
 
 /*
- * Unlikely\Import\Transform\Clean
+ * FileCMS\Transform\Clean
  *
  * @description converts HTML <table><tr><td>|<th> to <div class="row"><div class="col-xxx">
  * @author doug@unlikelysource.com
@@ -37,6 +37,7 @@ namespace FileCMS\Transform;
  *
  */
 use InvalidArgumentException;
+use FileCMS\Common\Transform\Base;
 class TableToDiv extends Base
 {
     const DESCRIPTION = 'Convert HTML &lt;table&gt;&lt;tr&gt;&lt;td&gt;|&lt;th&gt; to &lt;div class="row"&gt;&lt;div class="col-xxx"&gt;';

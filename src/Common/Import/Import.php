@@ -1,10 +1,10 @@
 <?php
-namespace FileCMS\Transform;
+namespace FileCMS\Common\Import;
 
 /*
- * Unlikely\Import\Transform\Import
+ * FileCMS\Common\Import\Import
  *
- * @description performs search and replace using str_replace() or str_ireplace()
+ * @description imports contents from "trusted" website(s)
  * @author doug@unlikelysource.com
  * @date 2021-10-04
  * Copyright 2021 unlikelysource.com
@@ -38,17 +38,17 @@ namespace FileCMS\Transform;
  */
 use FileCMS\Common\Page\Edit;
 use FileCMS\Common\Generic\Messages;
+use FileCMS\Common\Transform\Transform;
 class Import
 {
     const DEFAULT_START = '<body>';
     const DEFAULT_STOP  = '</body>';
     const ERROR_UPLOAD  = 'ERROR: unable to upload list of URLs to import';
     const ERROR_URL_EMPTY = 'ERROR: no data returned from this URL. Check HTTP status on this URL.';
-    const URLS_KEY = 'URLS';
+    const URLS_KEY   = 'URLS';
     const CONFIG_KEY = 'IMPORT';
     public static $list = [];
     public static $config = [];
-    public static $container = [];
     /**
      * Grabs contents, applies transforms
      * If $delim_stop is an array:
@@ -71,35 +71,8 @@ class Import
         $url = trim($url);
         $html = file_get_contents("$url");
         $html = self::get_delimited($html, $delim_start, $delim_stop);
-        $html = str_replace(PHP_EOL, ' ', trim($html));
-        if (!empty($html) && !empty($callbacks)) {
-            foreach ($callbacks as $key => $item) {
-                $class  = $item['callback'] ?? '';
-                $params = $item['params'] ?? [];
-                $obj    = self::get_instance($class, $params);
-                $html   = (!empty($obj)) ? $obj($html, $params) : $html;
-            }
-        }
+        $html = Transform::transform($html, $callbacks);
         return $html;
-    }
-    /**
-     * Gets instance of callback from self::$container
-     *
-     * @param string $class : class to be instantiated
-     * @param array  $params : params (if any)
-     * @return TransformInterface $obj | NULL
-     */
-    public static function get_instance(string $class, array $params)
-    {
-        if ($class === '') return NULL;
-        if (empty(self::$container[$class])) {
-            if (empty($params['__construct'])) {
-                self::$container[$class] = new $class();
-            } else {
-                self::$container[$class] = new $class($params['__construct']);
-            }
-        }
-        return self::$container[$class] ?? NULL;
     }
     /**
      * Grabs contents from between start/stop delimiters
@@ -158,39 +131,6 @@ class Import
             }
         }
         return (bool) $ok;
-    }
-
-    /**
-     * Uploads and stores list of URLs to import
-     * Must be in JSON format:
-     * {
-     *   "self::CONFIG" : { "param" : "value", "param" : "value", etc. },
-     *   "self::URLS"   : [ "url", "url", "url", etc. ]
-     * }
-     *
-     * @param string $field  : field name for uploaded file (from $_FILES)
-     * @param array $info    : $_FILES
-     * @return array $list   : list of URLs (or filenames) to import | empty array if upload failed
-     */
-    public static function get_upload(string $field, array $info)
-    {
-        self::$list = [];
-        // is there an upload error?
-        if ($info[$field]['error'] == UPLOAD_ERR_OK) {
-            // is this an uploaded file?
-            if (is_uploaded_file($info[$field]['tmp_name'])) {
-                // ok, go ahead and load the file
-                $text = file_get_contents($info[$field]['tmp_name']);
-                if ($bytes !== FALSE) {
-                    $data = json_decode($text, TRUE);
-                    if ($data !== NULL) {
-                        self::$config = $data[self::CONFIG_KEY] ?? [];
-                        self::$list   = $data[self::URLS_KEY] ?? [];
-                    }
-                }
-            }
-        }
-        return self::$list;
     }
     /**
      * Performs actual import

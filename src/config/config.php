@@ -1,4 +1,5 @@
 <?php
+use FileCMS\Common\Transform\TransformInterface;
 $config = [
     'CARDS'  => 'cards',
     'LAYOUT' => BASE_DIR . '/templates/layout/layout.html',
@@ -97,8 +98,14 @@ $config = [
         'thumb_url'   => '/thumb',
         'allowed_types' => ['image/'],
     ],
+    'TRANSFORM' => [
+        'enable' => TRUE,                      // change this to FALSE to disable this feature
+        'backup_dir' => BASE_DIR . '/backups',
+        'transform_dir' => SRC_DIR . '/Transform',
+        'transform_file_field' => 'transform_file',  // IMPORTANT: the form must use this name
+    ],
     'IMPORT' => [
-        'enable' => TRUE,                      // change this to FALSE to diseable this feature
+        'enable' => TRUE,                      // change this to FALSE to disable this feature
         'delim_start'  => '<body>',            // marks beginning of contents to extract
         'delim_stop'   => '</body>',           // marks end of contents to extract
         'import_file_field' => 'import_file',  // IMPORTANT: the form must use this name
@@ -125,7 +132,7 @@ $config = [
             ],
             'attribs_remove' => [
                 'callback' => 'FileCMS\Transform\RemoveAttributes',
-                'params' => ['attributes' => \FileCMS\Transform\TransformInterface::DEFAULT_ATTR_LIST],
+                'params' => ['attributes' => TransformInterface::DEFAULT_ATTR_LIST],
                 'description' => 'Remove these attributes: width,height,style,class',
             ],
             'replace_dentalwellness' => [

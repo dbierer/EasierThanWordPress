@@ -2,7 +2,7 @@
 namespace FileCMS\Transform;
 
 /*
- * Unlikely\Import\Transform\InsertBefore
+ * FileCMS\Transform\InsertBefore
  *
  * @description inserts given text before any other text
  * @author doug@unlikelysource.com
@@ -36,6 +36,7 @@ namespace FileCMS\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use FileCMS\Common\Transform\Base;
 class Prepend extends Base
 {
     const DESCRIPTION = 'Inserts given text before any other text';

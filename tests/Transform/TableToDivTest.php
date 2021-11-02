@@ -1,7 +1,8 @@
 <?php
 namespace FileCMSTest\Transform;
 
-use FileCMS\Transform\{TableToDiv,TransformInterface};
+use FileCMS\Common\Transform\TransformInterface;
+use FileCMS\Transform\TableToDiv;
 use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 class TableToDivTest extends TestCase

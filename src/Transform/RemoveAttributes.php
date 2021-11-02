@@ -2,7 +2,7 @@
 namespace FileCMS\Transform;
 
 /*
- * Unlikely\Import\Transform\RemoveAttributes
+ * FileCMS\Transform\RemoveAttributes
  *
  * @description Removes listed attributes
  *
@@ -37,6 +37,7 @@ namespace FileCMS\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use FileCMS\Common\Transform\Base;
 class RemoveAttributes extends Base
 {
     const DESCRIPTION = 'Remove listed attributes as per config settings';

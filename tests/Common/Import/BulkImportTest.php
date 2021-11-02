@@ -1,8 +1,8 @@
 <?php
-namespace FileCMSTest\Transform;
+namespace FileCMSTest\Common\Import;
 
 use FileCMS\Common\Generic\Messages;
-use FileCMS\Transform\Import;
+use FileCMS\Common\Import\Import;
 use FileCMS\Common\Page\Edit;
 use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
@@ -12,8 +12,8 @@ class BulkImportTest extends TestCase
     public $testFileDir = '';
     public function setUp() : void
     {
-        $this->config = require __DIR__ . '/../../src/config/config.php';
-        $this->testFileDir = realpath(__DIR__ . '/../test_files');
+        $this->config = require __DIR__ . '/../../../src/config/config.php';
+        $this->testFileDir = realpath(__DIR__ . '/../../test_files');
         $path = $this->testFileDir . '/bulk';
         $list = glob($path . '/*');
         if (!empty($list))

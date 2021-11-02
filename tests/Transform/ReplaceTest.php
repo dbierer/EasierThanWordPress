@@ -1,7 +1,8 @@
 <?php
 namespace FileCMSTest\Transform;
 
-use FileCMS\Transform\{Replace,TransformInterface};
+use FileCMS\Common\Transform\TransformInterface;
+use FileCMS\Transform\Replace;
 use PHPUnit\Framework\TestCase;
 class ReplaceTest extends TestCase
 {

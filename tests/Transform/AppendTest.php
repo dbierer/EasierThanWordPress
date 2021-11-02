@@ -1,7 +1,8 @@
 <?php
 namespace FileCMSTest\Transform;
 
-use FileCMS\Transform\{Append,TransformInterface};
+use FileCMS\Common\Transform\TransformInterface;
+use FileCMS\Transform\Append;
 use PHPUnit\Framework\TestCase;
 class AppendTest extends TestCase
 {

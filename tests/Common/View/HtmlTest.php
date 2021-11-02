@@ -1,6 +1,7 @@
 <?php
 namespace FileCMSTest\Common\View;
 
+use FileCMS\Common\Transform\TransformInterface;
 use FileCMS\Common\View\Html;
 use PHPUnit\Framework\TestCase;
 class HtmlTest extends TestCase

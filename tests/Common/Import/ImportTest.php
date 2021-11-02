@@ -1,9 +1,9 @@
 <?php
-namespace FileCMSTest\Transform;
+namespace FileCMSTest\Common\Import;
 
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use FileCMS\Transform\Import;
+use FileCMS\Common\Import\Import;
 use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 class ImportTest extends TestCase
@@ -85,26 +85,4 @@ class ImportTest extends TestCase
         $actual = Import::import($url, $callbax, $start, $stop);
         $this->assertEquals($expected, $actual, 'Callback not invoked properly');
     }
-    /*
-    public function testGetUpload()
-    {
-        // generate list of URLs
-        $trusted  = ['http://unlikelysource.com'];
-        $src_name = $this->testFileDir . '/files_to_upload.txt';
-        $tmp_name = $this->testFileDir . '/php' . bin2hex(random_bytes(3));
-        copy($src_name, $tmp_name);
-        $size     = filesize($tmp_name);
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        $_FILES['test'] = [
-            'name' => 'test.txt',
-            'type' => 'text/html',
-            'tmp_name' => $tmp_name,
-            'error' => '0',
-            'size' => $size
-        ];
-        $expected = 2;
-        $actual   = count(Import::get_upload('test', $_FILES, $trusted));
-        $this->assertEquals($expected, $actual, 'Upload count does not match');
-    }
-    */
 }

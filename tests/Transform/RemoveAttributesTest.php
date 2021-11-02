@@ -1,7 +1,8 @@
 <?php
 namespace FileCMSTest\Transform;
 
-use FileCMS\Transform\{RemoveAttributes,TransformInterface};
+use FileCMS\Common\Transform\TransformInterface;
+use FileCMS\Transform\RemoveAttributes;
 use PHPUnit\Framework\TestCase;
 class RemoveAttributesTest extends TestCase
 {

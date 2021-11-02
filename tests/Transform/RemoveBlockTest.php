@@ -1,7 +1,8 @@
 <?php
 namespace FileCMSTest\Transform;
 
-use FileCMS\Transform\{RemoveBlock,TransformInterface};
+use FileCMS\Common\Transform\TransformInterface;
+use FileCMS\Transform\RemoveBlock;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 class RemoveBlockTest extends TestCase

@@ -2,7 +2,7 @@
 namespace FileCMS\Transform;
 
 /*
- * Unlikely\Import\Transform\Replace
+ * FileCMS\Transform\Replace
  *
  * @description performs search and replace using preg_replace()
  * @author doug@unlikelysource.com
@@ -36,6 +36,7 @@ namespace FileCMS\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use FileCMS\Common\Transform\Base;
 class ReplaceRegex extends Base
 {
     const DESCRIPTION = 'Perform search and replace using preg_replace() based upon config settings';

@@ -2,7 +2,7 @@
 namespace FileCMS\Transform;
 
 /*
- * Unlikely\Import\Transform\Replace
+ * FileCMS\Transform\Replace
  *
  * @description performs search and replace using preg_replace()
  * @author doug@unlikelysource.com
@@ -36,6 +36,7 @@ namespace FileCMS\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use FileCMS\Common\Transform\Base;
 class ReplaceCallbackArray extends Base
 {
     const DESCRIPTION = 'Runs preg_replace_callback_array() using the set of patterns supplied in the callback array file.';

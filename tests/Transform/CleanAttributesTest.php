@@ -1,7 +1,8 @@
 <?php
 namespace FileCMSTest\Transform;
 
-use FileCMS\Transform\{CleanAttributes,TransformInterface};
+use FileCMS\Common\Transform\TransformInterface;
+use FileCMS\Transform\CleanAttributes;
 use PHPUnit\Framework\TestCase;
 class CleanAttributesTest extends TestCase
 {

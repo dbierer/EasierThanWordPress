@@ -2,7 +2,7 @@
 namespace FileCMS\Transform;
 
 /*
- * Unlikely\Import\Transform\Replace
+ * FileCMS\Transform\Replace
  *
  * @description performs search and replace using str_replace() or str_ireplace()
  * @author doug@unlikelysource.com
@@ -36,6 +36,7 @@ namespace FileCMS\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use FileCMS\Common\Transform\Base;
 class Replace extends Base
 {
     const DESCRIPTION = 'Perform search and replace based upon config settings using str_replace() or str_ireplace(). If $case is TRUE, performs case-sensitive replacement; case-insensitive is the default.';

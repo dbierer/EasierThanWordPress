@@ -1,7 +1,8 @@
 <?php
 namespace FileCMSTest\Transform;
 
-use FileCMS\Transform\{ReplaceRegex,TransformInterface};
+use FileCMS\Common\Transform\TransformInterface;
+use FileCMS\Transform\ReplaceRegex;
 use PHPUnit\Framework\TestCase;
 class ReplaceRegexTest extends TestCase
 {

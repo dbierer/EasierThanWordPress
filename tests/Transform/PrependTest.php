@@ -1,7 +1,8 @@
 <?php
 namespace FileCMSTest\Transform;
 
-use FileCMS\Transform\{Prepend,TransformInterface};
+use FileCMS\Common\Transform\TransformInterface;
+use FileCMS\Transform\Prepend;
 use PHPUnit\Framework\TestCase;
 class PrependTest extends TestCase
 {

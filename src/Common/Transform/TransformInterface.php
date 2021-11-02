@@ -1,12 +1,12 @@
 <?php
-namespace FileCMS\Transform;
+namespace FileCMS\Common\Transform;
 
 /*
- * Unlikely\Import\Transform\Base
+ * FileCMS\Common\Transform\TransformInterface
  *
- * @description base class for transformations
+ * @description defines __invoke() signature for transform methods
  * @author doug@unlikelysource.com
- * @date 2021-10-23
+ * @date 2021-10-04
  * Copyright 2021 unlikelysource.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,17 +36,13 @@ namespace FileCMS\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-abstract class Base implements TransformInterface
+interface TransformInterface
 {
-    const DESCRIPTION = 'Transformations';
-    public static $description = NULL;
+    const DEFAULT_ATTR_LIST = ['width','height','style','class'];
     /**
-     * Returns description
-     *
-     * @return string $description : defaults to self::DESCRIPTION
+     * @param string $html : HTML string to be cleaned
+     * @param array $params : []
+     * @return string $html : cleaned HTML
      */
-    public function getDescription()
-    {
-        return static::$description ?? static::DESCRIPTION;
-    }
+    public function __invoke(string $html, array $params = []) : string;
 }

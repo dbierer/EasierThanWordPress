@@ -2,7 +2,7 @@
 namespace FileCMS\Transform;
 
 /*
- * Unlikely\Import\Transform\Append
+ * FileCMS\Transform\Append
  *
  * @description appends supplied text to the end of current HTML
  * @author doug@unlikelysource.com
@@ -36,6 +36,7 @@ namespace FileCMS\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use FileCMS\Common\Transform\Base;
 class Append extends Base
 {
     const DESCRIPTION = 'Appends supplied text to existing HTML text';

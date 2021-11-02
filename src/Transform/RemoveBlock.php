@@ -2,7 +2,7 @@
 namespace FileCMS\Transform;
 
 /*
- * Unlikely\Import\Transform\Clean
+ * FileCMS\Transform\Clean
  *
  * @description Removes blocks based up search criteria, start and stop strings
  *
@@ -38,6 +38,7 @@ namespace FileCMS\Transform;
  *
  */
 use InvalidArgumentException;
+use FileCMS\Common\Transform\Base;
 class RemoveBlock extends Base
 {
     const DESCRIPTION = 'Remove blocks based up search criteria, start and stop strings';

@@ -2,7 +2,7 @@
 namespace FileCMS\Transform;
 
 /*
- * Unlikely\Import\Transform\CleanAttributes
+ * FileCMS\Transform\CleanAttributes
  *
  * @description Removes "\n" in front of listed attributes
  * @author doug@unlikelysource.com
@@ -36,6 +36,7 @@ namespace FileCMS\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use FileCMS\Common\Transform\Base;
 class CleanAttributes extends Base
 {
     const DESCRIPTION = 'Remove "\n" in front of listed attributes';

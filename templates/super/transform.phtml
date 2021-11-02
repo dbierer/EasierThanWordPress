@@ -10,7 +10,7 @@ if (!empty($OBJ)) {
     $config = $OBJ->config;
 }
 // check to see if authenticated and feature enabled
-$enabled = (isset($config['IMPORT']['enable'])) ? $config['IMPORT']['enable'] : FALSE;
+$enabled = (isset($config['TRANSFORM']['enable'])) ? $config['TRANSFORM']['enable'] : FALSE;
 if (!$enabled || Profile::verify($config) === FALSE) {
     Profile::logout();
     $message = Messages::getInstance();
@@ -19,65 +19,37 @@ if (!$enabled || Profile::verify($config) === FALSE) {
     exit;
 }
 // init vars
-$total     = 0;
-$key       = '';
-$bulk      = [];
-$edit      = new Edit($config);
 $message   = Messages::getInstance();
-$transform = $config['IMPORT']['transform'] ?? [];
-$trusted   = $config['IMPORT']['trusted_src'] ?? [];
-$tidy      = $config['IMPORT']['use_tidy'] ?? [];
-$super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
-$delim_start = $_POST['delim_start'] ?? $config['IMPORT']['delim_start'] ?? Import::DEFAULT_START;
-// grab stop delimiter
-if (!empty($_POST['delim_stop'])) {
-    // if there's a comma, we need to produce an array of stops
-    if (strpos($_POST['delim_stop'], ',') !== FALSE) {
-        $delim_stop = explode(',', $_POST['delim_stop']);
-    } else {
-        $delim_stop = $_POST['delim_stop'];
-    }
-} else {
-    // otherwise grab stop delim from config or use default
-    $delim_stop = $config['IMPORT']['delim_stop']  ?? Import::DEFAULT_STOP;
+$trans_dir = $config['TRANSFORM']['transform_dir'] ?? SRC_DIR . '/Transform';
+$trans_field = $config['TRANSFORM']['transform_file_field'] ?? 'transform_file';
+// check to see if we need to transform anything
+if (!empty($_POST['choose_transform'])) {
 }
-$import_file_field = $config['IMPORT']['import_file_field'] ?? 'import_file';
-// check to see if we need to import anything
-if (!empty($_POST)) {
-    $tmp_trans   = [];
-    // if "import_url" is set, just import from the list
-    if (!empty($_POST['import_url'])) {
-        $url  = strip_tags($_POST['import_url']);
-        $key = Import::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $tidy);
-        if (!empty($key)) {
-            header('Location: ' . $super_url . '/edit?page_key=' . $key);
-            exit;
-        }
-    // check to see if "import_bulk" is set
-    } elseif (!empty($_POST['import_bulk'])) {
-        $temp = $_POST['import_bulk'] ?? '';
-        //$temp = str_replace(PHP_EOL, ' ', $temp);
-        $list = explode(PHP_EOL, trim($temp));
-        if (empty($list)) {
-            $message->addMessage(Import::ERROR_UPLOAD);
-        } else {
-            $bulk = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $tidy);
-        }
-    // check to see if "import_file" is set
-    } elseif (!empty($_FILES['import_file'])) {
-        $list = Import::get_upload($import_file_field, $_FILES);
-        if (empty($list)) {
-            $message->addMessage(Import::ERROR_UPLOAD);
-        } else {
-            // overwrite config params
-            if (!empty(Import::$config)) {
-                $delim_start = Import::$config['delim_start'] ?? $delim_start;
-                $delim_stop  = Import::$config['delim_stop']  ?? $delim_stop;
-                $trusted     = Import::$config['trusted_src'] ?? $trusted;
-                $transform   = Import::$config['transform']   ?? $transform;
-                $tidy        = Import::$config['use_tidy']    ?? $tidy;
+// build dropdown list of existing pages to transform
+$pages = $edit->getListOfPages();
+$select = '<select name="page_key" class="form-control" placeholder="Choose" multiple size=12>' . PHP_EOL;
+$select .= '<option>' . Edit::CHOOSE_TOP . '</option>' . PHP_EOL;
+foreach (array_keys($pages) as $key)
+    $select .= '<option>' . $key . '</option>' . PHP_EOL;
+$select .= '</select>' . PHP_EOL;
+// build list of transforms
+$transform_list = '';
+if (Transform::load_transforms($transform_dir)) {
+    if (!empty(Transform::$container)) {
+        foreach (Transform::$container as $class => $obj) {
+            $transform_list .= '<h4>' . $class . '</h4>';
+            $transform_list .= '<table>';
+            $transform_key = md5($class);
+            $params = get_object_vars($obj);
+            foreach ($params as $key => $value) {
+                $sub_key = $transform_key . '_' . $key;
+                $transform_list .= '<tr>';
+                $transform_list .= '<th>' . $key . '</th>';
+                $transform_list .= '<td><input name="' . $sub_key . '" value="' . htmlspecialchars($value) . '"></td>';
+                $transform_list .= '</tr>';
             }
-            $bulk = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $tidy);
+            $transform_list .= '</table>';
+            $transform_list .= $obj::DESCRIPTION;
         }
     }
 }
@@ -93,7 +65,10 @@ if (!empty($bulk))
       <div class="row h-100 align-items-center">
         <div class="col-lg-12">
           <h1 class="display-4 text-white mt-5 mb-2">Transform</h1>
-          <p class="lead mb-5 text-white-50">Use this page to perform transformations on existing web pages.
+          <p class="lead mb-5 text-white-50">Use this page to filter and transform existing web pages.
+          Automatically creates a backup of any page before it is transformed.
+          Be sure to preview the page before you save it.
+          You are also given the option to restore the page, in which case it restores from the backup file created.
           <?php include ($config['SUPER']['super_menu'] ?? '') ?>
         </div>
       </div>
@@ -110,45 +85,18 @@ if (!empty($bulk))
                     <div class="col-sm-6 mb-6">
                         <div class="form-group">
                             <label class="h6 small d-block text-uppercase">
-                                Manually a Single URL to Import
+                                Choose from Page List (or Enter URL)
                                 <span class="text-danger">*</span>
                             </label>
-                            <div class="input-group">
-                                <input class="form-control" name="import_url" id="import_url" size=60 placeholder="http://company.com/page/one.html" type="text" title="Enter single URL" value="" />
-                            </div>
-                            <p>(or enter bulk list of URLs to automatically import)</p>
-                            <hr />
+                            <div class="input-group"><?= $select ?></div>
                         </div>
                         <div class="form-group">
                             <label class="h6 small d-block text-uppercase">
-                                Enter Bulk List URLs to Import
+                                Upload File with List of Pages to Transform
                                 <span class="text-danger">*</span>
                             </label>
-                            <div class="input-group">
-                                <textarea class="form-control" name="import_bulk" id="import_bulk" rows=4 cols=80 title="Enter single URL, or a list of URLs, one per line" ></textarea>
-                            </div>
-                            <p>(or upload a single URL to import)</p>
-                            <hr />
-                        </div>
-                        <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                Upload File with List of URLs to Automatically Import
-                                <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group"><input type="file" name="<?= $import_file_field ?>" /></div>
-                            <p>(or manually enter one or more URLs to import)</p>
-                            <hr />
-                        </div>
-                        <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                Start / Stop Delimiters
-                                <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <input class="form-control" name="delim_start" id="delim_start" size=40 placeholder="&lt;body&gt;" type="text" title="Delimiter that tells import where to start extracting HTML content" value="<?= htmlspecialchars($delim_start); ?>" />
-                                <input class="form-control" name="delim_stop" id="delim_stop" size=40 placeholder="&lt;/body&gt;" type="text" title="Delimiter that tells import where to stop extracting HTML content" value="<?= htmlspecialchars((is_array($delim_stop)) ? implode(',', $delim_stop) : $delim_stop); ?>" />
-                            </div>
-                            <p>(or enter bulk list of URLs to automatically import)</p>
+                            <div class="input-group"><input type="file" name="<?= $trans_field ?>" /></div>
+                            <p>(or manually enter one or more pages to transform)</p>
                             <hr />
                         </div>
                     </div>
@@ -157,14 +105,9 @@ if (!empty($bulk))
                             <label class="h6 small d-block text-uppercase">
                                 Transform Filters to Apply
                             </label>
-                            <p>Expand list of transform filters by adding to the <i>IMPORT::transforms</i> configuration array</p>
+                            <p>Expand list of transform filters by adding to the <i>TRANSFORM::transforms</i> configuration array</p>
                             <hr />
-                            <?php foreach ($transform as $key => $item) :
-                                    $callback = $item['callback'] ?? NULL;
-                                    echo '<br /><b>' . $key . '</b><br />';
-                                    echo (empty($callback)) ? Messages::NO_DESCRIPTION : $callback::DESCRIPTION;
-                                  endforeach;
-                            ?>
+                            <?= $transform_list ?>
                         </div>
                     </div>
                 </div>
@@ -173,24 +116,7 @@ if (!empty($bulk))
                 <div class="row">
                     <div class="col-sm-12 mb-12">
                         <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                Target URL
-                            </label>
-                            <div class="input-group">
-                                <input class="form-control" name="target_url" id="target_url" size=60 placeholder="http://company.com/page/title" type="text" />
-                            </div>
-                            <p>Optional destination.  If not set, uses "path" from import URL source as destination.</p>
-                            <hr />
-                        </div>
-                    </div>
-                </div>
-                <!-- End Input -->
-
-                <!-- Input -->
-                <div class="row">
-                    <div class="col-sm-12 mb-12">
-                        <div class="form-group">
-                            <input name="choose_import" type="submit" class="btn btn-primary btn-circled" value="Import">
+                            <input name="choose_transform" type="submit" class="btn btn-primary btn-circled" value="Transform">
                         </div>
                     </div>
                 </div>

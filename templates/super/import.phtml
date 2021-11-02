@@ -1,5 +1,6 @@
 <?php
-use FileCMS\Transform\Import;
+use FileCMS\Common\File\UploadJson;
+use FileCMS\Common\Import\Import;
 use FileCMS\Common\Page\Edit;
 use FileCMS\Common\Security\Profile;
 use FileCMS\Common\Generic\Messages;
@@ -65,19 +66,24 @@ if (!empty($_POST)) {
         }
     // check to see if "import_file" is set
     } elseif (!empty($_FILES['import_file'])) {
-        $list = Import::get_upload($import_file_field, $_FILES);
-        if (empty($list)) {
+        $data = UploadJson::upload($import_file_field, $_FILES);
+        if (empty($data)) {
             $message->addMessage(Import::ERROR_UPLOAD);
         } else {
-            // overwrite config params
-            if (!empty(Import::$config)) {
-                $delim_start = Import::$config['delim_start'] ?? $delim_start;
-                $delim_stop  = Import::$config['delim_stop']  ?? $delim_stop;
-                $trusted     = Import::$config['trusted_src'] ?? $trusted;
-                $transform   = Import::$config['transform']   ?? $transform;
-                $tidy        = Import::$config['use_tidy']    ?? $tidy;
+            // get list of URLs and import config from uploaded JSON data
+            $list = $data[Import::URLS_KEY] ?? [];
+            if (!empty($list)) {
+                $import_config = $data[Import::CONFIG_KEY] ?? [];
+                // overwrite config params
+                if (!empty($import_config)) {
+                    $delim_start = $import_config['delim_start'] ?? $delim_start;
+                    $delim_stop  = $import_config['delim_stop']  ?? $delim_stop;
+                    $trusted     = $import_config['trusted_src'] ?? $trusted;
+                    $transform   = $import_config['transform']   ?? $transform;
+                    $tidy        = $import_config['use_tidy']    ?? $tidy;
+                }
+                $bulk = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $tidy);
             }
-            $bulk = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $tidy);
         }
     }
 }

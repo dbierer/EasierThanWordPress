@@ -2,7 +2,7 @@
 namespace FileCMS\Transform;
 
 /*
- * Unlikely\Import\Transform\Clean
+ * FileCMS\Transform\Clean
  *
  * @description Uses Tidy extension to clean up HTML fragment
  * Only returns contents inside <body>*</body> if "bodyOnly" param is set
@@ -38,6 +38,7 @@ namespace FileCMS\Transform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use FileCMS\Common\Transform\Base;
 class Clean extends Base
 {
     const DESCRIPTION = 'Use Tidy extension to clean up HTML fragment';
