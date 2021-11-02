@@ -83,7 +83,7 @@ class Transform
      * @param string $path : directory to find transforms
      * @return int $num    : count of self::$container
      */
-    public static function load_transforms(string $path) : array
+    public static function load_transforms(string $path) : int
     {
         if (file_exists($path)) {
             $iter = new RecursiveDirectoryIterator($path);
@@ -102,6 +102,6 @@ class Transform
                 }
             }
         }
-        return count(self::$container[$class]);
+        return count(self::$container);
     }
 }
