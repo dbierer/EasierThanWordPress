@@ -40,7 +40,7 @@ namespace FileCMS\Transform;
 use FileCMS\Common\Transform\Base;
 class RemoveAttributes extends Base
 {
-    const DESCRIPTION = 'Remove listed attributes as per config settings';
+    const DESCRIPTION = 'Remove listed attributes as per config settings. Separate multiple attributes with a comma.';
     public $attributes = [];
     /**
      * Removes listed attributes
@@ -53,8 +53,8 @@ class RemoveAttributes extends Base
     {
         $this->attributes  = $params['attributes'] ?? [];
         if (empty($this->attributes)) return $html;
-        // clean attributes before removal
-        $html = (new CleanAttributes())($html, $this->attributes);
+        if (is_string($this->attributes))
+            $this->attributes = explode(',', $this->attributes);
         $search = ['!\b%s=".+?"!',"!\b%s='.+?'!",'!\b%s=.+?\b!'];
         foreach ($this->attributes as $attrib) {
             $attrib = trim($attrib);

@@ -42,6 +42,9 @@ use FileCMS\Common\Generic\Messages;
 class Transform
 {
     const CONFIG_KEY = 'TRANSFORM';
+    const NOT_AVAILABLE = 'Not Available';
+    const ERR_NO_PAGES = 'ERROR: no pages chosen';
+    const ERR_NO_TRANS = 'ERROR: no transforms chosen';
     public static $container = [];
     /**
      * Grabs contents, applies transforms
@@ -104,4 +107,69 @@ class Transform
         }
         return count(self::$container);
     }
+    /**
+     * Returns callback list formatted as HTML
+     *
+     * @param string $tag : HTML header tag
+     * @return string $html
+     */
+    public static function get_callback_list_as_html(string $tag = 'h4')
+    {
+        $html = '';
+        foreach (self::$container as $class => $obj) {
+            $transform_key = md5($class);
+            $temp = explode('\\', $class);
+            $show = array_pop($temp);
+            $html .= '<br />'
+                    . '<' . $tag . '>'
+                    . '<input type="checkbox" name="choose[]" value="' . $transform_key . '" title="Check this box to use this transform" />'
+                    . '<input type="hidden" name="' . $transform_key . '_class" value="' . urlencode($class) . '" />'
+                    . '&nbsp;'
+                    . $show
+                    . '</' . $tag . '>';
+            $html .= '<table>';
+            if (is_object($obj) && $obj instanceof TransformInterface) {
+                $params = get_object_vars($obj);
+                foreach ($params as $key => $value) {
+                    $sub_key = $transform_key . '_' . $key;
+                    $html .= '<tr>';
+                    $html .= '<th>' . $key . '</th>';
+                    $html .= '<td><input name="' . $sub_key . '" placeholder="' . gettype($value) . '"></td>';
+                    $html .= '</tr>';
+                }
+            } else {
+                $html .= '<tr><th>' . $key . '</th><td>' . self::NOT_AVAILABLE . '</td></tr>';
+            }
+            $html .= '</table>';
+            $html .= $obj::DESCRIPTION;
+        }
+        return $html;
+    }
+    /**
+     * Returns array of callbacks ready for processing from HTML
+     *
+     * @param array $trans_keys : array of transform keys
+     * @param array $post       : $_POST
+     * @return array $transform : [class => ['callback' => string, 'params' => array]]
+     */
+     public static function extract_callbacks_from_post(array $trans_keys, array $post) : array
+     {
+        $transform = [];
+        foreach ($trans_keys as $hash) {
+            $class = $post[$hash . '_class'] ?? '';
+            $class = urldecode($class);
+            if (!empty($class)) {
+                $transform[$class] = ['callback' => $class, 'params' => []];
+                foreach ($post as $key => $value) {
+                    if (strpos($key, $hash . '_') === 0) {
+                        $item = trim(str_replace($hash . '_', '', $key));
+                        if (!empty($item) && $item !== 'class') {
+                            $transform[$class]['params'][$item] = urldecode($value);
+                        }
+                    }
+                }
+            }
+        }
+        return $transform;
+     }
 }

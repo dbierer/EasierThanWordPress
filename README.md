@@ -1,5 +1,15 @@
-# Simple HTML
+# FileCMS
 Really simple PHP app that builds HTML files from HTML widgets.
+* Includes a class that can generate and validate CAPTCHAs (uses the GD extension).
+* Includes the CKEditor for full-featured editing.
+* Includes an email contact form that uses PHPMailer.
+* Is able to import single files from a legacy website, or can do bulk import
+* Includes a complete set of transformation filters that can be applied during import, or afterwards
+* Entirely file-based: does not require a database!
+* Very fast and flexible.
+* Once you've got it up and running, just upload HTML snippets and/or modify the configuration file.
+
+License: Apache v2
 
 ## Initial Installation
 1. Clone this repository to the project root of your new website.
@@ -167,18 +177,48 @@ The skeleton app includes under `/templates` a file `contact.phtml` that impleme
 ## Import Feature
 You can enable the import feature by setting the `IMPORT::enable` config key to `TRUE`.
 The importer itself is at `/templates/site/super/import.phtml`.
+Selected transformation filters can be applied to one or more pages during the import process.
+
 Here are some notes on config file settings under the `IMPORT` config key:
+* `IMPORT::enable`
+  * Set this value to `FALSE` if you do not wish this feature to be available.
 * `IMPORT::delim_start`
   * tells the importer where to start cutting out content from the HTML source
   * default: &lt;body&gt;
 * `IMPORT::delim_stop`
   * tells the importer where to stop cutting out content from the HTML source
   * default: &lt;/body&gt;
+* `IMPORT::trusted_src`
+  * list of one or more prefixes from "trusted" sources for import
+  * allows you to limit where imports can be taken from
+  * in case you get hacked, this prevents attackers from importing malicious from their own sites
+* `IMPORT::import_file_field`
+  * this file must be in JSON format
+  * name of the file upload field used in the form
+  * you can upload a list of URLs to import followed by a list of transforms to apply
+    * the URLs key is 'URLS'
+    * the 'IMPORT' key lets you override any Import configuration including the transforms to apply during import
 * `IMPORT::transform`
   * sub-array of transforms to make available to the importer
   * `callback` : anything that's callable
     * if your own PHP function or anonymous function, signature must match `SimpleHtml\Transform\TransformInterface`
   * `params` : array of parameters the callback expects
   * `description` : shows up when you run `/super/import`
+After logging in as the admin user, go to `/super/import`.
 
+## Transform Feature
+You can apply transformation filters on existing pages.
+The importer itself is at `/templates/site/super/import.phtml`.
+Included transformation classes are located in `/src/Transform`.
+You can add your own by simply extending `FileCMS\Common\Transform\Base`.
+After logging in as the admin user, go to `/super/transform`.
 
+Here are some notes on config file settings under the `TRANSFORM` config key:
+* `TRANSFORM::enable`
+  * Set this value to `FALSE` if you do not wish this feature to be available.
+* `TRANSFORM::backup_dir`
+  * Directory where backups will be placed prior to transformation
+* `TRANSFORM::transform_dir`
+  * Directory where transform classes are found
+* `TRANSFORM::transform_file_field`
+  * Name of the form field that is used if you want to upload a set of transforms

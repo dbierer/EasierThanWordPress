@@ -45,4 +45,8 @@ interface TransformInterface
      * @return string $html : cleaned HTML
      */
     public function __invoke(string $html, array $params = []) : string;
+    /**
+     * @return string $description : defaults to self::DESCRIPTION
+     */
+    public function getDescription() : string;
 }

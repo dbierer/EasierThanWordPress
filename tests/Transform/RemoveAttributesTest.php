@@ -41,4 +41,13 @@ class RemoveAttributesTest extends TestCase
         $actual = $obj($str, $params);
         $this->assertEquals($expected, $actual, 'Multiple attributes not removed correctly');
     }
+    public function testRemovesMultipleAttributesIfString()
+    {
+        $str = '<td width="150" height="20" background="../images/backgrounds/bkgnd_tandk.gif">';
+        $params = ['attributes' => 'width,height'];
+        $expected = '<td background="../images/backgrounds/bkgnd_tandk.gif">';
+        $obj = new RemoveAttributes();
+        $actual = $obj($str, $params);
+        $this->assertEquals($expected, $actual, 'Multiple attributes not removed correctly');
+    }
 }

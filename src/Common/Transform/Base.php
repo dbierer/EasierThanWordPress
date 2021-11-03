@@ -45,7 +45,7 @@ abstract class Base implements TransformInterface
      *
      * @return string $description : defaults to self::DESCRIPTION
      */
-    public function getDescription()
+    public function getDescription() : string
     {
         return static::$description ?? static::DESCRIPTION;
     }
