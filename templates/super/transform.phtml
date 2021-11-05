@@ -21,15 +21,17 @@ if (!$enabled || Profile::verify($config) === FALSE) {
 // init vars
 $message   = Messages::getInstance();
 $edit      = new Edit($config);
+$pages     = $edit->getListOfPages();
 $transform = [];
+$bulk      = [];
 $super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
-$backup_dir  = $config['TRANSFORM']['backup_dir'] ?? BASE_DIR . '/backups';
+$backup_dir  = $config['SUPER']['backup_dir'] ?? BASE_DIR . '/backups';
 $trans_dir   = $config['TRANSFORM']['transform_dir'] ?? SRC_DIR . '/Transform';
 $trans_field = $config['TRANSFORM']['transform_file_field'] ?? 'transform_file';
 // check to see if we need to transform anything
 if (!empty($_POST['choose_transform'])) {
-    $pages = $_POST['page_key'] ?? [];
-    if (empty($pages)) {
+    $key_list = $_POST['page_key'] ?? [];
+    if (empty($key_list)) {
         $message->addMessage(Transform::ERR_NO_PAGES);
     } else {
         $trans_keys = $_POST['choose'] ?? [];
@@ -38,14 +40,21 @@ if (!empty($_POST['choose_transform'])) {
         } else {
             $transform = Transform::extract_callbacks_from_post($trans_keys, $_POST);
             // perform transforms on selected pages
-            if (!empty($transform)) {
-                foreach ($pages as $url) {
+            if (empty($transform)) {
+                $message->addMessage(Transform::ERR_TRANS_UNABLE);
+            } else {
+                foreach ($key_list as $key) {
                     // get filename
-                    // get backup filename
-                    // make directory under backup if it doesn't exist
-                    // backup file
-                    // do transform
-                    // save
+                    $fn = $pages[$key] ?? '';
+                    if (empty($fn) || !file_exists($fn)) {
+                        $message->addMessage(Edit::ERROR_FILE);
+                    } else {
+                        $contents = Transform::transform($contents, $transform);
+                        // save using Tidy (last arg)
+                        if ($edit->save($key, $contents, $backup_dir, HTML_DIR, TRUE)) {
+                            $bulk[] = $key;
+                        }
+                    }
                 }
             }
         }
@@ -53,7 +62,6 @@ if (!empty($_POST['choose_transform'])) {
     $message->addMessage(htmlspecialchars(var_export($transform, TRUE)));
 }
 // build dropdown list of existing pages to transform
-$pages = $edit->getListOfPages();
 $select = '<select name="page_key[]" class="form-control" placeholder="Choose" multiple size=12>' . PHP_EOL;
 $select .= '<option>' . Edit::CHOOSE_TOP . '</option>' . PHP_EOL;
 foreach (array_keys($pages) as $key)

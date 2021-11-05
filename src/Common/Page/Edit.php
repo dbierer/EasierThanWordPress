@@ -43,9 +43,12 @@ class Edit
     const SUCCESS_SAVE   = 'SUCCESS: page saved successfully';
     const SUCCESS_DEL    = 'SUCCESS: page deleted successfully';
     const SUCCESS_CANCEL = 'Operation cancelled';
+    const SUCCESS_RESTORE = 'SUCCESS: page restored from backup';
     const ERROR_SAVE   = 'ERROR: unable to save page';
     const ERROR_DEL    = 'ERROR: unable to delete page';
     const ERROR_KEY    = 'ERROR: missing, unknown or invalid URL';
+    const ERROR_FILE   = 'ERROR: file not found for this URL';
+    const ERROR_RESTORE = 'ERROR: backup file not found.  Unable to restore.';
     public $allowed = [];   // allowed extensions
     public $config  = [];
     public $pages   = [];
@@ -76,6 +79,35 @@ class Edit
         foreach ($this->allowed as $ext)
             $key = str_ireplace('.' . $ext, '', $key);
         return trim($key);
+    }
+    /**
+     * Returns filename from key
+     *
+     * @string $key        : sanitized filename
+     * @param string $path : usually HTML_DIR
+     * @return string $fn  : filename | '' if not found
+     */
+    public function getFilenameFromKey(string $key, string $path = HTML_DIR)
+    {
+        $pages = $this->getListOfPages($path);
+        return $pages[$key] ?? '';
+    }
+    /**
+     * Return backup filename from existing file
+     * Creates underlying directory structure under $backup_dir if needed
+     *
+     * @param string $fn : name of existing file
+     * @param string $backup_dir : path to backups
+     * @param string $base : base path for existing file
+     * @return string $backup_fn : empty string if unable to create
+     */
+    public function getBackupFn(string $fn, string $backup_dir, string $base = HTML_DIR)
+    {
+        if (stripos($fn, $base) === FALSE) return '';
+        $backup_fn = str_replace($base, $backup_dir, $fn);
+        $dir_name  = dirname($backup_fn);
+        if (!file_exists($dir_name)) mkdir($dir_name, 0775, TRUE);
+        return (file_exists($dir_name)) ? $backup_fn : '';
     }
     /**
      * Returns list of pages from starting point HTML_DIR
@@ -163,15 +195,47 @@ class Edit
             return $html;
     }
     /**
+     * Creates backup of existing page
+     *
+     * @param string $fn         : name of existing file
+     * @param string $backup_dir : backup directory
+     * @param string $path       : starting path (if other than HTML_DIR)
+     * @return bool TRUE if backup was successful; FALSE otherwise
+     */
+    public function backup(string $fn, string $backup_dir, string $path = HTML_DIR) : bool
+    {
+        if (!file_exists($fn)) return FALSE;
+        $backup_fn = $this->getBackupFn($fn, $backup_dir, $path);
+        return copy($fn, $backup_fn);
+    }
+    /**
+     * Restores from backup of existing page
+     *
+     * @param string $key        : key to page to be restored
+     * @param string $backup_dir : backup directory
+     * @param string $path       : starting path (if other than HTML_DIR)
+     * @return bool TRUE if backup was successful; FALSE otherwise
+     */
+    public function restore(string $key, string $backup_dir, string $path = HTML_DIR) : bool
+    {
+        $pages = $this->getListOfPages($path);
+        $fn = $pages[$key] ?? '';
+        if (empty($fn)) return FALSE;
+        $backup_fn = $this->getBackupFn($fn, $backup_dir, $path);
+        if (empty($backup_fn)) return FALSE;
+        return copy($backup_fn, $fn);
+    }
+    /**
      * Saves new or revised page
      *
      * @param string $key       : URI path
      * @param string $contents  : HTML
+     * @param string $backup_dir : backup directory
      * @param string $path      : starting path (if other than HTML_DIR)
      * @param bool   $tidy      : If set TRUE, fixes using Tidy extension
      * @return bool TRUE if save was successful; FALSE otherwise
      */
-    public function save(string $key, string $contents, string $path = HTML_DIR, bool $tidy = FALSE) : bool
+    public function save(string $key, string $contents, string $backup_dir, string $path = HTML_DIR, bool $tidy = FALSE) : bool
     {
         // use Tidy to sanitize
         $contents = trim($contents);
@@ -196,6 +260,7 @@ class Edit
         $fn    = $pages[$key] ?? '';
         // if we've got a filename from $this->pages, overwrite it
         if (!empty($fn)) {
+            $this->backup($fn, $backup_dir, $path);
             $ok = file_put_contents($fn, $contents);
         // if key doesn't exist, it's a new file
         } else {
@@ -208,8 +273,9 @@ class Edit
             $fn    = $dir . '/' . $fn . '.html';
             $fn    = str_replace('//', '/', $fn);
             // create directory if needed
-            if (!file_exists($dir)) mkdir($dir, 0755, TRUE);
+            if (!file_exists($dir)) mkdir($dir, 0775, TRUE);
             // save to file
+            $this->backup($fn, $backup_dir, $path);
             $ok = file_put_contents($fn, $contents);
         }
         return (bool) $ok;

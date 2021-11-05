@@ -7,10 +7,12 @@ class EditTest extends TestCase
 {
     public $edit;
     public $testFileDir = '';
+    public $backupDir = '';
     public $new_dir = '';
     public function setUp() : void
     {
         $this->testFileDir = realpath(__DIR__ . '/../../test_files');
+        $this->backupDir = realpath($this->testFileDir . '/../backups');
         $config = include __DIR__ . '/../../../src/config/config.php';
         $this->edit = new Edit($config);
         $this->new_dir = $this->testFileDir . '/new';
@@ -40,6 +42,69 @@ class EditTest extends TestCase
         $expected = '/test1';
         $actual   = $this->edit->getKeyFromFilename($fn, $this->testFileDir);
         $this->assertEquals($expected, $actual, 'Edit::getKeyFromFilename() does not produce expected key');
+    }
+    public function testGetFilenameFromKey()
+    {
+        $expected = $this->testFileDir . '/test1.html';
+        $key      = '/test1';
+        $actual   = $this->edit->getFilenameFromKey($key, $this->testFileDir);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testGetBackupFn()
+    {
+        $fn = $this->testFileDir . '/test1.html';
+        $expected = $this->backupDir . '/test1.html';
+        $actual = $this->edit->getBackupFn($fn, $this->backupDir, $this->testFileDir);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testGetBackupFnCreatesDirectoryIfNotExists()
+    {
+        $fn = $this->testFileDir . '/sub/test1.html';
+        $backup_fn = $this->edit->getBackupFn($fn, $this->backupDir, $this->testFileDir);
+        $expected = TRUE;
+        $actual = file_exists($this->backupDir . '/sub');
+        $this->assertEquals($expected, $actual);
+    }
+    public function testBackupReturnsFalseIfEmptyFn()
+    {
+        $fn = '';
+        $expected = FALSE;
+        $actual = $this->edit->backup($fn, $this->backupDir, $this->testFileDir);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testBackupActuallyBacksUpFile()
+    {
+        $fn = $this->testFileDir . '/test1.html';
+        $backup_fn = $this->backupDir . '/test1.html';
+        if (file_exists($backup_fn)) unlink($backup_fn);
+        $this->edit->backup($fn, $this->backupDir, $this->testFileDir);
+        $expected = file_get_contents($fn);
+        $actual   = (file_exists($backup_fn)) ? file_get_contents($backup_fn) : '';
+        $this->assertEquals($expected, $actual);
+    }
+    public function testBackupBacksUpFileIntoSubDir()
+    {
+        $fn = $this->testFileDir . '/sub/test1.html';
+        $backup_subdir = $this->backupDir . '/sub';
+        $backup_fn = $backup_subdir . '/test1.html';
+        if (file_exists($backup_fn)) unlink($backup_fn);
+        if (file_exists($backup_subdir)) rmdir($backup_subdir);
+        $this->edit->backup($fn, $this->backupDir, $this->testFileDir);
+        $expected = file_get_contents($fn);
+        $actual   = (file_exists($backup_fn)) ? file_get_contents($backup_fn) : '';
+        $this->assertEquals($expected, $actual);
+    }
+    public function testRestore()
+    {
+        $fn = $this->testFileDir . '/test5.html';
+        $backup_fn = $this->backupDir . '/test5.html';
+        $text = file_get_contents($fn);
+        $text = str_replace('Test 5', 'Test X', $text);
+        file_put_contents($backup_fn, $text);
+        $this->edit->restore('/test5', $this->backupDir, $this->testFileDir);
+        $expected = $text;
+        $actual   = (file_exists($backup_fn)) ? file_get_contents($backup_fn) : '';
+        $this->assertEquals($expected, $actual);
     }
     public function testGetListOfPagesCreatesArray()
     {
@@ -116,7 +181,7 @@ class EditTest extends TestCase
         file_put_contents($this->testFileDir . '/testX.html', $contents);
         $contents = str_replace('Test 1', 'Test X', $contents);
         $expected = TRUE;
-        $actual   = $this->edit->save('/testX', $contents, $this->testFileDir);
+        $actual   = $this->edit->save('/testX', $contents, $this->backupDir, $this->testFileDir);
         $this->assertEquals($expected, $actual, 'Edit::save() did not return TRUE upon successful save');
     }
     public function testSaveOverwritesExistingContents()
@@ -124,7 +189,7 @@ class EditTest extends TestCase
         $contents = file_get_contents($this->testFileDir . '/test1.html');
         file_put_contents($this->testFileDir . '/testX.html', $contents);
         $contents = str_replace('Test 1', 'Test X', $contents);
-        $response = $this->edit->save('/testX', $contents, $this->testFileDir);
+        $response = $this->edit->save('/testX', $contents, $this->backupDir, $this->testFileDir);
         $expected = trim($contents);
         $actual   = file_get_contents($this->testFileDir . '/testX.html');
         $this->assertEquals($expected, $actual, 'Edit::save() did overwrite original');
@@ -134,7 +199,7 @@ class EditTest extends TestCase
         $contents = file_get_contents($this->testFileDir . '/test1.html');
         file_put_contents($this->testFileDir . '/testX.html', $contents);
         $contents = str_replace('Test 1', 'Test X', $contents);
-        $response = $this->edit->save('/testX', $contents, $this->testFileDir, TRUE);
+        $response = $this->edit->save('/testX', $contents, $this->backupDir, $this->testFileDir, TRUE);
         $expected = '<h1>Test X</h1>';
         $actual   = trim(file_get_contents($this->testFileDir . '/testX.html'));
         $this->assertEquals($expected, $actual, 'Edit::save() did not fix using Tidy');
@@ -145,7 +210,7 @@ class EditTest extends TestCase
         if (file_exists($new_fn)) unlink($new_fn);
         $contents = file_get_contents($this->testFileDir . '/test1.html');
         $contents = str_replace('Test 1', 'Test Y', $contents);
-        $response = $this->edit->save('/testY', $contents, $this->testFileDir);
+        $response = $this->edit->save('/testY', $contents, $this->backupDir, $this->testFileDir);
         $expected = trim($contents);
         $actual   = (file_exists($new_fn)) ? file_get_contents($new_fn) : '';
         $this->assertEquals($expected, $actual, 'Edit::save() did not save new file');
@@ -155,7 +220,7 @@ class EditTest extends TestCase
         $new_fn   = $this->new_dir . '/testZ.html';
         $contents = file_get_contents($this->testFileDir . '/test1.html');
         $contents = str_replace('Test 1', 'Test Z', $contents);
-        $response = $this->edit->save('/new/testZ', $contents, $this->testFileDir);
+        $response = $this->edit->save('/new/testZ', $contents, $this->backupDir, $this->testFileDir);
         $expected = TRUE;
         $actual   = (file_exists($new_fn));
         $this->assertEquals($expected, $actual, 'Edit::save() did not create new directory and save new file');
@@ -165,7 +230,7 @@ class EditTest extends TestCase
         $new_fn   = $this->new_dir . '/testZ.html';
         $contents = file_get_contents($this->testFileDir . '/test1.html');
         $contents = str_replace('Test 1', 'Test Z', $contents);
-        $response = $this->edit->save('/new/testZ', $contents, $this->testFileDir);
+        $response = $this->edit->save('/new/testZ', $contents, $this->backupDir, $this->testFileDir);
         $expected = trim($contents);
         $actual   = (file_exists($new_fn)) ? file_get_contents($new_fn) : '';
         $this->assertEquals($expected, $actual, 'Edit::save() did not create new file in new directory contents do not match');

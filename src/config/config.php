@@ -42,6 +42,7 @@ $config = [
         'super_url'  => '/super',                // IMPORTANT: needs to be a subdir off the "super_dir" setting
         'super_dir'  => BASE_DIR . '/templates', // IMPORTANT: needs to have a subdir === "super_url" setting
         'super_menu' => BASE_DIR . '/templates/layout/super_menu.html',
+        'backup_dir' => BASE_DIR . '/backups',
     ],
     'STORAGE' => [
         'db_host' => 'localhost',
@@ -100,7 +101,6 @@ $config = [
     ],
     'TRANSFORM' => [
         'enable' => TRUE,                      // change this to FALSE to disable this feature
-        'backup_dir' => BASE_DIR . '/backups',
         'transform_dir' => SRC_DIR . '/Transform',
         'transform_file_field' => 'transform_file',  // IMPORTANT: the form must use this name
     ],

@@ -20,15 +20,16 @@ if (!$enabled || Profile::verify($config) === FALSE) {
     exit;
 }
 // init vars
-$total     = 0;
-$key       = '';
-$bulk      = [];
-$edit      = new Edit($config);
-$message   = Messages::getInstance();
-$transform = $config['IMPORT']['transform'] ?? [];
-$trusted   = $config['IMPORT']['trusted_src'] ?? [];
-$tidy      = $config['IMPORT']['use_tidy'] ?? [];
-$super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
+$total       = 0;
+$key         = '';
+$bulk        = [];
+$edit        = new Edit($config);
+$message     = Messages::getInstance();
+$backup_dir  = $config['SUPER']['backup_dir'] ?? BASE_DIR . '/backups';
+$transform   = $config['IMPORT']['transform'] ?? [];
+$trusted     = $config['IMPORT']['trusted_src'] ?? [];
+$tidy        = $config['IMPORT']['use_tidy'] ?? [];
+$super_url   = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
 $delim_start = $_POST['delim_start'] ?? $config['IMPORT']['delim_start'] ?? Import::DEFAULT_START;
 // grab stop delimiter
 if (!empty($_POST['delim_stop'])) {
@@ -49,7 +50,7 @@ if (!empty($_POST)) {
     // if "import_url" is set, just import from the list
     if (!empty($_POST['import_url'])) {
         $url  = strip_tags($_POST['import_url']);
-        $key = Import::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $tidy);
+        $key = Import::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $backup_dir, HTML_DIR, $tidy);
         if (!empty($key)) {
             header('Location: ' . $super_url . '/edit?page_key=' . $key);
             exit;
@@ -62,7 +63,7 @@ if (!empty($_POST)) {
         if (empty($list)) {
             $message->addMessage(Import::ERROR_UPLOAD);
         } else {
-            $bulk = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $tidy);
+            $bulk = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $backup_dir, HTML_DIR, $tidy);
         }
     // check to see if "import_file" is set
     } elseif (!empty($_FILES['import_file'])) {

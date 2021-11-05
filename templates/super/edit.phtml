@@ -23,6 +23,7 @@ $contents = '';
 $edit_width = $config['SUPER']['ckeditor']['width'] ?? 900;
 $edit_height = $config['SUPER']['ckeditor']['height'] ?? 500;
 $super_url   = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
+$backup_dir  = $config['SUPER']['backup_dir'] ?? BASE_DIR . '/backups';
 // acquire key and page_url
 $key      = $_REQUEST['page_key'] ?? '';
 $key      = ($key === Edit::CHOOSE_TOP) ? '' : $key;
@@ -35,6 +36,11 @@ if (empty($key)) {
     }
     $key = $edit->getKeyFromURL($page_url);
 }
+// establish filename and backup filename
+$fn = $edit->getFilenameFromKey($key);
+$backup_fn = (!empty($fn))
+           ? $edit->getBackupFn($fn, $backup_dir)
+           : '';
 // determine action
 if (!empty($_POST)) {
     // cancel option
@@ -53,15 +59,23 @@ if (!empty($_POST)) {
     } elseif (isset($_POST['choose'])) {
         header('Location: /super/choose');
         exit;
-    } else {
+    } elseif (isset($_POST['restore'])) {
+        if ($edit->restore($key, $backup_dir, HTML_DIR)) {
+            $message->addMessage(Edit::SUCCESS_RESTORE);
+        } else {
+            $message->addMessage(Edit::ERROR_RESTORE);
+        }
+    } elseif (isset($_POST['save'])) {
         // save data
         $data = $_POST['page_content'] ?? '';
-        if (!$edit->save($key, $data, HTML_DIR, TRUE)) {
+        if (!$edit->save($key, $data, $backup_dir, HTML_DIR, TRUE)) {
             $message->addMessage(Edit::ERROR_SAVE);
         } else {
             $message->addMessage(Edit::SUCCESS_SAVE);
         }
         $action = 'edit';
+    } else {
+        $message->addMessage(Edit::SUCCESS_CANCEL);
     }
 }
 if (isset($_GET['choose_edit_page'])) {
@@ -161,6 +175,10 @@ $msg = $message->getMessages() ?? Messages::EDIT;
                             <div class="input-group">
                                 <?php $label = ($action === 'delete') ? 'Delete' : 'Save'; ?>
                                 <input name="save" type="submit" class="btn btn-primary btn-circled" value="<?= $label ?>">
+                                <?php if (!empty($backup_fn)) : ?>
+                                &nbsp;&nbsp;
+                                <input name="restore" type="submit" class="btn btn-primary btn-circled" value="Restore" title="Click here to restore from backup (if any exists)">
+                                <?php endif; ?>
                                 &nbsp;&nbsp;
                                 <input name="choose" type="submit" class="btn btn-primary btn-circled" value="Back" title="Click here to choose another page to work with">
                                 &nbsp;&nbsp;

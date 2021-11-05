@@ -142,6 +142,7 @@ class Import
      * @param string|array $delim_stop : ending delimiter(s)
      * @param Edit $edit : used to save
      * @param Messages $message
+     * @param string $backup_dir : backup directory
      * @param string $path : where to save files; default === HTML_DIR
      * @param bool $tidy : set TRUE to use Tidy extension to cleanup upon save
      * @return boolean TRUE if OK; FALSE otherwise
@@ -153,6 +154,7 @@ class Import
                        $delim_stop,
                        Edit $edit,
                        Messages $message,
+                       string $backup_dir,
                        string $path = HTML_DIR,
                        bool $tidy = TRUE)
     {
@@ -164,7 +166,7 @@ class Import
             $message->addMessage(Import::ERROR_URL_EMPTY);
         } else {
             $key  = $edit->getKeyFromURL($url, $path);
-            if ($edit->save($key, $html, $path, $tidy)) {
+            if ($edit->save($key, $html, $backup_dir, $path, $tidy)) {
                 $message->addMessage(Edit::SUCCESS_SAVE);
                 $ok = TRUE;
             } else {
@@ -183,6 +185,7 @@ class Import
      * @param string|array $delim_stop : ending delimiter(s)
      * @param Edit $edit : used to save
      * @param Messages $message
+     * @param string $backup_dir : backup directory
      * @param string $path : where to save files; default === HTML_DIR
      * @param bool $tidy : set TRUE to use Tidy extension to cleanup upon save
      * @return array $bulk : list of URLs that were imported
@@ -195,6 +198,7 @@ class Import
         $delim_stop,
         Edit $edit,
         Messages $message,
+        string $backup_dir,
         string $path = HTML_DIR,
         bool $tidy = TRUE)
     {
