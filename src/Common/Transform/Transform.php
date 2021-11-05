@@ -46,6 +46,7 @@ class Transform
     const ERR_NO_PAGES = 'ERROR: no pages chosen';
     const ERR_NO_TRANS = 'ERROR: no transforms chosen';
     const ERR_TRANS_UNABLE = 'ERROR: unable to extract transforms from post';
+    const SUCCESS_TRANS = 'SUCCESS: successfully transformed %s';
     public static $container = [];
     /**
      * Grabs contents, applies transforms

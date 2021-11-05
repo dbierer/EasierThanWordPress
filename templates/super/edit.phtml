@@ -68,19 +68,16 @@ if (!empty($_POST)) {
     } elseif (isset($_POST['save'])) {
         // save data
         $data = $_POST['page_content'] ?? '';
-        if (!$edit->save($key, $data, $backup_dir, HTML_DIR, TRUE)) {
-            $message->addMessage(Edit::ERROR_SAVE);
-        } else {
+        if ($edit->save($key, $data, $backup_dir, HTML_DIR, TRUE)) {
             $message->addMessage(Edit::SUCCESS_SAVE);
+        } else {
+            $message->addMessage(Edit::ERROR_SAVE);
         }
-        $action = 'edit';
     } else {
         $message->addMessage(Edit::SUCCESS_CANCEL);
     }
 }
-if (isset($_GET['choose_edit_page'])) {
-    $action = 'edit';
-} elseif (isset($_GET['choose_del_page'])) {
+if (isset($_GET['choose_del_page'])) {
     $action = 'delete';
 } else {
     $action = 'edit';

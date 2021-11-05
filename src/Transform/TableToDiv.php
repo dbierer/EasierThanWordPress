@@ -94,16 +94,16 @@ class TableToDiv extends Base
         return $html;
     }
     /**
-     * Removes "<table>" and "</table>"
+     * Removes "<table><tbody><thead>" and related closing tags
      *
      * @param string $html : HTML string to be cleaned
      * @return string $html : HTML with table tags removed
      */
     public function removeTableTags(string $html) : string
     {
-        $search = '!<table.*?>!i';
+        $search = ['!<table.*?>!i','!<thead.*?>!i','!<tbody.*?>!i'];
         $html = preg_replace($search, '', $html);
-        $html = str_ireplace('</table>', '', $html);
+        $html = str_ireplace(['</table>','</thead>','</tbody>'], '', $html);
         return $html;
     }
     /**

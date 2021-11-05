@@ -41,11 +41,11 @@ use InvalidArgumentException;
 use FileCMS\Common\Transform\Base;
 class RemoveBlock extends Base
 {
-    const DESCRIPTION = 'Remove blocks based up search criteria, start and stop strings';
+    const DESCRIPTION = 'Remove blocks based up search criteria, start and stop strings. "items" parameter is optional and is used to verify that the block identified by start and stop is the one you wish to remove.  You can enter multiple items by separating the text with commas.';
     const ERR_PARAMS = 'ERROR: parameter array must contain the keys "start", "stop" and "items"';
     public $start = NULL;  // starting string
     public $stop  = NULL;  // ending string
-    public $items = [];    // array of search items used to confirm block to be removed
+    public $items = '';    // array|string of search items used to confirm block to be removed
     protected $beg_pos = NULL;  // start pos of block to be removed
     protected $end_pos = NULL;  // end pos of block to be removed
     /**
@@ -54,7 +54,8 @@ class RemoveBlock extends Base
      * @param string $html : HTML string to be cleaned
      * @param array $params : ['start' => : starting string for block to be removed,
      *                         'stop'  => : ending string for block to be removed; must occur *after* start string
-     *                         'items' => : array of strings that occur between "start" and "stop", used to correctly identify block to be removed
+     *                         'items' => : list of strings that occur between "start" and "stop", used to correctly identify block to be removed
+     *                                    : if string, expects multiple items to be comma separated, otherwise, in config, specify as an array
      * @return string $html : HTML with identified block removed
      */
     public function __invoke(string $html, array $params = []) : string
@@ -73,6 +74,7 @@ class RemoveBlock extends Base
      * @param array $params : ['start' => : starting string for block to be removed,
      *                         'stop'  => : ending string for block to be removed; must occur *after* start string
      *                         'items' => : array of strings that occur between "start" and "stop", used to correctly identify block to be removed
+     *                                    : if string, expects multiple items to be comma separated
      * @return void
      * @throws InvalidArgumentException
      */
@@ -81,6 +83,8 @@ class RemoveBlock extends Base
         $this->start = $params['start'] ?? '';
         $this->stop  = $params['stop']  ?? '';
         $this->items = $params['items'] ?? [];
+        if (is_string($this->items))
+            $this->items = explode(',', $this->items);
         if (empty($this->start) || empty($this->stop) || empty($this->items))
             throw new InvalidArgumentException(self::ERR_PARAMS);
     }

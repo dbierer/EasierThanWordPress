@@ -49,17 +49,18 @@ if (!empty($_POST['choose_transform'])) {
                     if (empty($fn) || !file_exists($fn)) {
                         $message->addMessage(Edit::ERROR_FILE);
                     } else {
-                        $contents = Transform::transform($contents, $transform);
+                        $contents = Transform::transform(file_get_contents($fn), $transform);
                         // save using Tidy (last arg)
                         if ($edit->save($key, $contents, $backup_dir, HTML_DIR, TRUE)) {
                             $bulk[] = $key;
+                            $message->addMessage(sprintf(Transform::SUCCESS_TRANS, $key));
                         }
                     }
                 }
             }
         }
     }
-    $message->addMessage(htmlspecialchars(var_export($transform, TRUE)));
+    $message->addMessage('<pre>' . htmlspecialchars(var_export($transform, TRUE)) . '</pre>');
 }
 // build dropdown list of existing pages to transform
 $select = '<select name="page_key[]" class="form-control" placeholder="Choose" multiple size=12>' . PHP_EOL;

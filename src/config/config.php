@@ -22,7 +22,7 @@ $config = [
         'message'   => 'Sorry! Unable to login.  Please contact your administrator',
         // array of $_SERVER keys to store in session if authenticated
         'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE','HTTP_COOKIE'],
-        // change the values to reflect the names of fiels in your login.phtml form
+        // change the values to reflect the names of fields in your login.phtml form
         'login_fields' => [
             'name'     => 'name',
             'password' => 'password',
@@ -43,6 +43,7 @@ $config = [
         'super_dir'  => BASE_DIR . '/templates', // IMPORTANT: needs to have a subdir === "super_url" setting
         'super_menu' => BASE_DIR . '/templates/layout/super_menu.html',
         'backup_dir' => BASE_DIR . '/backups',
+        'backup_cmd' => BASE_DIR . 'zip -r %%BACKUP_FN%% %%BACKUP_SRC%%',
     ],
     'STORAGE' => [
         'db_host' => 'localhost',
@@ -60,6 +61,11 @@ $config = [
                 'created' => function()      { return date('Y-m-d H:i:s');    },
             ],
         ],
+        // backup command for your database
+        'db_cmd' => 'mysqldump -u%%REPL_DB_USER%% -p%%REPL_DB_PWD%% %%REPL_DB_NAME%%',
+        // set this to 1 to enable automated backups using /backup.sh
+        'db_backup_enabled' => 0,
+        'db_backup_dir' => BASE_DIR . '/backups',
     ],
     'COMPANY_EMAIL' => [
         'to'   => '',

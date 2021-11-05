@@ -1,44 +1,7 @@
-[04-Nov-2021 02:52:43 UTC] PHP Warning:  copy(/repo/backups/blog/one.html): Failed to open stream: Permission denied in /repo/templates/super/edit.phtml on line 66
-[04-Nov-2021 02:52:43 UTC] PHP Stack trace:
-[04-Nov-2021 02:52:43 UTC] PHP   1. {main}() /repo/public/index.php:0
-[04-Nov-2021 02:52:43 UTC] PHP   2. include() /repo/public/index.php:26
-[04-Nov-2021 02:52:43 UTC] PHP   3. FileCMS\Common\View\Html->render($body = *uninitialized*) /repo/src/processing.php:16
-[04-Nov-2021 02:52:43 UTC] PHP   4. FileCMS\Common\View\Html->runPhpFile($fn = '/repo/templates/super/edit.phtml') /repo/src/Common/View/Html.php:56
-[04-Nov-2021 02:52:43 UTC] PHP   5. include() /repo/src/Common/View/Html.php:218
-[04-Nov-2021 02:52:43 UTC] PHP   6. copy($from = '/repo/backups/blog/one.html', $to = '/repo/templates/site/blog/one.html') /repo/templates/super/edit.phtml:66
-[04-Nov-2021 03:11:56 UTC] PHP Warning:  copy(/repo/backups/blog/one.html): Failed to open stream: Permission denied in /repo/src/Common/Page/Edit.php on line 209
-[04-Nov-2021 03:11:56 UTC] PHP Stack trace:
-[04-Nov-2021 03:11:56 UTC] PHP   1. {main}() /repo/public/index.php:0
-[04-Nov-2021 03:11:56 UTC] PHP   2. include() /repo/public/index.php:26
-[04-Nov-2021 03:11:56 UTC] PHP   3. FileCMS\Common\View\Html->render($body = *uninitialized*) /repo/src/processing.php:16
-[04-Nov-2021 03:11:56 UTC] PHP   4. FileCMS\Common\View\Html->runPhpFile($fn = '/repo/templates/super/edit.phtml') /repo/src/Common/View/Html.php:56
-[04-Nov-2021 03:11:56 UTC] PHP   5. include() /repo/src/Common/View/Html.php:218
-[04-Nov-2021 03:11:56 UTC] PHP   6. FileCMS\Common\Page\Edit->save($key = '/blog/one', $contents = '<header class="bg-primary py-5 mb-5">\r\n<div class="container h-100">\r\n<div class="row h-100 align-items-center">\r\n<div class="col-lg-12">\r\n<h1 class="display-4 text-white mt-5 mb-2">Blog One</h1>\r\n\r\n<p class="lead mb-5 text-white-50">Lorem ipsum dolor sit amet consectetur adipiscing elit ac, pretium quam fames velit porttitor nam. Mauris fringilla eleifend non suscipit ad penatibus lacinia duis, feugiat velit id phasellus aenean accumsan turpis amet montes, ut pulvinar felis dignissim gravida co', $backup_dir = '/repo/backups', $path = '/repo/templates/site', $tidy = TRUE) /repo/templates/super/edit.phtml:50
-[04-Nov-2021 03:11:56 UTC] PHP   7. FileCMS\Common\Page\Edit->backup($fn = '/repo/templates/site/blog/one.html', $backup_dir = '/repo/backups', $path = '/repo/templates/site') /repo/src/Common/Page/Edit.php:246
-[04-Nov-2021 03:11:56 UTC] PHP   8. copy($from = '/repo/templates/site/blog/one.html', $to = '/repo/backups/blog/one.html') /repo/src/Common/Page/Edit.php:209
-[04-Nov-2021 03:12:18 UTC] PHP Warning:  copy(/repo/backups/blog/one.html): Failed to open stream: Permission denied in /repo/templates/super/edit.phtml on line 73
-[04-Nov-2021 03:12:18 UTC] PHP Stack trace:
-[04-Nov-2021 03:12:18 UTC] PHP   1. {main}() /repo/public/index.php:0
-[04-Nov-2021 03:12:18 UTC] PHP   2. include() /repo/public/index.php:26
-[04-Nov-2021 03:12:18 UTC] PHP   3. FileCMS\Common\View\Html->render($body = *uninitialized*) /repo/src/processing.php:16
-[04-Nov-2021 03:12:18 UTC] PHP   4. FileCMS\Common\View\Html->runPhpFile($fn = '/repo/templates/super/edit.phtml') /repo/src/Common/View/Html.php:56
-[04-Nov-2021 03:12:18 UTC] PHP   5. include() /repo/src/Common/View/Html.php:218
-[04-Nov-2021 03:12:18 UTC] PHP   6. copy($from = '/repo/templates/site/blog/one.html', $to = '/repo/backups/blog/one.html') /repo/templates/super/edit.phtml:73
-[04-Nov-2021 03:15:36 UTC] PHP Warning:  copy(/repo/backups/blog/one.html): Failed to open stream: Permission denied in /repo/src/Common/Page/Edit.php on line 209
-[04-Nov-2021 03:15:36 UTC] PHP Stack trace:
-[04-Nov-2021 03:15:36 UTC] PHP   1. {main}() /repo/public/index.php:0
-[04-Nov-2021 03:15:36 UTC] PHP   2. include() /repo/public/index.php:26
-[04-Nov-2021 03:15:36 UTC] PHP   3. FileCMS\Common\View\Html->render($body = *uninitialized*) /repo/src/processing.php:16
-[04-Nov-2021 03:15:36 UTC] PHP   4. FileCMS\Common\View\Html->runPhpFile($fn = '/repo/templates/super/edit.phtml') /repo/src/Common/View/Html.php:56
-[04-Nov-2021 03:15:36 UTC] PHP   5. include() /repo/src/Common/View/Html.php:218
-[04-Nov-2021 03:15:36 UTC] PHP   6. FileCMS\Common\Page\Edit->save($key = '/blog/one', $contents = '<header class="bg-primary py-5 mb-5">\r\n<div class="container h-100">\r\n<div class="row h-100 align-items-center">\r\n<div class="col-lg-12">\r\n<h1 class="display-4 text-white mt-5 mb-2">Blog One</h1>\r\n\r\n<p class="lead mb-5 text-white-50">Lorem ipsum dolor sit amet consectetur adipiscing elit ac, pretium quam fames velit porttitor nam. Mauris fringilla eleifend non suscipit ad penatibus lacinia duis, feugiat velit id phasellus aenean accumsan turpis amet montes, ut pulvinar felis dignissim gravida co', $backup_dir = '/repo/backups', $path = '/repo/templates/site', $tidy = TRUE) /repo/templates/super/edit.phtml:50
-[04-Nov-2021 03:15:36 UTC] PHP   7. FileCMS\Common\Page\Edit->backup($fn = '/repo/templates/site/blog/one.html', $backup_dir = '/repo/backups', $path = '/repo/templates/site') /repo/src/Common/Page/Edit.php:246
-[04-Nov-2021 03:15:36 UTC] PHP   8. copy($from = '/repo/templates/site/blog/one.html', $to = '/repo/backups/blog/one.html') /repo/src/Common/Page/Edit.php:209
-[04-Nov-2021 03:15:50 UTC] PHP Warning:  copy(/repo/backups/blog/one.html): Failed to open stream: Permission denied in /repo/templates/super/edit.phtml on line 73
-[04-Nov-2021 03:15:50 UTC] PHP Stack trace:
-[04-Nov-2021 03:15:50 UTC] PHP   1. {main}() /repo/public/index.php:0
-[04-Nov-2021 03:15:50 UTC] PHP   2. include() /repo/public/index.php:26
-[04-Nov-2021 03:15:50 UTC] PHP   3. FileCMS\Common\View\Html->render($body = *uninitialized*) /repo/src/processing.php:16
-[04-Nov-2021 03:15:50 UTC] PHP   4. FileCMS\Common\View\Html->runPhpFile($fn = '/repo/templates/super/edit.phtml') /repo/src/Common/View/Html.php:56
-[04-Nov-2021 03:15:50 UTC] PHP   5. include() /repo/src/Common/View/Html.php:218
-[04-Nov-2021 03:15:50 UTC] PHP   6. copy($from = '/repo/templates/site/blog/one.html', $to = '/repo/backups/blog/one.html') /repo/templates/super/edit.phtml:73
+[05-Nov-2021 03:37:34 UTC] PHP Warning:  Undefined variable $contents in /repo/templates/super/transform.phtml on line 52
+[05-Nov-2021 03:37:34 UTC] PHP Stack trace:
+[05-Nov-2021 03:37:34 UTC] PHP   1. {main}() /repo/public/index.php:0
+[05-Nov-2021 03:37:34 UTC] PHP   2. include() /repo/public/index.php:17
+[05-Nov-2021 03:37:34 UTC] PHP   3. FileCMS\Common\View\Html->render($body = *uninitialized*) /repo/src/processing.php:16
+[05-Nov-2021 03:37:34 UTC] PHP   4. FileCMS\Common\View\Html->runPhpFile($fn = '/repo/templates/super/transform.phtml') /repo/src/Common/View/Html.php:56
+[05-Nov-2021 03:37:34 UTC] PHP   5. include() /repo/src/Common/View/Html.php:218
