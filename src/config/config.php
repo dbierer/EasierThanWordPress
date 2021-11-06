@@ -121,6 +121,7 @@ $config = [
         // you can also add your own anonymous functions as transforms as long as the signature
         // matches the one specified by FileCMS\Transform\TransformInterface
         'transform' => [
+            /*
             'clean' => [
                 'callback' => 'FileCMS\Transform\Clean',
                 'params' => ['bodyOnly' => TRUE],
@@ -131,20 +132,21 @@ $config = [
                 'params' => ['start' => '<tr height="20">','stop' => '</tr>','items' => ['bkgnd_tandk.gif','trans_spacer50.gif','bkgnd_tanlt.gif']],
                 'description' => 'Remove block starting with &lt;tr height="20"&gt;',
             ],
-            'table_to_row_col_div' => [
-                'callback' => 'FileCMS\Transform\TableToDiv',
-                'params' => ['td' => 'col', 'th' => 'col bold', 'row' => 'row', 'width' => 12],
-                'description' => 'Convert HTML table tags to div row/col classes',
-            ],
             'attribs_remove' => [
                 'callback' => 'FileCMS\Transform\RemoveAttributes',
                 'params' => ['attributes' => TransformInterface::DEFAULT_ATTR_LIST],
                 'description' => 'Remove these attributes: width,height,style,class',
             ],
-            'replace_dentalwellness' => [
+            'replace_regex' => [
                 'callback' => 'FileCMS\Transform\ReplaceRegex',
                 'params'   => ['regex' => ['!https://test.com(.*?).html!','!https://www.test.com(.*?).html!'], 'replace' => '$1'],
                 'description' => 'replace "https://test.com/xxx" with "/xxx"',
+            ],
+            */
+            'table_to_row_col_div' => [
+                'callback' => 'FileCMS\Transform\TableToDiv',
+                'params' => ['tr' => 'row', 'td' => 'col', 'th' => 'col bold'],
+                'description' => 'Convert HTML table tags to div row/col classes',
             ],
         ],
     ],

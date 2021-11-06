@@ -36,6 +36,7 @@ namespace FileCMS\Common\Import;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+use Throwable;
 use FileCMS\Common\Page\Edit;
 use FileCMS\Common\Generic\Messages;
 use FileCMS\Common\Transform\Transform;
@@ -68,10 +69,19 @@ class Import
                                   $delim_stop = self::DEFAULT_STOP)
     {
         // make sure URL is reachable
-        $url = trim($url);
-        $html = file_get_contents("$url");
-        $html = self::get_delimited($html, $delim_start, $delim_stop);
-        $html = Transform::transform($html, $callbacks);
+        $html = '';
+        try {
+            $url = trim($url);
+            $html = file_get_contents("$url");
+            if (empty($html)) {
+                $html = '';
+            } else {
+                $html = self::get_delimited($html, $delim_start, $delim_stop);
+                $html = Transform::transform($html, $callbacks);
+            }
+        } catch (Throwable $t) {
+            error_log(__METHOD__ . ':' . $t->getMessage());
+        }
         return $html;
     }
     /**
@@ -205,7 +215,7 @@ class Import
         $bulk = [];
         foreach ($list as $url) {
             $url  = strip_tags(trim($url));
-            $key = self::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $path, $tidy);
+            $key = self::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $backup_dir, $path, $tidy);
             if ($key !== FALSE) $bulk[] = $key;
         }
         return $bulk;

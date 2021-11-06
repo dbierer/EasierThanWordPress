@@ -70,11 +70,24 @@ class RemoveBlockTest extends TestCase
         $actual = $transform->confirm($html);
         $this->assertEquals($expected, $actual, 'Does not confirm internal items');
     }
-    public function testRemove()
+    public function testRemoveWorksWithArrayItems()
     {
         $transform = new RemoveBlock();
         $html = '<h1>TEST</h1><h2>TEST ONE TWO THREE</h2><p>TEST</p>';
         $params = ['start' => '<h2>', 'stop' => '</h2>', 'items' => ['ONE','TWO','THREE']];
+        $transform->init($params);
+        $expected = TRUE;
+        $transform->getStartAndStop($html);
+        $transform->confirm($html);
+        $expected = '<h1>TEST</h1><p>TEST</p>';
+        $actual = $transform->remove($html);
+        $this->assertEquals($expected, $actual, 'Does not remove identified block');
+    }
+    public function testRemoveWorksWithStringItems()
+    {
+        $transform = new RemoveBlock();
+        $html = '<h1>TEST</h1><h2>TEST ONE TWO THREE</h2><p>TEST</p>';
+        $params = ['start' => '<h2>', 'stop' => '</h2>', 'items' => 'ONE,TWO,THREE'];
         $transform->init($params);
         $expected = TRUE;
         $transform->getStartAndStop($html);

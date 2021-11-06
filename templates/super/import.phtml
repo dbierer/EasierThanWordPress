@@ -28,7 +28,8 @@ $message     = Messages::getInstance();
 $backup_dir  = $config['SUPER']['backup_dir'] ?? BASE_DIR . '/backups';
 $transform   = $config['IMPORT']['transform'] ?? [];
 $trusted     = $config['IMPORT']['trusted_src'] ?? [];
-$tidy        = $config['IMPORT']['use_tidy'] ?? [];
+$tidy        = $config['IMPORT']['use_tidy'] ?? FALSE;
+$tidy        = (bool) $tidy;
 $super_url   = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
 $delim_start = $_POST['delim_start'] ?? $config['IMPORT']['delim_start'] ?? Import::DEFAULT_START;
 // grab stop delimiter

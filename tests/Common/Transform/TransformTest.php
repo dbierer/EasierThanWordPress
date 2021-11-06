@@ -8,7 +8,7 @@ class TransformTest extends TestCase
     public $testFileDir = '';
     public function setUp() : void
     {
-        $this->testFileDir = realpath(__DIR__ . '/../test_files');
+        $this->testFileDir = realpath(__DIR__ . '/../../test_files');
         Transform::$container = [];
     }
     public function testGetInstanceReturnsNullIfClassEmpty()
@@ -115,6 +115,36 @@ class TransformTest extends TestCase
         $expected = ['FileCMS\Transform\TableToDiv','FileCMS\Transform\RemoveAttributes','FileCMS\Transform\Replace'];
         $extract  = Transform::extract_callbacks_from_post($trans_keys, $post);
         $actual   = array_keys($extract);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testLoadTransformUsingTableToDivCallbacksProducesExpectedResults()
+    {
+        $contents = file_get_contents($this->testFileDir . '/test6.html');
+        $callbacks = [
+            'TableToDiv' => [
+                'callback' => 'FileCMS\Transform\TableToDiv',
+                'params'   => ['tr' => 'row', 'td' => 'col', 'th' => 'col bold']
+            ],
+        ];
+        $expected = '<h1>Table Test</h1><div class="row"><div class="col">Item</div><div class="col">Status</div><div class="col">Notes</div></div><div class="row"><div class="col">one</div><div class="col">1</div><div class="col">blah blah blah</div></div><div class="row"><div class="col">two</div><div class="col">0</div><div class="col">blah blah blah</div></div><div class="row"><div class="col">three</div><div class="col">1</div><div class="col">blah blah blah</div></div>';
+        $actual   = Transform::transform($contents, $callbacks);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testLoadTransformUsingTwoCallbacksProducesExpectedResults()
+    {
+        $contents = file_get_contents($this->testFileDir . '/test7.html');
+        $callbacks = [
+            'Replace' => [
+                'callback' => 'FileCMS\Transform\Replace',
+                'params'   => ['search' => 'ul>', 'replace' => 'ol>']
+            ],
+            'RemoveBlock' => [
+                'callback' => 'FileCMS\Transform\RemoveBlock',
+                'params'   => ['start' => '<i>', 'stop' => '</i>', 'items' => ['WILL BE','FOR SURE']]
+            ],
+        ];
+        $expected = '<h1>Testing Multiple Callbacks</h1><ol>    <li>One</li>    <li>Two</li>    <li>Three</li></ol><p></p><p><i>This WILL NOT be removed</i></p>';
+        $actual   = Transform::transform($contents, $callbacks);
         $this->assertEquals($expected, $actual);
     }
 }

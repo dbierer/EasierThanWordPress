@@ -1,7 +1,7 @@
 #!/bin/bash
 DIR=`pwd`
-export USAGE="Usage: init.sh up|down|build|ls|init|shell [7|8]"
-export CONTAINER="simple_html"
+export USAGE="Usage: init.sh up|down|build|ls|init|shell"
+export CONTAINER="file_cms"
 export INIT=0
 if [[ -z "$1" ]]; then
     echo $USAGE

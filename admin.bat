@@ -1,6 +1,6 @@
 @echo off
 SET USAGE="Usage: init.sh up|down|build|ls|init|shell"
-SET CONTAINER="simple_html"
+SET CONTAINER="file_cms"
 SET INIT=0
 
 IF "%~1"=="" GOTO :done

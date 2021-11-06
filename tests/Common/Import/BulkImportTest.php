@@ -10,14 +10,20 @@ class BulkImportTest extends TestCase
 {
     public $config = [];
     public $testFileDir = '';
+    public $testBackupDir = '';
     public function setUp() : void
     {
         $this->config = require __DIR__ . '/../../../src/config/config.php';
         $this->testFileDir = realpath(__DIR__ . '/../../test_files');
+        $this->testBackupDir = realpath(__DIR__ . '/../../backups');
         $path = $this->testFileDir . '/bulk';
-        $list = glob($path . '/*');
-        if (!empty($list))
-            foreach ($list as $fn) unlink($fn);
+        if (!file_exists($path)) {
+            mkdir($path, 0775, TRUE);
+        } else {
+            $list = glob($path . '/*');
+            if (!empty($list))
+                foreach ($list as $fn) unlink($fn);
+        }
     }
     public function testBulkImportCreatesExpectedFiles()
     {
@@ -28,6 +34,7 @@ class BulkImportTest extends TestCase
         $trusted     = ['https://test.unlikelysource.com'];
         $message     = Messages::getInstance();
         $path        = $this->testFileDir . '/bulk';
+        $backup_dir  = $this->testBackupDir;
         $bulk        = [];
         $temp = <<<EOT
 https://test.unlikelysource.com/test1.html
@@ -35,7 +42,7 @@ https://test.unlikelysource.com/test2.html
 https://test.unlikelysource.com/test3.html
 EOT;
         $list = explode(PHP_EOL, trim($temp));
-        $result = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $path);
+        $result = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $backup_dir, $path);
         $expected = [
             $path . '/test1.html',
             $path . '/test2.html',

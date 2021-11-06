@@ -11,9 +11,11 @@ use InvalidArgumentException;
 class ImportTest extends TestCase
 {
     public $testFileDir = '';
+    public $testBackupDir = '';
     public function setUp() : void
     {
-        $this->testFileDir = realpath(__DIR__ . '/../test_files');
+        $this->testFileDir = realpath(__DIR__ . '/../../test_files');
+        $this->testBackupDir = realpath(__DIR__ . '/../../backups');
     }
     public function testGetDelimitedStartDoesNotExist()
     {
@@ -76,6 +78,17 @@ class ImportTest extends TestCase
         $actual = Import::import($url, $callbax, $start, $stop);
         $this->assertEquals($expected, $actual, 'Contents from between delimiters not returned.');
     }
+    public function testImportReturnsEmptyStringIfBadUrl()
+    {
+        $url      = 'https://test.unlikelysource.com/does_not_exist.html';
+        $callbax  = [];
+        $start    = '<body>';
+        $stop     = '</body>';
+        $expected = '';
+        echo "\nMaking request to $url\n";
+        $actual = Import::import($url, $callbax, $start, $stop);
+        $this->assertEquals($expected, $actual, 'Contents from between delimiters not returned.');
+    }
     public function testImportExtractsExpectedContentWithAppendTransform()
     {
         $url      = 'https://test.unlikelysource.com/test1.html';
@@ -86,5 +99,41 @@ class ImportTest extends TestCase
         echo "\nMaking request to $url\n";
         $actual = Import::import($url, $callbax, $start, $stop);
         $this->assertEquals($expected, $actual, 'Callback not invoked properly');
+    }
+    public function testDoImportKicksOutUntrustedSource()
+    {
+        $config = include __DIR__ . '/../../../src/config/config.php';
+        $url = 'https://bad.company.com';
+        $trusted = ['https://unlikelysource.com'];
+        $transform = [];
+        $delim_start = '<body>';
+        $delim_stop = '</body>';
+        $edit = new Edit($config);
+        $message = Messages::getInstance();
+        $tidy = TRUE;
+        $expected = FALSE;
+        echo "\nMaking request to $url\n";
+        $actual = Import::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $this->testBackupDir, $this->testFileDir, $tidy);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testDoImportProducesExpectedResult()
+    {
+        $target_fn = $this->testFileDir . '/test8.html';
+        if (file_exists($target_fn)) unlink($target_fn);
+        $config = include __DIR__ . '/../../../src/config/config.php';
+        $url = 'https://test.unlikelysource.com/test8.html';
+        $trusted = ['https://test.unlikelysource.com'];
+        $transform = [];
+        $delim_start = '<body>';
+        $delim_stop = '</body>';
+        $edit = new Edit($config);
+        $message = Messages::getInstance();
+        $tidy = TRUE;
+        echo "\nMaking request to $url\n";
+        $key = Import::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $this->testBackupDir, $this->testFileDir, $tidy);
+        $expected = '<h1>Test 8</h1>';
+        $actual = (file_exists($target_fn)) ? file_get_contents($target_fn) : '';
+        $this->assertEquals('/test8', $key, 'Key not OK');
+        $this->assertEquals($expected, $actual, 'Contents not OK');
     }
 }
