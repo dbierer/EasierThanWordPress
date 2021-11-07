@@ -177,10 +177,10 @@ class Import
         } else {
             $key  = $edit->getKeyFromURL($url, $path);
             if ($edit->save($key, $html, $backup_dir, $path, $tidy)) {
-                $message->addMessage(Edit::SUCCESS_SAVE);
+                $message->addMessage(Edit::SUCCESS_SAVE . ' ' . $key);
                 $ok = TRUE;
             } else {
-                $message->addMessage(Edit::ERROR_SAVE);
+                $message->addMessage(Edit::ERROR_SAVE . ' ' . $key);
             }
         }
         return ($ok) ? $key : FALSE;
@@ -198,7 +198,7 @@ class Import
      * @param string $backup_dir : backup directory
      * @param string $path : where to save files; default === HTML_DIR
      * @param bool $tidy : set TRUE to use Tidy extension to cleanup upon save
-     * @return array $bulk : list of URLs that were imported
+     * @return array $bulk : list of URLs that were imported: 0 => [failed], 1 => [succeeded]
      */
     public static function do_bulk_import(
         array $list,
@@ -216,7 +216,11 @@ class Import
         foreach ($list as $url) {
             $url  = strip_tags(trim($url));
             $key = self::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $backup_dir, $path, $tidy);
-            if ($key !== FALSE) $bulk[] = $key;
+            if ($key === FALSE) {
+                $bulk[0][] = $key;
+            } else {
+                $bulk[1][] = $key;
+            }
         }
         return $bulk;
     }

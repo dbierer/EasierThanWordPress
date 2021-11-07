@@ -68,7 +68,7 @@ if (!empty($_POST)) {
         }
     // check to see if "import_file" is set
     } elseif (!empty($_FILES['import_file'])) {
-        $data = UploadJson::upload($import_file_field, $_FILES);
+        $data = UploadJson::upload($import_file_field, $_FILES, $message);
         if (empty($data)) {
             $message->addMessage(Import::ERROR_UPLOAD);
         } else {
@@ -91,8 +91,11 @@ if (!empty($_POST)) {
 }
 // get messages
 $msg = $message->getMessages() ?? 'Enter a URL to import.  Alternatively you can upload a list of URLs of pages to import.';
-if (!empty($bulk))
-    foreach ($bulk as $key)
+if (!empty($bulk[0]))
+    foreach ($bulk[0] as $key)
+        $msg .= '<br /><b style="color:red;">' . $key . '</b>';
+if (!empty($bulk[1]))
+    foreach ($bulk[1] as $key)
         $msg .= '<br /><a target="_blank" href="/super/edit?page_key=' . $key . '">' . $key . '</a>';
 ?>
   <!-- Header -->
@@ -121,6 +124,18 @@ if (!empty($bulk))
                     <div class="col-sm-6 mb-6">
                         <div class="form-group">
                             <label class="h6 small d-block text-uppercase">
+                                Start / Stop Delimiters
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" name="delim_start" id="delim_start" size=40 placeholder="&lt;body&gt;" type="text" title="Delimiter that tells import where to start extracting HTML content" value="<?= htmlspecialchars($delim_start); ?>" />
+                                <input class="form-control" name="delim_stop" id="delim_stop" size=40 placeholder="&lt;/body&gt;" type="text" title="Delimiter that tells import where to stop extracting HTML content" value="<?= htmlspecialchars((is_array($delim_stop)) ? implode(',', $delim_stop) : $delim_stop); ?>" />
+                            </div>
+                            <p>(or enter bulk list of URLs to automatically import)</p>
+                            <hr />
+                        </div>
+                        <div class="form-group">
+                            <label class="h6 small d-block text-uppercase">
                                 Manually a Single URL to Import
                                 <span class="text-danger">*</span>
                             </label>
@@ -143,23 +158,14 @@ if (!empty($bulk))
                         </div>
                         <div class="form-group">
                             <label class="h6 small d-block text-uppercase">
-                                Upload File with List of URLs to Automatically Import
+                                Upload JSON File with List of URLs to Import
                                 <span class="text-danger">*</span>
                             </label>
                             <div class="input-group"><input type="file" name="<?= $import_file_field ?>" /></div>
-                            <p>(or manually enter one or more URLs to import)</p>
-                            <hr />
-                        </div>
-                        <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                Start / Stop Delimiters
-                                <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <input class="form-control" name="delim_start" id="delim_start" size=40 placeholder="&lt;body&gt;" type="text" title="Delimiter that tells import where to start extracting HTML content" value="<?= htmlspecialchars($delim_start); ?>" />
-                                <input class="form-control" name="delim_stop" id="delim_stop" size=40 placeholder="&lt;/body&gt;" type="text" title="Delimiter that tells import where to stop extracting HTML content" value="<?= htmlspecialchars((is_array($delim_stop)) ? implode(',', $delim_stop) : $delim_stop); ?>" />
-                            </div>
-                            <p>(or enter bulk list of URLs to automatically import)</p>
+                            <p>(or manually enter one or more URLs to import).
+                            <br />IMPORTANT: at a minimum, ensure file is in JSON format with at least this key:
+                            <code>{ "URLS" : ['url1','url2',etc.]}</code>
+                            </p>
                             <hr />
                         </div>
                     </div>
@@ -168,12 +174,21 @@ if (!empty($bulk))
                             <label class="h6 small d-block text-uppercase">
                                 Transform Filters to Apply
                             </label>
-                            <p>Expand list of transform filters by adding to the <i>IMPORT::transforms</i> configuration array</p>
+                            <p>Expand list of transform filters by adding to the <i>IMPORT::transforms</i> configuration array.
+                            Alternatively, if you want to upload groups of files, and apply a separate set of transformations to the group,
+                            create a group of <code>importNN.json</code> files, and use these keys:
+                            <br /><code>{ "URLS" : ["url1","url2",etc.],</code>
+                            <br /><code>  "IMPORT" : { "transform" : [</code>
+                            <br /><code>     { "callback" : "Class", "params" : {"key" : "val"}},</code>
+                            <br /><code>     { "callback" : "Class", "params" : {"key" : "val"}}</code>
+                            <br /><code>]}}</code>
+                            </p>
                             <hr />
                             <?php foreach ($transform as $key => $item) :
                                     $callback = $item['callback'] ?? NULL;
-                                    echo '<br /><b>' . $key . '</b><br />';
+                                    echo '<b>' . $key . '</b><br />';
                                     echo (empty($callback)) ? Messages::NO_DESCRIPTION : $callback::DESCRIPTION;
+                                    echo '<br />';
                                   endforeach;
                             ?>
                         </div>

@@ -57,6 +57,7 @@ class Browse
                             . 'text-align:center;'
                             . 'vertical-align:center;'
                             . 'border:thin solid black;'
+                            . 'display:block;'
                             . 'float:left;';
     const DISP_IMG_STYLE  = 'width:80%;height:80%;';
     const GD_MAP          = ['jpg' => 'jpeg', 'jpeg' => 'jpeg', 'png' => 'png', 'bmp' => 'bmp', 'gif' => 'gif'];
@@ -100,9 +101,7 @@ class Browse
         while ($list->valid()) {
             $key = $list->key();
             $fn  = $list->current();
-            $thumb_fn = $this->getThumbFnFromImageFn($fn);
-            $thumb_url = $this->getThumbUrlFromImageUrl($key);
-            if (!file_exists($thumb_fn)) $this->queue[] = $fn;
+            $thumb_url = $this->getThumbUrlFromImageUrl($key, $fn);
             $id   = 'img_' . $count++;
             $html = '<div style="' . self::DISPLAY_STYLE . '">'
                   . '<a style="cursor:pointer;" name="' . $id . '" onclick="returnFileUrl(\'' . $id . '\')">'
@@ -163,42 +162,20 @@ class Browse
      * Returns thumbnail URL from image URL
      *
      * @param string $img_url    : image filename
+     * @param string $img_fn    : image filename
      * @return string $thumb_url : thumbnail filename
      */
-    public function getThumbUrlFromImageUrl(string $img_url)
+    public function getThumbUrlFromImageUrl(string $img_url, string $img_fn)
     {
-        return str_replace($this->img_url, $this->thumb_url, $img_url);
-    }
-
-    /**
-     * Returns FilterIterator instance that only accepts allowed file extensions
-     *
-     * @param string $path  : starting path (if other than HTML_DIR
-     * @return FilterIterator $filter : instance of FilterIterator
-     */
-    public function getFilterIterator(string $path = NULL)
-    {
-        $path = $path ?? $this->img_dir;
-        $iter = new RecursiveDirectoryIterator($path);
-        $itIt = new RecursiveIteratorIterator($iter);
-        return new class ($itIt, $this->allowed) extends FilterIterator {
-            public $allowed = [];
-            public function __construct($itIt, $allowed)
-            {
-                parent::__construct($itIt);
-                $this->allowed = $allowed;
-            }
-            public function accept()
-            {
-                $ok  = FALSE;
-                $obj = $this->current() ?? FALSE;
-                if (!empty($obj)) {
-                    $ext = strtolower($obj->getExtension());
-                    $ok  = in_array($ext, $this->allowed);
-                }
-                return $ok;
-            }
-        };
+        // check to see if thumb image exists
+        $thumb_fn = $this->getThumbFnFromImageFn($img_fn);
+        if (file_exists($thumb_fn)) {
+            $thumb_url = str_replace($this->img_url, $this->thumb_url, $img_url);
+        } else {
+            $thumb_url = $img_url;
+            $this->queue[] = $img_fn;
+        }
+        return $thumb_url;
     }
 
     /**
@@ -212,12 +189,17 @@ class Browse
     {
         $path = $path ?? $this->img_dir;
         if (empty($this->images)) {
+            $iter = new RecursiveDirectoryIterator($path);
+            $itIt = new RecursiveIteratorIterator($iter);
             $this->images = new ArrayIterator();
-            $filt = $this->getFilterIterator($path);
-            foreach ($filt as $name => $obj) {
-                $url = $this->img_url . '/' . str_replace($path, '', $name);
-                $url = str_replace('//', '/', $url);
-                $this->images->offsetSet($url, $name);
+            foreach ($itIt as $name => $obj) {
+                $ext = strtolower($obj->getExtension());
+                $ok  = in_array($ext, $this->allowed);
+                if ($ok) {
+                    $url = $this->img_url . '/' . str_replace($path, '', $name);
+                    $url = str_replace('//', '/', $url);
+                    $this->images->offsetSet($url, $name);
+                }
             }
             $this->images->ksort();
         }

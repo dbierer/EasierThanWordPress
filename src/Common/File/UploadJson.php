@@ -71,10 +71,10 @@ class UploadJson
                 } else {
                     $data = json_decode($text, TRUE);
                     if ($data === NULL) {
-                        $message->addMessage(json_last_error_msg());
+                        $message->addMessage('JSON ERROR: ' . json_last_error_msg());
                         $data = [];
                     } elseif ($data === FALSE) {
-                        $message=>addMessage(self::ERR_NO_DATA);
+                        $message->addMessage(self::ERR_NO_DATA);
                         $data = [];
                     }
                 }

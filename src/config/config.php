@@ -1,5 +1,4 @@
 <?php
-use FileCMS\Common\Transform\TransformInterface;
 $config = [
     'CARDS'  => 'cards',
     'LAYOUT' => BASE_DIR . '/templates/layout/layout.html',
@@ -134,7 +133,7 @@ $config = [
             ],
             'attribs_remove' => [
                 'callback' => 'FileCMS\Transform\RemoveAttributes',
-                'params' => ['attributes' => TransformInterface::DEFAULT_ATTR_LIST],
+                'params' => ['attributes' => ['width','height','align','valign']],
                 'description' => 'Remove these attributes: width,height,style,class',
             ],
             'replace_regex' => [
