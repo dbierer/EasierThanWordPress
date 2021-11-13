@@ -10,15 +10,6 @@ if (!empty($OBJ)) {
     $uri    = $OBJ->uri;
     $config = $OBJ->config;
 }
-// check to see if authenticated and feature enabled
-$enabled = (isset($config['IMPORT']['enable'])) ? $config['IMPORT']['enable'] : FALSE;
-if (!$enabled || Profile::verify($config) === FALSE) {
-    Profile::logout();
-    $message = Messages::getInstance();
-    $message->addMessage('Unable to authenticate');
-    header('Location: /');
-    exit;
-}
 // init vars
 $total       = 0;
 $key         = '';
@@ -132,7 +123,6 @@ if (!empty($bulk[1]))
                                 <input class="form-control" name="delim_stop" id="delim_stop" size=40 placeholder="&lt;/body&gt;" type="text" title="Delimiter that tells import where to stop extracting HTML content" value="<?= htmlspecialchars((is_array($delim_stop)) ? implode(',', $delim_stop) : $delim_stop); ?>" />
                             </div>
                             <p>(or enter bulk list of URLs to automatically import)</p>
-                            <hr />
                         </div>
                         <div class="form-group">
                             <label class="h6 small d-block text-uppercase">
@@ -143,7 +133,6 @@ if (!empty($bulk[1]))
                                 <input class="form-control" name="import_url" id="import_url" size=60 placeholder="http://company.com/page/one.html" type="text" title="Enter single URL" value="" />
                             </div>
                             <p>(or enter bulk list of URLs to automatically import)</p>
-                            <hr />
                         </div>
                         <div class="form-group">
                             <label class="h6 small d-block text-uppercase">
@@ -154,7 +143,6 @@ if (!empty($bulk[1]))
                                 <textarea class="form-control" name="import_bulk" id="import_bulk" rows=4 cols=80 title="Enter single URL, or a list of URLs, one per line" ></textarea>
                             </div>
                             <p>(or upload a single URL to import)</p>
-                            <hr />
                         </div>
                         <div class="form-group">
                             <label class="h6 small d-block text-uppercase">
@@ -166,7 +154,6 @@ if (!empty($bulk[1]))
                             <br />IMPORTANT: at a minimum, ensure file is in JSON format with at least this key:
                             <code>{ "URLS" : ['url1','url2',etc.]}</code>
                             </p>
-                            <hr />
                         </div>
                     </div>
                     <div class="col-sm-6 mb-6">
@@ -183,7 +170,6 @@ if (!empty($bulk[1]))
                             <br /><code>     { "callback" : "Class", "params" : {"key" : "val"}}</code>
                             <br /><code>]}}</code>
                             </p>
-                            <hr />
                             <?php foreach ($transform as $key => $item) :
                                     $callback = $item['callback'] ?? NULL;
                                     echo '<b>' . $key . '</b><br />';
@@ -206,7 +192,6 @@ if (!empty($bulk[1]))
                                 <input class="form-control" name="target_url" id="target_url" size=60 placeholder="http://company.com/page/title" type="text" />
                             </div>
                             <p>Optional destination.  If not set, uses "path" from import URL source as destination.</p>
-                            <hr />
                         </div>
                     </div>
                 </div>

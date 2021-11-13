@@ -9,17 +9,10 @@ if (!empty($OBJ)) {
     $uri    = $OBJ->uri;
     $config = $OBJ->config;
 }
-// check to see if authenticated
-$message = Messages::getInstance();
-if (Profile::verify($config) === FALSE) {
-    Profile::logout();
-    $message->addMessage(Messages::ERROR_AUTH);
-    header('Location: /');
-    exit;
-}
 // init vars
-$edit      = new Edit($config);
 $contents  = '';
+$edit      = new Edit($config);
+$message   = Messages::getInstance();
 $super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
 // build dropdown list of existing pages
 $pages = $edit->getListOfPages();
@@ -52,7 +45,6 @@ $msg     = $message->getMessages() ?? Messages::CHOOSE;
         <div class="col-lg-12">
           <form class="choose_form" action="<?= $super_url ?>/edit" method="get">
             <h2>Edit Existing Page</h2>
-            <hr />
             <div class="form-group">
                 <label class="h6 small d-block text-uppercase">
                     Enter URL from this Website (or choose from Page List)
@@ -62,7 +54,6 @@ $msg     = $message->getMessages() ?? Messages::CHOOSE;
                     <input class="form-control" name="page_url" id="page_url" size=60 placeholder="http://company.com/page/title" type="text" />
                 </div>
             </div>
-            <hr />
             <div class="form-group">
                 <label class="h6 small d-block text-uppercase">
                     Choose from Page List (or Enter URL)
@@ -70,7 +61,6 @@ $msg     = $message->getMessages() ?? Messages::CHOOSE;
                 </label>
                 <div class="input-group"><?= $select ?></div>
             </div>
-            <hr />
             <div class="form-group">
                 <input name="choose_edit_page" type="submit" class="btn btn-primary btn-circled" value="Edit Existing Page">
                 <input name="choose_new_page" type="submit" class="btn btn-primary btn-circled" value="Add New Page">

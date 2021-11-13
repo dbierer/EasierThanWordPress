@@ -1,6 +1,7 @@
 <?php
 use FileCMS\Common\Security\Profile;
 use FileCMS\Common\Generic\Messages;
+if (!empty($_SESSION['attempts'])) $_SESSION['attempts'] = NULL;
 Profile::logout();
 $message = Messages::getInstance();
 $message->addMessage(Messages::SUCCESS_LOGOUT);

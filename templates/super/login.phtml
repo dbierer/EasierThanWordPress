@@ -15,8 +15,11 @@ Profile::logout();
 $hashKey = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
 $message = Messages::getInstance();
 $msg     = $message->getMessages() ?? Messages::LOGIN;
-$other   = [];
-$super_url = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
+$other   = '';
+$super_url  = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;
+$allowed_ip = $config['SUPER']['allowed_ip'] ?? [];
+$validation = $config['SUPER']['validation'] ?? [];
+$ip         = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 if ($_POST) {
     // capture login params
     $name   = $_POST['name']     ?? 'Default';
@@ -29,16 +32,13 @@ if ($_POST) {
     $valid_other = $_SESSION['other'] ?? 'Not Set';
     $valid_hash  = $_SESSION[$hashKey] ?? 'Not Set';
     // expected results
-    $expected = 3;
+    $expected = 4;
     // validate login
     $valid = 0;
     $valid += (int) ($name === $valid_name);
     $valid += (int) ($pwd  === $valid_pwd);
     $valid += (int) password_verify($phrase, $valid_hash);
-    if (!empty($other)) {
-        $expected++;
-        $valid += (int) ($other === $valid_other);
-    }
+    $valid += (int) ($other === $valid_other);
     if ($valid === $expected) {
         // store md5 of selected $_SERVER array settings
         Profile::set(Profile::build($config));
@@ -49,21 +49,16 @@ if ($_POST) {
         $msg = $config['SUPER']['message'] ?? Messages::ERROR_LOGIN;
     }
 }
+// add "other" authentication factor
+$other = array_rand($validation);
+$_SESSION['other'] = $validation[$other];
 // login attempt control
 $max      = $config['SUPER']['attempts'] ?? 3;
 $attempts = $_SESSION['attempts'] ?? 0;
 $_SESSION['attempts'] = ++$attempts;
 if ($attempts > $max) {
-    $validation = $config['SUPER']['validation'] ?? [];
-    if (!empty($validation)) {
-        $count = count($validation);
-        $idx   = rand(1, $count) - 1;
-        $key   = array_keys($validation)[$idx] ?? '';
-        if (!empty($validation[$key])) {
-            $other = $key;
-            $_SESSION['other'] = $validation[$key];
-        }
-    }
+    sleep(rand(1,5));
+    error_log('Excessive Login Attempts: ' . $ip);
 }
 // generate CAPTCHA
 $token   = bin2hex(random_bytes(4));
@@ -120,7 +115,6 @@ $_SESSION[$hashKey] = $hash;
                     </div>
                     <!-- End Input -->
 
-                    <?php if (!empty($other)) : ?>
                     <!-- Input -->
                     <div class="col-sm-6 mb-6">
                         <div class="form-group">
@@ -135,19 +129,25 @@ $_SESSION[$hashKey] = $hash;
                         </div>
                     </div>
                     <!-- End Input -->
-                    <?php endif; ?>
 
-                <div class="">
-                    <br />
-                    &nbsp;&nbsp;Prove you're human! Enter the characters below:<br />&nbsp;&nbsp;
-                    <?php foreach ($images as $fn) : ?><img src="/img/captcha/<?= $fn; ?>" style="width:50px;height:auto;" /><?php endforeach; ?>
-                    &nbsp;<input type="text" name="phrase" placeholder="I'm not a robot" /><br /><br />
-                    <input type="hidden" id="source" name="source" value="<?= $config['HOST'] . $uri; ?>" />
-                    <input name="submit" type="submit" class="btn btn-primary btn-circled" value="Login" />
-
+                </div>
+                <div class="row">
+                    <!-- Input -->
+                    <div class="col-sm-12 mb-12">
+                        <div class="form-group">
+                            &nbsp;&nbsp;Prove you're human! Enter the characters below:<br />&nbsp;&nbsp;
+                            <?php foreach ($images as $fn) : ?><img src="/img/captcha/<?= $fn; ?>" style="width:50px;height:auto;" /><?php endforeach; ?>
+                            &nbsp;<input type="text" name="phrase" placeholder="I'm not a robot" /><br /><br />
+                            <input type="hidden" id="source" name="source" value="<?= $config['HOST'] . $uri; ?>" />
+                            <br />
+                            <input name="submit" type="submit" class="btn btn-primary btn-circled" value="Login" />
+                        </div>
+                    </div>
+                    <!-- End Input -->
                 </div>
             </form>
             <!-- End Contacts Form -->
+
            <!-- form message -->
             <div class="row">
                 <div class="col-12">

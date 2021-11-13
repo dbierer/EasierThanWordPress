@@ -8,18 +8,11 @@ if (!empty($OBJ)) {
     $uri    = $OBJ->uri;
     $config = $OBJ->config;
 }
-// check to see if authenticated
-$message  = Messages::getInstance();
-if (Profile::verify($config) === FALSE) {
-    Profile::logout();
-    $message->addMessage(Messages::ERROR_AUTH);
-    header('Location: /');
-    exit;
-}
 // init vars
 $key      = '';
-$edit     = new Edit($config);
 $contents = '';
+$edit     = new Edit($config);
+$message  = Messages::getInstance();
 $edit_width = $config['SUPER']['ckeditor']['width'] ?? 900;
 $edit_height = $config['SUPER']['ckeditor']['height'] ?? 500;
 $super_url   = $config['SUPER']['super_url'] ?? Edit::DEFAULT_SUPER;

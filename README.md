@@ -89,12 +89,42 @@ http://localhost:8888/
 http://10.10.10.10/
 ```
 
+## Bootstrap and Document Root
+Set the website document root to `/public`
+* The central point of entry is `/public/index.php`
+* There is a file `.htaccess` that controls URL rewriting
+* If you are using *nginx* you will need to incorporate the same logic into your primary config file
+* `/public/index.php` first loads the *bootstrap* file `/bootstrap.php`
+  * This file defines three key constants used throughout the program (summarized in the table shown next)
+  * The bootstrap file also load the Composer autoloader
+  * If you add your own classes under `/src` be sure to update `composer.json` and refresh Composer autoloading:
+```
+composer dump-autoload
+```
+Here is a summary of the three key constants defined by `/bootstrap.php`.  Change as needed.
+
+| Constant | Default | Description |
+| :------  | :------ | :----------
+| BASE_DIR | Same directory as `bootstrap.php` | Project root |
+| HTML_DIR | `/templates/site` | Location of HTML snippets |
+| SRC_DIR  | `/src` | Location of source code |
+
+
 ## Templates
+By default templates are stored in `/templates/site`.  You can alter this in the config file.
 ### Config File
 Default: `/src/config/config.php`
 * Delimiter: `DELIM` defaults to `%%`
 * "Cards" `CARDS` defaults to `cards`
   * Represents the subdirectory under which view renderer expects to file HTML "cards"
+### Layout
+The overall website look-and-feel is in a single HTML file, by default in `/templates/layout/layout.phtml`.
+* The view rendered by requests is injected into the layout by replacing `%%CONTENTS%%`.
+
+### HTML
+You can create HTML snippets designed to fit into `layout.phtml` any place in the designated HTML directory.
+* Be sure to set the constant `HTML_DIR` in the file `/bootstrap.php`.
+
 ### Cards
 #### Auto-Populate All Cards
 To get an HTML file to auto-populate with cards use this syntax:
@@ -222,3 +252,9 @@ Here are some notes on config file settings under the `TRANSFORM` config key:
   * Directory where transform classes are found
 * `TRANSFORM::transform_file_field`
   * Name of the form field that is used if you want to upload a set of transforms
+
+## Pre-Processing
+Before the final HTML view is rendered, `/public/index.php` includes `/src/processsing.php`.
+In this file you can include any pre-processing you need done.
+* The request URL is available as the variable `$uri`
+* This is where the admin URL is captured and sent to processing

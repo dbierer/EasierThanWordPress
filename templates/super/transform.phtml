@@ -9,15 +9,6 @@ if (!empty($OBJ)) {
     $uri    = $OBJ->uri;
     $config = $OBJ->config;
 }
-// check to see if authenticated and feature enabled
-$enabled = (isset($config['TRANSFORM']['enable'])) ? $config['TRANSFORM']['enable'] : FALSE;
-if (!$enabled || Profile::verify($config) === FALSE) {
-    Profile::logout();
-    $message = Messages::getInstance();
-    $message->addMessage('Unable to authenticate');
-    header('Location: /');
-    exit;
-}
 // init vars
 $message   = Messages::getInstance();
 $edit      = new Edit($config);
@@ -116,7 +107,6 @@ if (!empty($bulk))
                             </label>
                             <div class="input-group"><input type="file" name="<?= $trans_field ?>" /></div>
                             <p>(or manually enter one or more pages to transform)</p>
-                            <hr />
                         </div>
                     </div>
                     <div class="col-sm-6 mb-6">
@@ -125,7 +115,6 @@ if (!empty($bulk))
                                 Transform Filters to Apply
                             </label>
                             <p>Expand list of transform filters by adding to the <i>TRANSFORM::transforms</i> configuration array</p>
-                            <hr />
                             <?= $transform_list ?>
                         </div>
                     </div>

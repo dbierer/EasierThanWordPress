@@ -39,7 +39,7 @@ namespace FileCMS\Transform;
 use FileCMS\Common\Transform\Base;
 class Replace extends Base
 {
-    const DESCRIPTION = 'Perform search and replace based upon config settings using str_replace() or str_ireplace(). If $case is TRUE, performs case-sensitive replacement; case-insensitive is the default.';
+    const DESCRIPTION = 'Perform search and replace based upon config settings using str_replace() or str_ireplace(). If $case is 1, performs case-sensitive replacement; case-insensitive is the default.';
     public $case = FALSE;
     public $search = '';
     public $replace = '';

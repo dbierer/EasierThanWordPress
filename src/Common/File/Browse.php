@@ -101,12 +101,14 @@ class Browse
         while ($list->valid()) {
             $key = $list->key();
             $fn  = $list->current();
+            $size = $this->getStrSize(filesize($fn));
             $thumb_url = $this->getThumbUrlFromImageUrl($key, $fn);
             $id   = 'img_' . $count++;
             $html = '<div style="' . self::DISPLAY_STYLE . '">'
                   . '<a style="cursor:pointer;" name="' . $id . '" onclick="returnFileUrl(\'' . $id . '\')">'
                   . '<img src="' . $thumb_url . '" alt="' . $key . '" style="' . self::DISP_IMG_STYLE . '"/>'
                   . '</a>'
+                  . '<br />Size: ' . $size
                   . '<input type="hidden" id="' . $id . '" value="' . $key . '" />'
                   . '</div>'
                   . '&nbsp;';
@@ -115,6 +117,22 @@ class Browse
         }
     }
 
+    /**
+     * Returns size as nnn M or nnn K
+     *
+     * @param int $size
+     * @return string $str_size
+     */
+    protected function getStrSize($size)
+    {
+        $str_size = (string) $size;
+        if ($size > 1000000) {
+            $str_size = sprintf('%.1fM', $size / 1000000);
+        } elseif ($size > 1000) {
+            $str_size = sprintf('%.1fK', $size / 1000);
+        }
+        return $str_size;
+    }
     /**
      * Creates thumbnail for an image
      * NOTE: requires the GD extension
