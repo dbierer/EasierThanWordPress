@@ -22,6 +22,14 @@ class ReplaceTest extends TestCase
         $actual = (new Replace())($text, $params);
         $this->assertEquals($expected, $actual, 'Text was not replaced.');
     }
+    public function testInvokeRemovesTextIfReplaceParamIsEmpty()
+    {
+        $text = '<img src="https://my.web.site.com/images/test" />';
+        $expected = '<img src="/images/test" />';
+        $params = ['search' => 'https://my.web.site.com'];
+        $actual = (new Replace())($text, $params);
+        $this->assertEquals($expected, $actual, 'Text was not replaced.');
+    }
     public function testInvokeCaseInSensitiveWorks()
     {
         $text = '<img src="https://my.web.site.com/images/test" />';

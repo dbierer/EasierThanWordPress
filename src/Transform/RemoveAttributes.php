@@ -55,14 +55,17 @@ class RemoveAttributes extends Base
         if (empty($this->attributes)) return $html;
         if (is_string($this->attributes))
             $this->attributes = explode(',', $this->attributes);
-        $search = ['!\b%s=".+?"!',"!\b%s='.+?'!",'!\b%s=.+?\b!'];
+        $search = ['!\b%s=".*?"!',"!\b%s='.*?'!",'!\b%s=.+?(\b|\>|/\>)!'];
         foreach ($this->attributes as $attrib) {
             $attrib = trim($attrib);
-            $patt = [];
-            foreach ($search as $blank)
-                $patt[] = sprintf($blank, $attrib);
-            $html = preg_replace($patt, ' ', $html);
-            $html = str_replace('  ',' ',$html);
+            foreach ($search as $blank) {
+                $patt = sprintf($blank, $attrib);
+                if (preg_match($patt, $html)) {
+                    $html = preg_replace($patt, ' ', $html);
+                    $html = str_replace('  ',' ',$html);
+                    break;
+                }
+            }
         }
         $html = str_replace('  ',' ',$html);
         $html = str_replace(' >','>',$html);

@@ -11,7 +11,7 @@ elif [[ "$1" = "up" ||  "$1" = "start" ]]; then
 elif [[ "$1" = "down" ||  "$1" = "stop" ]]; then
     docker-compose down
     sudo chown -R $USER:$USER *
-    sudo chown -R $USER:$USER .*
+    sudo chmod -R 775 .*
     rm 1
 elif [[ "$1" = "build" ]]; then
     docker-compose build $2

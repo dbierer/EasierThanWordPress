@@ -97,4 +97,11 @@ class UploadTest extends TestCase
         $actual   = substr($error, 0, strlen($expected));
         $this->assertEquals($expected, $actual, 'Did not return correct error response if invalid MIME type');
     }
+    public function testHandleUploadsFileCorrectly()
+    {
+        $upload = new Upload($this->config);
+        $error    = TRUE;
+        $actual   = FALSE;
+        $this->assertEquals($expected, $actual, 'Did not return correct error response if invalid MIME type');
+    }
 }

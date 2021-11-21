@@ -7,10 +7,11 @@ use RecursiveDirectoryIterator;
 class Html
 {
     const DEFAULT_CARD_DIR = 'cards';
-    const DEFAULT_LAYOUT   = BASE_DIR . '/layout.html';
-    const DEFAULT_HOME     = 'index.html';
+    const DEFAULT_LAYOUT   = BASE_DIR . '/layouts/layout.html';
+    const DEFAULT_HOME     = HTML_DIR . '/home.phtml';
     const DEFAULT_DELIM    = '%%';
     const DEFAULT_EXT      = ['html', 'htm'];
+    const FALLBACK_HOME    = 'fallback.html';
     public $uri    = '';
     public $htmDir = '';
     public $delim  = '';

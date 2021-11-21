@@ -52,12 +52,15 @@ class Upload
     const UPLOAD_ERROR_IMAGE_SIZE = 'ERROR: existing width x height: %d  x %d. Allowed width x weight: %d x %d';
     const UPLOAD_ERROR_FILE_SIZE  = 'ERROR: maximum file size: %s bytes';
     const UPLOAD_ERROR_MISSING    = 'ERROR: configuration is missing the "UPLOADS" key';
+    const UPLOAD_ERROR_FIELD      = 'ERROR: uploads field is missing: check to see if your form field name is correct';
     const UPLOAD_DEFAULT_URL      = '/images';
     const UPLOAD_DEFAULT_EXT      = ['jpg','jpeg','png','gif','bmp'];
     const UPLOAD_DEFAULT_TYPES    = ['image/'];
     const UPLOAD_DEFAULT_WIDTH    = 1000;
     const UPLOAD_DEFAULT_HEIGHT   = 1000;
     const UPLOAD_DEFAULT_SIZE     = 3000000;
+    const UPLOAD_PERMISSIONS      = 0644;
+    const UPLOAD_FIELD_NAME       = 'upload';
     public $allowed_hosts         = ['localhost' => 'localhost', 'your.website.com' => 'your.website.com'];
     public $errors                = [];
     public $config                = [];
@@ -80,8 +83,9 @@ class Upload
      */
     public function handle(string $field)
     {
-        $upload_dir  = $this->config['upload_dir'] ?? '/tmp';
+        $upload_dir  = $this->config['img_dir'] ?? '/tmp';
         $fn          = $_FILES[$field]['name'] ?? '';
+        $size        = $_FILES[$field]['size'] ?? 0;
         $tmp_file    = $_FILES[$field]['tmp_name'] ?? '';
         $url         = $this->config['url'] ?? self::UPLOAD_DEFAULT_URL;
         $allowed_ext = $this->config['allowed_ext'] ?? self::UPLOAD_DEFAULT_EXT;
@@ -89,7 +93,8 @@ class Upload
         $response = [
             'uploaded' => 1,
             'fileName' => $fn,
-            'url'      => $url . '/' . $fn
+            'url'      => $url . '/' . $fn,
+            'size'     => $size
         ];
         if (empty($fn) || empty($tmp_file)) {
             $this->errors[] = self::UPLOAD_ERROR_UPLOAD;
@@ -114,7 +119,9 @@ class Upload
         }
         // looks good ... move the file
         $uploadpath = str_replace('//', '/', $upload_dir . '/' . $fn);
+        error_log(__METHOD__ . ':' . __LINE__ . ':' . $uploadpath);
         if (move_uploaded_file($_FILES['upload']['tmp_name'], $uploadpath)) {
+            chmod($uploadpath, self::UPLOAD_PERMISSIONS);
             $url = str_replace('//', '/', $url . '/' . $fn);
             $message->addMessage(sprintf(self::UPLOAD_SUCCESS, $fn, filesize($tmp_file)));
         } else {
@@ -187,6 +194,7 @@ class Upload
     {
         $response['uploaded'] = 0;
         $response['error'] = trim(implode("\n", $this->errors));
+        error_log(__METHOD__ . ':' . var_export($this->errors, TRUE));
         return $response;
     }
 }

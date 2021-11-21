@@ -1,0 +1,35 @@
+<?php
+use FileCMS\Common\File\Upload;
+use FileCMS\Common\Generic\Messages;
+// process contact post (if any)
+// $OBJ == calling instance
+if (!empty($OBJ)) {
+    $uri    = $OBJ->uri;
+    $config = $OBJ->config;
+}
+// init vars
+$message     = Messages::getInstance();
+// check to see if we need to upload anything
+if (!empty($_POST)) {
+    // check to see if "upload" is set
+    if (empty($_FILES[Upload::UPLOAD_FIELD_NAME])) {
+        $message->addMessage(Upload::UPLOAD_ERROR_FIELD);
+    } else {
+        $upload = new Upload($config);
+        $response = $upload->handle(Upload::UPLOAD_FIELD_NAME);
+        // check response
+        if (empty($response['uploaded'])) {
+            $message->addMessage(Upload::UPLOAD_ERROR_IMAGE);
+        } elseif ($response['uploaded'] === 0) {
+           if (!empty($response['error'])) $message->addMessage($response['error']);
+        } else {
+            $fn = $response['fileName'] ?? 'Unknown';
+            $url = $response['url'] ?? '/images/alien.png';
+            $size = $response['size'] ?? 0;
+            $html = '<a target="_blank" href="' . $url . '">' . basename($fn) . '</a>';
+            $message->addMessage(sprintf(Upload::UPLOAD_SUCCESS, $fn, $size));
+            $message->addMessage($html);
+        }
+    }
+}
+require __DIR__ . '/choose.phtml';

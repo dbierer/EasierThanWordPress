@@ -93,9 +93,10 @@ $config = [
     ],
     'UPLOADS' => [
         'restrict_size' => TRUE,    // set to FALSE to ignore size restrictions
-        'create_thumbs' => FALSE,     // set TRUE to enable automatic thumbnail creation
-        'img_width'   => 500,
-        'img_height'  => 500,
+        'create_thumbs' => FALSE,   // set TRUE to enable automatic thumbnail creation
+        'path_exclude'  => [],      // directory path fragment to exclude from list of images
+        'img_width'   => 1000,
+        'img_height'  => 1000,
         'img_size'    => 3000000,
         'allowed_ext' => ['jpg','jpeg','png','gif','bmp'],
         'img_dir'  => BASE_DIR . '/public/images',

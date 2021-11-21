@@ -49,6 +49,7 @@ class Browse
     const DEFAULT_IMG_DIR   = BASE_DIR . '/public/images';
     const DEFAULT_THUMB_DIR = BASE_DIR . '/public/images/thumb';
     const DEFAULT_THUMB_URL = '/images/thumb';
+    const DEFAULT_PATH_EXCLUDE = ['newsletters'];
     const THUMB_WIDTH       = 75;
     const DISPLAY_STYLE     = 'background-color:#E5E5E5;'
                             . 'margin=10px;'
@@ -69,6 +70,7 @@ class Browse
     public $img_url       = '';
     public $thumb_dir     = '';
     public $thumb_url     = '';
+    public $path_exclude  = [];
     public $create_thumbs = FALSE;
     public $queue         = []; // files queued to make thumbnail images
     /**
@@ -85,6 +87,7 @@ class Browse
         $this->thumb_dir = $this->config['thumb_dir'] ?? self::DEFAULT_THUMB_DIR;
         $this->thumb_url = $this->config['thumb_url'] ?? self::DEFAULT_THUMB_URL;
         $this->create_thumbs = $this->config['create_thumbs'] ?? FALSE;
+        $this->path_exclude  = $this->config['path_exclude'] ?? self::DEFAULT_THUMB_EXCLUDE;
     }
 
     /**
@@ -157,7 +160,7 @@ class Browse
             // make sure underlying directory is created
             $thumb_dir = dirname($thumb_fn);
             if (!file_exists($thumb_dir))
-                mkdir($thumb_dir, 0664, TRUE);
+                mkdir($thumb_dir, 0755, TRUE);
             // save
             $save = 'image' . (self::GD_MAP[strtolower($ext)] ?? 'jpeg');
             $result = $save($thumb, $thumb_fn);
@@ -212,11 +215,22 @@ class Browse
             $this->images = new ArrayIterator();
             foreach ($itIt as $name => $obj) {
                 $ext = strtolower($obj->getExtension());
-                $ok  = in_array($ext, $this->allowed);
-                if ($ok) {
-                    $url = $this->img_url . '/' . str_replace($path, '', $name);
-                    $url = str_replace('//', '/', $url);
-                    $this->images->offsetSet($url, $name);
+                // make sure extension is allowed
+                if (in_array($ext, $this->allowed)) {
+                    $ok = TRUE;
+                    $path = $obj->getPath();
+                    // check to see if image is in excluded path
+                    foreach ($this->path_exclude as $dir) {
+                        if (stripos($path, $dir) !== FALSE) {
+                            $ok = FALSE;
+                            break;
+                        }
+                    }
+                    if ($ok) {
+                        $url = $this->img_url . '/' . str_replace($path, '', $name);
+                        $url = str_replace('//', '/', $url);
+                        $this->images->offsetSet($url, $name);
+                    }
                 }
             }
             $this->images->ksort();
