@@ -6,7 +6,7 @@ $config = [
     'HOST'   => '',
     'DELIM'  => '%%',
     // use '' for CACHE if you want to disable it
-    'CACHE'  => BASE_DIR . '/logs/cache.txt',
+    'CACHE'  => BASE_DIR . '/data/cache.txt',
     'META' => [
         'default' => [
             'title' => 'FileCMS',

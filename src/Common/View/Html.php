@@ -12,19 +12,27 @@ class Html
     const DEFAULT_DELIM    = '%%';
     const DEFAULT_EXT      = ['html', 'htm'];
     const FALLBACK_HOME    = 'fallback.html';
-    public $uri    = '';
-    public $htmDir = '';
-    public $delim  = '';
-    public $config = [];
+    public $uri     = '';
+    public $htmDir  = '';
+    public $cardDir = '';
+    public $delim   = '';
+    public $config  = [];
     public $allowed = [];   // allowed extensions
     public function __construct(array $config, string $uri, string $htmlDir)
     {
         $this->config  = $config;
         $this->uri     = $uri;
         $this->htmlDir = $htmlDir;
+        $this->cardDir = $config['CARDS'] ?? static::DEFAULT_CARD_DIR;
         $this->delim   = $config['DELIM'] ?? static::DEFAULT_DELIM;
         $this->allowed = $config['SUPER']['allowed_ext'] ?? self::DEFAULT_EXT;
     }
+    /**
+     * Produces HTML snippet injected into layout
+     *
+     * @param string $body : existing body if any
+     * @return string $html : full HTML page
+     */
     public function render(string $body = '')
     {
         // pull in layout and body
@@ -40,7 +48,30 @@ class Html
             $this->injectMeta($layout, $tag, $val);
         }
         // work with body: if html, just read contents
-        if (!$body) {
+        $body = $this->partial($body);
+        // render and deliver final output
+        $search   = $this->delim . 'CONTENTS' . $this->delim;
+        $output   = str_replace($search, $body, $layout);
+        // replace message if present
+        if ($msg && strpos($output, $this->config['MSG_MARKER'])) {
+            $msg = '<div class="row justify-content-between">' . $msg . '</div>' . PHP_EOL;
+            $output = str_replace($this->config['MSG_MARKER'], $msg, $output);
+        }
+        return $output;
+    }
+    /**
+     * Produces partial HTML snippet to be injected into layout
+     *
+     * @param string $body : existing body if any
+     * @return string $html : full HTML page
+     */
+    public function partial(string $body = '')
+    {
+        // pull in layout and body
+        $msg    = '';
+        $output = '';
+        // work with body: if html, just read contents
+        if (empty($body)) {
             // try HTML and HTM extensions
             foreach ($this->allowed as $ext) {
                 $bodyFn = $this->htmlDir . $this->uri . '.' . $ext;
@@ -68,28 +99,12 @@ class Html
                 }
             }
         }
-        try {
-            // inject cards into body
-            $card_dir = $this->config['CARDS'] ?? self::DEFAULT_CARD_DIR;
-            $iter = new RecursiveDirectoryIterator($this->htmlDir);
-            foreach ($iter as $dir => $obj) {
-                $name = $obj->getBasename();
-                if ($obj->isDir() && $name !== '.' && $name !== '..')
-                    $body = $this->injectCards($body, $dir, $card_dir);
-            }
-        } catch (Throwable $t) {
-            error_log($t);
+        // inject cards into body
+        if (stripos($body, $this->delim) !== FALSE) {
+            $search = '!' . $this->delim . '(.+?)' . $this->delim . '!i';
+            $body = preg_replace_callback($search, [$this, 'injectCards'], $body);
         }
-
-        // render and deliver final output
-        $search   = $this->delim . 'CONTENTS' . $this->delim;
-        $output   = str_replace($search, $body, $layout);
-        // replace message if present
-        if ($msg && strpos($output, $this->config['MSG_MARKER'])) {
-            $msg = '<div class="row justify-content-between">' . $msg . '</div>' . PHP_EOL;
-            $output = str_replace($this->config['MSG_MARKER'], $msg, $output);
-        }
-        return $output;
+        return $body;
     }
     /**
      * Populates <HEAD> section with  meta tags and title
@@ -111,67 +126,81 @@ class Html
     }
     /**
      * Populates body with cards
+     * Called from preg_replace_callback()
      *
-     * @param string $body : final HTML to be produced (by ref)
-     * @param string $dir  : name of current card dir we're working on
-     * @param string $card_dir : directory name for cards (default "cards")
+     * @param array $match : what got matched during this pass
      * @return string $body : HTML w/ cards injected
      */
-    public function injectCards(string $body, string $dir, string $card_dir)
+    public function injectCards(array $match)
     {
-        // randomize linked list of cards
-        $name = basename($dir);
-        $search = $this->delim . strtoupper($name);
-        if (stripos($body, $search) !== FALSE) {
-            $search = '!' . $this->delim . strtoupper($name) . '(.*?)?' . $this->delim . '!i';
-            preg_match($search, $body, $matches);
-            $qualifier = $matches[1] ?? '';
+        $card = '';
+        $item = $match[1] ?? '';
+        if ($item === FALSE) return '';
+        // figure out if matched item is stand-alone, or has args
+        if (strpos($item, '=') !== FALSE) {
+            [$dir, $qualifier] = explode('=', $item);
             $qualifier = trim($qualifier);
-            // randomize linked list of cards
-            if (empty($qualifier)) {
-                $iter = $this->getCardIterator($dir, $card_dir);
+        } else {
+            $dir = $item;
+            $qualifier = '';
+        }
+        $dir = $this->getDir($dir);
+        // randomize linked list of cards
+        if (empty($qualifier)) {
+            $iter = $this->getCardIterator($dir);
+        } else {
+            // otherwise look for ","
+            if (strpos($qualifier, ',') !== FALSE) {
+                $iter = $this->getOrderedCardIterator($dir, $qualifier);
+            // is a number?
+            } elseif (ctype_digit((string) $qualifier)) {
+                $iter = $this->getCardIterator($dir, $this->cardDir);
+                $temp = clone $iter;
+                $iter = new LimitIterator($temp, 0, (int) $qualifier);
+                $iter->rewind();
+            // is a single card?
+            } elseif (strlen($qualifier) > 0) {
+                $iter = $this->getOrderedCardIterator($dir, $qualifier);
             } else {
-                // get rid of "="
-                $qualifier = trim(str_replace('=', '', $qualifier));
-                // is it just a number?
-                if (((int) $qualifier) > 0) {
-                    $iter = $this->getCardIterator($dir, $card_dir);
-                    $temp = clone $iter;
-                    $iter = new LimitIterator($temp, 0, (int) $qualifier);
-                    $iter->rewind();
-                // otherwise look for ","
-                } elseif (strpos($qualifier, ',') !== FALSE) {
-                    $iter = $this->getOrderedCardIterator($dir, $card_dir, $qualifier);
-                } else {
-                    $iter = FALSE;
-                }
-            }
-            // loop through iteration
-            if ($iter !== FALSE) {
-                $card = '';
-                while ($iter->valid()) {
-                    $fn = $iter->current();
-                    $card .= (file_exists($fn)) ? file_get_contents($fn) : '';
-                    $iter->next();
-                }
-                $body = str_replace($matches[0], $card, $body);
+                $iter = FALSE;
             }
         }
-        return $body;
+        // loop through iteration
+        if ($iter !== FALSE) {
+            while ($iter->valid()) {
+                $fn = $iter->current();
+                $card .= (file_exists($fn)) ? file_get_contents($fn) : '';
+                $iter->next();
+            }
+        }
+        return $card;
+    }
+    /**
+     * Produces confirmed directory path
+     *
+     * @param string $dir   : relative directory
+     * @return string $path : absolute directory path or '' if not found
+     */
+    public function getDir(string $dir)
+    {
+        $path = str_replace('//', '/', $this->htmlDir . '/' . $dir);
+        if (!file_exists($path)) {
+            $path = str_replace('//', '/', $this->htmlDir . '/' . strtolower($dir));
+        }
+        return (file_exists($path)) ? $path : '';
     }
     /**
      * Produces randomized iteration of cards
      *
      * @param string $dir  : current card dir we're working on
-     * @param string $card_dir : directory name for cards
      * @return ArrayIterator $list | bool FALSE
      */
-    public function getCardIterator(string $dir, string $card_dir)
+    public function getCardIterator(string $dir)
     {
         $iter  = FALSE;
         $cards = [];
         $temp  = [];
-        $dir   = str_replace('//', '/', $dir . '/' . $card_dir);
+        $dir   = str_replace('//', '/', $dir . '/' . $this->cardDir);
         $list  = glob($dir . '/*');
         if ($list) {
             foreach ($list as $fn)
@@ -188,15 +217,14 @@ class Html
      * Produces ordered iteration of cards
      *
      * @param string $dir       : current card dir we're working on
-     * @param string $card_dir  : directory name for cards
      * @param string $qualifier : something like "adding_intelligence,talk_to_users,etc."
      * @return ArrayIterator $iter | bool FALSE
      */
-    public function getOrderedCardIterator(string $dir, string $card_dir, string $qualifier)
+    public function getOrderedCardIterator(string $dir, string $qualifier)
     {
         // build out directory path
         $list = explode(',', $qualifier);
-        $path = $dir . '/' . $card_dir;
+        $path = $dir . '/' . $this->cardDir;
         foreach ($list as $key => $value) {
             $value = trim($value);
             $value .= (substr($value, -4) !== 'html') ? '.html' : '';

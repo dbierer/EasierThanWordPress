@@ -126,6 +126,8 @@ You can create HTML snippets designed to fit into `layout.phtml` any place in th
 * Be sure to set the constant `HTML_DIR` in the file `/bootstrap.php`.
 
 ### Cards
+Important: each `%%CARD%%` directive you add **must** be on its own line!
+
 #### Auto-Populate All Cards
 To get an HTML file to auto-populate with cards use this syntax:
 ```

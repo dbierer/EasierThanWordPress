@@ -42,6 +42,27 @@ EOT;
         $actual = $body;;
         $this->assertEquals($expected, $actual, 'Meta tag not injected');
     }
+    public function testGetDirReturnsEmptyIfPathNotFound()
+    {
+        $dir = 'xyz';
+        $expected = '';
+        $actual = $this->html->getDir($dir);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testGetDirReturnsCorrectPath()
+    {
+        $dir = 'blog';
+        $expected = BASE_DIR . '/templates/site/blog';
+        $actual = $this->html->getDir($dir);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testGetDirReturnsCorrectPathIfDirUppercase()
+    {
+        $dir = 'BLOG';
+        $expected = BASE_DIR . '/templates/site/blog';
+        $actual = $this->html->getDir($dir);
+        $this->assertEquals($expected, $actual);
+    }
     public function testGetCardIteratorReturnsIterator()
     {
         $expected = 'ArrayIterator';
@@ -52,38 +73,36 @@ EOT;
     }
     public function testGetOrderedCardIterator()
     {
-        $expected = 'one.html two.html three.html';
-        $dir      = BASE_DIR . '/templates/site/blog';
-        $iter     = $this->html->getOrderedCardIterator($dir, 'cards', 'one,two,three');
-        $actual   = '';
-        foreach ($iter as $item)
-            $actual .= basename($item) . ' ';
-        $actual   = trim($actual);
+        $dir     = $this->html->getDir('blog');
+        $iter    = $this->html->getOrderedCardIterator($dir, 'one,two,three');
+        $copy    = $iter->getArrayCopy();
+        $real    = glob(BASE_DIR . '/templates/site/blog/cards/*.html');
+        $actual   = array_diff($real, $copy);
+        $expected = [BASE_DIR . '/templates/site/blog/cards/four.html'];
         $this->assertEquals($expected, $actual, 'Ordered results not produced');
     }
-    public function testInjectCardsSingle()
+    public function testPartialSingle()
     {
         $body     = '<html><body>%%BLOG=1%%</body></html>';
-        $dir      = BASE_DIR . '/templates/site/blog';
-        $body     = $this->html->injectCards($body, $dir, 'cards');
+        $body     = $this->html->partial($body);
         $expected = TRUE;
         $actual   = (bool) strpos($body, '<h3 class="card-title">');
         $this->assertEquals($expected, $actual, 'Card not injected');
     }
-    public function testInjectCardsTriple()
+    public function testPartialTriple()
     {
         $body     = '<html><body>%%BLOG=3%%</body></html>';
         $dir      = BASE_DIR . '/templates/site/blog';
-        $body     = $this->html->injectCards($body, $dir, 'cards');
+        $body     = $this->html->partial($body);
         $expected = 3;
         $actual   = substr_count($body, '<h3 class="card-title">');
         $this->assertEquals($expected, $actual, 'Multiple cards not injected properly');
     }
-    public function testInjectCardsOrdered()
+    public function testPartialOrdered()
     {
         $body     = '<html><body>%%BLOG=one,two,three%%</body></html>';
         $dir      = BASE_DIR . '/templates/site/blog';
-        $body     = $this->html->injectCards($body, $dir, 'cards');
+        $body     = $this->html->partial($body);
         $expected = ['<a href="/blog/one">Card One</a>','<a href="/blog/two">Card Two</a>','<a href="/blog/three">Card Three</a>'];
         $pattern  = '!>(.*?)</h3>!';
         $matches  = [];
@@ -91,12 +110,24 @@ EOT;
         $actual   = $matches[1] ?? 'Fail';
         $this->assertEquals($expected, $actual, 'Multiple cards not injected in order');
     }
-    /*
+    public function testPartialSingleByName()
+    {
+        $body     = '<html><body>%%BLOG=one%%</body></html>';
+        $dir      = BASE_DIR . '/templates/site/blog';
+        $body     = $this->html->partial($body);
+        $expected = '<a href="/blog/one">Card One</a>';
+        $pattern  = '!>(.*?)</h3>!';
+        $matches  = [];
+        preg_match($pattern, $body, $matches);
+        $actual   = $matches[1] ?? 'Fail';
+        $this->assertEquals($expected, $actual, 'Single card by name not injected');
+    }
     public function testRender()
     {
-        $this->html = new Html($this->config, '/home', HTML_DIR);
-        // string $body = ''
+        $expected = TRUE;
+        $html     = $this->html->render();
+        $actual   = (bool) strpos($html, 'Business Name or Tagline');
+        $this->assertEquals($expected, $actual);
     }
-    */
 }
 

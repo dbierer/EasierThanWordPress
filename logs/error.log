@@ -1,7 +1,0 @@
-Sat Nov 20 20:46:23 EST 2021
-[21-Nov-2021 01:47:51 UTC] FileCMS\Common\File\Upload::getErrorResponse:array (
-  0 => 'ERROR: existing width x height: 688  x 1000. Allowed width x weight: 500 x 500',
-)
-[21-Nov-2021 01:51:04 UTC] FileCMS\Common\File\Upload::handle:122:/tmp/kitten_surin_apr_2021.jpg
-[21-Nov-2021 01:52:11 UTC] FileCMS\Common\File\Upload::handle:122:/repo/public/images/kitten_surin_apr_2021.jpg
-[21-Nov-2021 01:54:50 UTC] FileCMS\Common\File\Upload::handle:122:/repo/public/images/kitten_surin_apr_2021.jpg
