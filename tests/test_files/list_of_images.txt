@@ -1,0 +1,8 @@
+tests/test_files/images/blog-2.jpg
+tests/test_files/images/test/test.jpg
+tests/test_files/images/blog-3.jpg
+tests/test_files/images/blog-1.jpg
+tests/test_files/images/fon_100.png
+tests/test_files/images/fon_favorite_100px.png
+tests/test_files/images/xyz/fon_100.png
+tests/test_files/images/blog-4.jpg

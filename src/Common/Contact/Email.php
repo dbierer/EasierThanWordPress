@@ -5,6 +5,9 @@ use PHPMailer\PHPMailer\PHPMailer;
 class Email extends Base
 {
     const BODY_PATTERN = '%-20s : %s' . "\n";
+    const DEFAULT_SUBJECT = 'Customer Request';
+    const DEFAULT_SUCCESS = 'SUCCESS: email sent';
+    const DEFAULT_ERROR   = 'ERROR: unable to send email';
     /**
      * @param array $config : from /src/config/config.php
      * @param array $post   : $_POST
@@ -22,12 +25,12 @@ class Email extends Base
         $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
         $phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
         if ($_POST) {
-            $msg = $config['COMPANY_EMAIL']['ERROR'];
+            $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
             if (!empty($email)) {
                 $body    = "\n";
                 foreach ($inputs as $key => $value)
                     $body .= sprintf(self::BODY_PATTERN, ucfirst($key), $value);
-                $subject = $inputs['subject'] ?? 'PHP-CL Contact/Comment/Career';
+                $subject = $inputs['subject'] ?? self::DEFAULT_SUBJECT;
                 $msg = Email::confirmAndSend($email, $config, $subject, $body);
             }
         }
@@ -39,7 +42,7 @@ class Email extends Base
         string $subject,
         string $body)
     {
-        $msg       = $config['COMPANY_EMAIL']['ERROR'];
+        $msg       = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
         $phraseKey = $config['captcha']['input_tag_name'] ?? 'phrase';
         $hashKey   = $config['captcha']['sess_hash_key'] ?? 'hash';
         $phrase    = $_REQUEST[$phraseKey] ?? '';
@@ -58,12 +61,12 @@ class Email extends Base
                     $mail = new PHPMailer();
                     if ($phpmailerConfig['smtp']) {
                         $mail->IsSMTP();
-                        $mail->Host       = $phpmailerConfig['smtp_host'];
+                        $mail->Host       = $phpmailerConfig['smtp_host'] ?? '';
                         $mail->Port       = $phpmailerConfig['smtp_port'];
                         $mail->SMTPAuth   = $phpmailerConfig['smtp_auth'];
-                        $mail->Username   = $phpmailerConfig['smtp_username'];
-                        $mail->Password   = $phpmailerConfig['smtp_password'];
-                        $mail->SMTPSecure = $phpmailerConfig['smtp_secure'];
+                        $mail->Username   = $phpmailerConfig['smtp_username'] ?? '';
+                        $mail->Password   = $phpmailerConfig['smtp_password'] ?? '';
+                        $mail->SMTPSecure = $phpmailerConfig['smtp_secure'] ?? 'tls';
                     }
                     // set up mail obj
                     $mail->setFrom($from);
@@ -74,12 +77,12 @@ class Email extends Base
                     $mail->Body    = $body;
                     //send the message, check for errors
                     if ($mail->send()) {
-                        $msg = $config['COMPANY_EMAIL']['SUCCESS'];
+                        $msg = $config['COMPANY_EMAIL']['SUCCESS'] ?? self::DEFAULT_SUCCESS;
                     } else {
-                        $msg = $config['COMPANY_EMAIL']['ERROR'];
+                        $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
                     }
                 } catch (\Exception $e) {
-                    $msg = $config['COMPANY_EMAIL']['ERROR'];
+                    $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
                     error_log(__METHOD__ . ':' . $e->getMessage());
                 }
             } else {

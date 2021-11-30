@@ -2,17 +2,21 @@
 namespace FileCMSTest\Common\File;
 
 use FilterIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use InvalidArgumentException;
 use FileCMS\Common\File\Browse;
 use PHPUnit\Framework\TestCase;
 class BrowseTest extends TestCase
 {
+    public $testImgFileList = [];
     public $testFileDir = '';
     public $config = [];
     public function setUp() : void
     {
         $this->testFileDir = realpath(__DIR__ . '/../../test_files');
         $this->testImgDir = $this->testFileDir . '/images';
+        $this->testImgFileList = file($this->testFileDir . '/list_of_images.txt');
         $this->config = include __DIR__ . '/../../../src/config/config.php';
         $this->config['UPLOADS']['img_dir'] = $this->testFileDir . '/images';
         $this->config['UPLOADS']['thumb_dir']  = $this->testFileDir . '/thumb';
@@ -63,6 +67,7 @@ class BrowseTest extends TestCase
     {
         $browse = new Browse($this->config);
         $browse->img_dir = $this->testImgDir;
+        $browse->path_exclude = [];
         $images = $browse->getListOfImages($this->testImgDir);
         $expected = 'ArrayIterator';
         $actual = get_class($images);
@@ -73,6 +78,7 @@ class BrowseTest extends TestCase
         $browse = new Browse($this->config);
         $browse->img_dir = $this->testImgDir;
         $browse->allowed    = ['jpg'];
+        $browse->path_exclude = [];
         $images = $browse->getListOfImages($this->testImgDir);
         $images->rewind();
         $expected = '/images/blog-1.jpg';
@@ -84,6 +90,7 @@ class BrowseTest extends TestCase
         $browse = new Browse($this->config);
         $browse->img_dir = $this->testImgDir;
         $browse->allowed    = ['jpg'];
+        $browse->path_exclude = [];
         $images = $browse->getListOfImages($this->testImgDir);
         $images->rewind();
         $expected = $this->testImgDir . '/blog-1.jpg';
@@ -94,11 +101,9 @@ class BrowseTest extends TestCase
     {
         $browse = new Browse($this->config);
         $browse->img_dir = $this->testImgDir;
+        $browse->path_exclude = [];
         $images = $browse->getListOfImages($this->testImgDir);
-        $expected = count(glob($this->testImgDir . '/*.jpg'))
-                    + count(glob($this->testImgDir . '/*.png'))
-                    + count(glob($this->testImgDir . '/test/*.png'))
-                    + count(glob($this->testImgDir . '/test/*.jpg'));
+        $expected = count($this->testImgFileList);
         $actual = $images->count();
         $this->assertEquals($expected, $actual, 'Browse::getListOfImages() did not return expected count');
     }
@@ -107,8 +112,11 @@ class BrowseTest extends TestCase
         $browse = new Browse($this->config);
         $browse->img_dir = $this->testImgDir;
         $browse->allowed    = ['png'];
+        $browse->path_exclude = [];
         $images = $browse->getListOfImages($this->testImgDir);
-        $expected = count(glob($this->testImgDir . '/*.png'));
+        $expected = 0;
+        foreach ($this->testImgFileList as $name)
+            if (strpos($name, '.png') !== FALSE) $expected++;
         $actual = $images->count();
         $this->assertEquals($expected, $actual, 'Browse::getListOfImages() did not return expected value when only PNG allowed');
     }
@@ -118,8 +126,10 @@ class BrowseTest extends TestCase
         $browse->img_dir = $this->testImgDir;
         $browse->path_exclude    = ['xyz'];
         $images = $browse->getListOfImages($this->testImgDir);
-        $expected = count(glob($this->testImgDir . '/*'));
-        $actual = $images->count() + 1;
+        $expected = 0;
+        foreach ($this->testImgFileList as $name)
+            if (strpos($name, 'xyz') === FALSE) $expected++;
+        $actual = $images->count();
         $this->assertEquals($expected, $actual);
     }
     public function testMakeThumbnailCreatesImageReturnsFalseIfImageDoesntExist()
@@ -129,6 +139,7 @@ class BrowseTest extends TestCase
         $browse = new Browse($this->config);
         $browse->img_dir = $this->testImgDir;
         $browse->allowed    = ['jpg'];
+        $browse->path_exclude = [];
         $result = $browse->makeThumbnail($img_fn);
         $expected = FALSE;
         $actual   = $result;
@@ -147,6 +158,7 @@ class BrowseTest extends TestCase
         $browse->img_dir = $this->testImgDir;
         $browse->thumb_dir  = $thumb_dir;
         $browse->allowed    = ['jpg'];
+        $browse->path_exclude = [];
         $result = $browse->makeThumbnail($img_fn);
         $list   = glob($thumb_fn);
         $expected = $thumb_fn;
@@ -167,6 +179,7 @@ class BrowseTest extends TestCase
         $browse = new Browse($this->config);
         $browse->img_dir = $this->testImgDir;
         $browse->thumb_dir  = $thumb_dir;
+        $browse->path_exclude = [];
         $result = $browse->makeThumbnail($img_fn);
         $list   = glob($thumb_fn);
         $expected = $thumb_fn;
@@ -179,11 +192,13 @@ class BrowseTest extends TestCase
         $browse = new Browse($this->config);
         $browse->img_dir = $this->testImgDir;
         $browse->allowed    = ['png'];
+        $browse->path_exclude = [];
         $generator = $browse->handle();
-        $expected = count(glob($this->testImgDir . '/*.png'));
         $actual = 0;
-        foreach ($generator as $item)
-            $actual += (strpos($item, 'input')) ? 1 : 0;
+        foreach ($generator as $html) $actual++;
+        $expected = 0;
+        foreach ($this->testImgFileList as $name)
+            if (strpos($name, '.png') !== FALSE) $expected++;
         $this->assertEquals($expected, $actual, 'Browse::handle() did not return expected number of image references when only PNG allowed');
     }
 }

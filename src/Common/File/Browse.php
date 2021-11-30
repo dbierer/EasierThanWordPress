@@ -214,23 +214,28 @@ class Browse
             $itIt = new RecursiveIteratorIterator($iter);
             $this->images = new ArrayIterator();
             foreach ($itIt as $name => $obj) {
+                // skip '.' and '..' and directories
+                if ($obj->isDir()) continue;
+                if (basename($name) === '.') continue;
+                if (basename($name) === '..') continue;
                 $ext = strtolower($obj->getExtension());
-                // make sure extension is allowed
-                if (in_array($ext, $this->allowed)) {
-                    $ok = TRUE;
-                    $path = $obj->getPath();
-                    // check to see if image is in excluded path
+                // skip disallowed extensions
+                if (!in_array($ext, $this->allowed)) continue;
+                // check to see if image is in excluded path
+                $ok = TRUE;
+                $imgPath = $obj->getPath();
+                if (!empty($this->path_exclude)) {
                     foreach ($this->path_exclude as $dir) {
-                        if (stripos($path, $dir) !== FALSE) {
+                        if (stripos($imgPath, $dir) !== FALSE) {
                             $ok = FALSE;
                             break;
                         }
                     }
-                    if ($ok) {
-                        $url = $this->img_url . '/' . str_replace($path, '', $name);
-                        $url = str_replace('//', '/', $url);
-                        $this->images->offsetSet($url, $name);
-                    }
+                }
+                if ($ok) {
+                    $url = $this->img_url . '/' . str_replace($path, '', $name);
+                    $url = str_replace('//', '/', $url);
+                    $this->images->offsetSet($url, $name);
                 }
             }
             $this->images->ksort();
