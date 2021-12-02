@@ -118,31 +118,36 @@ class Edit
      */
     public function getListOfPages(string $path = HTML_DIR)
     {
-        if (empty($this->pages)) {
-            $iter = new RecursiveDirectoryIterator($path);
-            $itIt = new RecursiveIteratorIterator($iter);
-            $filt = new class ($itIt, $this->allowed) extends FilterIterator {
-                public $allowed = [];
-                public function __construct($iter, $allowed)
+        $iter = new RecursiveDirectoryIterator($path);
+        $itIt = new RecursiveIteratorIterator($iter);
+        $filt = new class ($itIt, $this->allowed) extends FilterIterator {
+            public $allowed = [];
+            public function __construct($iter, $allowed)
+            {
+                parent::__construct($iter);
+                $this->allowed = $allowed;
+            }
+            public function accept()
+            {
+                $ok  = FALSE;
+                $obj = $this->current() ?? FALSE;
+                $name = $this->key() ?? '';
+                if (!empty($obj)
+                    && $obj instanceof SplFileInfo
+                    && !$obj->isDir()
+                    && !empty($name)
+                    && $name !== '.'
+                    && $name !== '..')
                 {
-                    parent::__construct($iter);
-                    $this->allowed = $allowed;
+                    $ext = strtolower($obj->getExtension());
+                    $ok  = in_array($ext, $this->allowed);
                 }
-                public function accept()
-                {
-                    $ok  = FALSE;
-                    $obj = $this->current() ?? FALSE;
-                    if ($obj && $obj instanceof SplFileInfo) {
-                        $ext = strtolower($obj->getExtension());
-                        $ok  = in_array($ext, $this->allowed);
-                    }
-                    return $ok;
-                }
-            };
-            foreach ($filt as $name => $obj)
-                $this->pages[$this->getKeyFromFilename($name, $path)] = $name;
-            ksort($this->pages);
-        }
+                return $ok;
+            }
+        };
+        foreach ($filt as $name => $obj)
+            $this->pages[$this->getKeyFromFilename($name, $path)] = $name;
+        ksort($this->pages);
         return $this->pages;
     }
     /**

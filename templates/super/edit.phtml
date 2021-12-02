@@ -46,6 +46,8 @@ if (!empty($_POST)) {
             } else {
                 $message->addMessage(Edit::ERROR_DEL);
             }
+            header('Location: /super/choose');
+            exit;
         } else {
             $message->addMessage(Edit::SUCCESS_CANCEL);
         }
