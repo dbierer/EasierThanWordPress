@@ -49,7 +49,7 @@ class Browse
     const DEFAULT_IMG_DIR   = BASE_DIR . '/public/images';
     const DEFAULT_THUMB_DIR = BASE_DIR . '/public/images/thumb';
     const DEFAULT_THUMB_URL = '/images/thumb';
-    const DEFAULT_PATH_EXCLUDE = ['newsletters'];
+    const DEFAULT_PATH_EXCLUDE = [];
     const THUMB_WIDTH       = 75;
     const DISPLAY_STYLE     = 'background-color:#E5E5E5;'
                             . 'margin=10px;'
@@ -87,7 +87,7 @@ class Browse
         $this->thumb_dir = $this->config['thumb_dir'] ?? self::DEFAULT_THUMB_DIR;
         $this->thumb_url = $this->config['thumb_url'] ?? self::DEFAULT_THUMB_URL;
         $this->create_thumbs = $this->config['create_thumbs'] ?? FALSE;
-        $this->path_exclude  = $this->config['path_exclude'] ?? self::DEFAULT_THUMB_EXCLUDE;
+        $this->path_exclude  = $this->config['path_exclude'] ?? self::DEFAULT_PATH_EXCLUDE;
     }
 
     /**
