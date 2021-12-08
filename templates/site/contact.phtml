@@ -28,6 +28,8 @@ $captcha = new Captcha($config['CAPTCHA']);
 $images  = $captcha->writeImages($token);
 $hash    = password_hash($captcha->phrase, PASSWORD_BCRYPT);
 $_SESSION[$hashKey] = $hash;
+// form config
+$form_config = $config['COMPANY_EMAIL']['fields'] ?? [];
 ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
@@ -56,81 +58,51 @@ $_SESSION[$hashKey] = $hash;
             <!-- Contacts Form -->
             <form class="contact_form" action="mail.php">
                 <div class="row">
-                    <!-- Input -->
-                    <div class="col-sm-6 mb-6">
-                        <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                Your name
-                                <span class="text-danger">*</span>
-                            </label>
+                    <?php if (empty($form_config)) : ?>
+                        <?php include __DIR__ . '/../layout/contact.html'; ?>
+                    <?php else : ?>
+                        <?php foreach ($form_config as $key => $item) : ?>
+                            <?php $type = $item['attributes']['type'] ?? 'text'; ?>
+                            <?php $name = $item['attributes']['name'] ?? 'unknown'; ?>
+                            <?php $attr = $item['attributes'] ?? []; ?>
+                            <?php if ($type === 'textarea') : ?>
+                                <!-- Textarea -->
+                                <div class="col-sm-6 mb-6">
+                                    <div class="form-group">
+                                        <label class="h6 small d-block text-uppercase">
+                                            <?= $item['label'] ?? 'Unknown' ?>
+                                            <span class="text-danger">*</span>
+                                        </label>
 
-                            <div class="input-group">
-                                <input class="form-control" name="name" id="name" required="" placeholder="John Doe" type="text">
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Input -->
+                                        <div class="input-group">
+                                            <textarea name="<?= $name ?>" id="<?= $name ?>" <?php foreach ($attr as $x => $y) echo $x . '="' . $y . '" '; ?> >
+                                            </textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Textarea -->
+                            <?php elseif ($type === 'hidden') : ?>
+                                <!-- Hidden -->
+                                <input name="<?= $name ?>" id="<?= $name ?>" <?php foreach ($attr as $x => $y) echo $x . '="' . $y . '" '; ?> >
+                                <!-- End Text -->
+                            <?php else : ?>
+                                <!-- Text -->
+                                <div class="col-sm-6 mb-6">
+                                    <div class="form-group">
+                                        <label class="h6 small d-block text-uppercase">
+                                            <?= $item['label'] ?? 'Unknown' ?>
+                                            <span class="text-danger">*</span>
+                                        </label>
 
-                    <!-- Input -->
-                    <div class="col-sm-6 mb-6">
-                        <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                Your email address
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <div class="input-group ">
-                                <input class="form-control" name="email" id="email" required="" placeholder="john@gmail.com" type="email">
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Input -->
-
-                    <div class="w-100"></div>
-
-                    <!-- Input -->
-                    <div class="col-sm-6 mb-6">
-                        <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                Subject
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <div class="input-group">
-                                <input class="form-control" name="subject" id="subject" required="" placeholder="Website Quote" type="text">
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Input -->
-
-                    <!-- Input -->
-                    <div class="col-sm-6 mb-6">
-                        <div class="form-group">
-                            <label class="h6 small d-block text-uppercase">
-                                Your Phone Number
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <div class="input-group ">
-                                <input class="form-control" id="phone" name="phone" required="" placeholder="1-800-643-4500" type="text">
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Input -->
-                </div>
-
-                <!-- Input -->
-                <div class="form-group mb-5">
-                    <label class="h6 small d-block text-uppercase">
-                        How can we help you?
-                        <span class="text-danger">*</span>
-                    </label>
-
-                    <div class="input-group">
-                        <textarea class="form-control" rows="4" name="message" id="message" required="" placeholder="Hello, I would like to ..."></textarea>
-                    </div>
-                </div>
-                <!-- End Input -->
+                                        <div class="input-group">
+                                            <input name="<?= $name ?>" id="<?= $name ?>" <?php foreach ($attr as $x => $y) echo $x . '="' . $y . '" '; ?> />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Text -->
+                            <?php endif ; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
 
                 <div class="">
                     <br />

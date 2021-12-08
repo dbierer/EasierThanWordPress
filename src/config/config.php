@@ -1,4 +1,5 @@
 <?php
+use FileCMS\Common\Security\{Filter, Validation};
 $config = [
     'CARDS'  => 'cards',
     'LAYOUT' => BASE_DIR . '/templates/layout/layout.html',
@@ -49,17 +50,6 @@ $config = [
         'db_name' => 'REPL_DB_NAME',
         'db_user' => 'REPL_DB_USER',
         'db_pwd'  => 'REPL_DB_PWD',
-        'tables'  => [
-            'contacts' => [
-                'name'    => function($item) { return trim(substr($item, 0, 64));   },
-                'email'   => function($item) { return trim(substr($item, 0, 255));  },
-                'phone'   => function($item) { return trim(substr($item, 0, 32));   },
-                'subject' => function($item) { return trim(substr($item, 0, 64));   },
-                'source'  => function($item) { return trim(substr($item, 0, 64));   },
-                'message' => function($item) { return trim(substr($item, 0, 4096)); },
-                'created' => function()      { return date('Y-m-d H:i:s');    },
-            ],
-        ],
         // backup command for your database
         'db_cmd' => 'mysqldump -u%%REPL_DB_USER%% -p%%REPL_DB_PWD%% %%REPL_DB_NAME%%',
         // set this to 1 to enable automated backups using /backup.sh
@@ -80,6 +70,99 @@ $config = [
             'smtp_username' => 'REPL_SMTP_USERNAME',// Username if smtp_auth is true
             'smtp_password' => 'REPL_SMTP_PASSWORD',// Password if smtp_auth is true
             'smtp_secure'   => 'tls',               // Supported SMTP secure connection - 'none, 'ssl', or 'tls'
+        ],
+        'fields' => [
+            'contacts' => [
+                'name'    => [
+                    'label' => 'Your Name',
+                    'attributes' => [
+                        ['type' => 'text', 'class' => 'form-control', 'required' => '""', 'placeholder' => 'John Doe'],
+                    ],
+                    'validator' => [
+                        ['callback' => Validation::alpha, 'params' => ['allowed' => [' ']]],
+                    ],
+                    'filter' => [
+                        ['callback' => Filter::truncate, 'params' => ['length' => 64]],
+                        ['callback' => Filter::trim],
+                        ['callback' => Filter::stripTags],
+                    ],
+                ],
+                'email'   => [
+                    'label' => 'Your Email Address',
+                    'attributes' => [
+                        ['type' => 'email', 'class' => 'form-control', 'required' => '""', 'placeholder' => 'john@gmail.com'],
+                    ],
+                    'validator' => [
+                        ['callback' => Validation::email],
+                    ],
+                    'filter' => [
+                        ['callback' => Filter::truncate, 'params' => ['length' => 255]],
+                        ['callback' => Filter::trim],
+                        ['callback' => Filter::stripTags],
+                    ],
+                ],
+                'phone'   => [
+                    'label' => 'Your Phone Number (optional)',
+                    'attributes' => [
+                        ['type' => 'text', 'class' => 'form-control', 'required' => '""', 'placeholder' => '+1-800-643-4500'],
+                    ],
+                    'validator' => [
+                        ['callback' => Validation::phone, 'params' => ['allowed' => ['+','-',' ']]],
+                    ],
+                    'filter' => [
+                        ['callback' => Filter::truncate, 'params' => ['length' => 32]],
+                        ['callback' => Filter::trim],
+                        ['callback' => Filter::stripTags],
+                    ],
+                ],
+                'subject' => [
+                    'label' => 'What\'s This About?',
+                    'attributes' => [
+                        ['type' => 'text', 'class' => 'form-control', 'required' => '""', 'placeholder' => 'Subject line for the email you wish to send'],
+                    ],
+                    'validator' => [
+                        ['callback' => Validation::alpha, 'params' => ['allowed' => [',','-',' ',':']]],
+                    ],
+                    'filter' => [
+                        ['callback' => Filter::truncate, 'params' => ['length' => 64]],
+                        ['callback' => Filter::trim],
+                        ['callback' => Filter::stripTags],
+                    ],
+                ],
+                'source'  => [
+                    'label' => 'URL of Where You Heard About Us',
+                    'attributes' => [
+                        ['type' => 'text', 'class' => 'form-control', 'required' => '""', 'placeholder' => 'https://unlikelysource.com'],
+                    ],
+                    'validator' => [
+                        ['callback' => Validation::url],
+                    ],
+                    'filter' => [
+                        ['callback' => Filter::truncate, 'params' => ['length' => 64]],
+                        ['callback' => Filter::trim],
+                        ['callback' => Filter::stripTags],
+                    ],
+                ],
+                'message' => [
+                    'label' => 'What Would You Like to Tell Us?',
+                    'attributes' => [
+                        ['type' => 'textarea', 'rows' => '4', 'placeholder' => 'Hello, I would like to ...'],
+                    ],
+                    'filter' => [
+                        ['callback' => Filter::truncate, 'params' => ['length' => 4096]],
+                        ['callback' => Filter::trim],
+                        ['callback' => Filter::stripTags],
+                    ],
+                ],
+                'created' => [
+                    'attributes' => [
+                        ['type' => 'hidden'],
+                    ],
+                    'filter' => [
+                        ['callback' => Filter::date],
+                    ],
+                ],
+            ],
         ],
     ],
     'MSG_MARKER'  => '<!-- %%MESSAGES%% -->',
