@@ -32,14 +32,16 @@ namespace FileCMS\Common\Security;
  *
  */
 
-class Validation
+class Validation extends Base
 {
-    const ERR_ALPHA = 'Non alpha and non-allowed characters found ';
+    const ERR_ALPHA = 'Non alpha and non-allowed characters found';
     const ERR_ALNUM = 'Non alpha-nunmeric and non-allowed characters found';
     const ERR_DIGIT = 'Text does not contain only numbers and non-allowed characters';
     const ERR_EMAIL = 'Invalid email address';
     const ERR_PHONE = 'Invalid phone number';
     const ERR_URL   = 'Invalid URL';
+    const ERR_TOO_LONG = 'Text is too long';
+    const ERR_TOO_SHORT = 'Text is too short';
     public static $errMessage = [];
     /**
      * Runs a set of validators against a string
@@ -51,6 +53,13 @@ class Validation
      */
     public static function runValidators(string $text, array $callbacks)
     {
+        $expected = 0;
+        $actual   = 0;
+        foreach ($callbacks as $method => $params) {
+            $expected++;
+            $actual += (int) self::$method($text, $params);
+        }
+        return ($expected === $actual);
     }
     /**
      * Returns error messages as a string
@@ -81,6 +90,25 @@ class Validation
         return $valid;
     }
     /**
+     * Validates digits
+     *
+     * @param string $text
+     * @param array $params : Allows list of characters in "allowed" parameter key
+     * @return bool : TRUE if only digits found, FALSE otherwise
+     */
+    public static function digits(string $text, array $params = [])
+    {
+        $valid = TRUE;
+        $allowed = $params['allowed'] ?? [];
+        foreach ($allowed as $item)
+            $text  = str_replace($item, '', $text);
+        if (!ctype_digit($text)) {
+            self::$errMessage[] = self::ERR_DIGIT;
+            $valid = FALSE;
+        }
+        return $valid;
+    }
+    /**
      * Validates alpha-numeric
      *
      * @param string $text
@@ -100,46 +128,22 @@ class Validation
         return $valid;
     }
     /**
-     * Validates digits
-     *
-     * @param string $text
-     * @param array $params : not used
-     * @return bool : TRUE if only digits found, FALSE otherwise
-     */
-    public static function digits(string $text, array $params = [])
-    {
-        $valid = TRUE;
-        if (!ctype_digit($text)) {
-            self::$errMessage[] = self::ERR_DIGIT;
-            $valid = FALSE;
-        }
-        return $valid;
-    }
-    /**
      * Validates phone number
      *
      * @param string $text
      * @param array $params : Allows list of characters in "allowed" parameter key
-     * @return bool : TRUE if only digits found, FALSE otherwise
+     * @return bool : TRUE if valid phone number, FALSE otherwise
      */
     public static function phone(string $text, array $params = [])
     {
-        $valid = TRUE;
-        $allowed = $params['allowed'] ?? [];
-        foreach ($allowed as $item)
-            $text  = str_replace($item, '', $text);
-        if (!ctype_digit($text)) {
-            self::$errMessage[] = self::ERR_PHONE;
-            $valid = FALSE;
-        }
-        return $valid;
+        return self::digits($text, $params);
     }
     /**
      * Validates email address
      *
      * @param string $text
      * @param array $params : not used
-     * @return bool : TRUE if only digits found, FALSE otherwise
+     * @return bool : TRUE if valid email, FALSE otherwise
      */
     public static function email(string $text, array $params = [])
     {
@@ -155,13 +159,51 @@ class Validation
      *
      * @param string $text
      * @param array $params : not used
-     * @return bool : TRUE if only digits found, FALSE otherwise
+     * @return bool : TRUE if valid URL found, FALSE otherwise
      */
     public static function url(string $text, array $params = [])
     {
         $valid = TRUE;
         if (!filter_var($text, FILTER_VALIDATE_URL)) {
             self::$errMessage[] = self::ERR_URL;
+            $valid = FALSE;
+        }
+        return $valid;
+    }
+    /**
+     * Checks if string is too long
+     *
+     * @param string $text
+     * @param array $params : "size" : string must be < or = to this value
+     * @return bool : TRUE if string is not too long, FALSE otherwise
+     */
+    public static function notTooLong(string $text, array $params = [])
+    {
+        $valid = TRUE;
+        $size  = (isset($params['size']))
+               ? (int) $params['size']
+               : strlen($text);
+        if (strlen($text) > $size) {
+            self::$errMessage[] = self::ERR_TOO_LONG;
+            $valid = FALSE;
+        }
+        return $valid;
+    }
+    /**
+     * Checks if string is too short
+     *
+     * @param string $text
+     * @param array $params : "size" : string must be > or = to this value
+     * @return bool : TRUE if string is not too short, FALSE otherwise
+     */
+    public static function notTooShort(string $text, array $params = [])
+    {
+        $valid = TRUE;
+        $size  = (isset($params['size']))
+               ? (int) $params['size']
+               : strlen($text);
+        if (strlen($text) < $size) {
+            self::$errMessage[] = self::ERR_TOO_SHORT;
             $valid = FALSE;
         }
         return $valid;

@@ -32,18 +32,22 @@ namespace FileCMS\Common\Security;
  *
  */
 
-class Filter
+class Filter extends Base
 {
     const DEFAULT_DATE = 'Y-m-d H:i:s';
     /**
      * Runs a set of filters against a string
      *
      * @param string $text : string to filter
-     * @param array $callbacks : array of callbacks to call: all callbacks need to return bool
+     * @param array $callbacks : array of callbacks to call: all callbacks need to return string
      * @return string $text : the filtered text is returned
      */
     public static function runFilters(string $text, array $callbacks)
     {
+        foreach ($callbacks as $method => $params) {
+            $text = self::$method($text, $params);
+        }
+        return $text;
     }
     /**
      * Trims white space and "\n"
@@ -76,7 +80,10 @@ class Filter
      */
     public static function truncate(string $text, array $params = [])
     {
-        return substr($text, 0, $size);
+        $length = (isset($params['length']))
+                ? (int) $params['length']
+                : strlen($text);
+        return substr($text, 0, $length);
     }
     /**
      * Produces current date and time

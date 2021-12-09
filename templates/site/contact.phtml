@@ -1,24 +1,50 @@
 <?php
 use FileCMS\Common\Image\Captcha;
 use FileCMS\Common\Contact\{Email,Storage};
+use FileCMSTest\Common\Security\{Filter,Validation};
 // process contact post (if any)
 // $OBJ == calling instance
 if (!empty($OBJ)) {
     $uri    = $OBJ->uri;
     $config = $OBJ->config;
 }
+$fields = $config['COMPANY_EMAIL']['fields'] ?? [];
 if ($_POST) {
     $body = '';
     $log = $config['CONTACT_LOG'];
     $inputs = $_POST;
-    $msg = Email::processPost($config, $inputs, $body);
-    // store message in database
-    $storage = new Storage($config);
-    $storage->save('contacts', $inputs);
-    // log body + message
-    $body .= ($msg) ? "\n$msg\n" : '';
-    if ($body) {
-        file_put_contents($log, $body, FILE_APPEND);
+    $expected = 0;
+    $actual   = 0;
+    if (!empty($fields)) {
+        // validate form data
+        foreach ($fields as $name => $settings) {
+            $text = $inputs[$name] ?? '';
+            if (!empty($text)) {
+                $callbacks = $settings['validator'] ?? [];
+                if (!empty($callbacks)) {
+                    $expected++;
+                    $actual += (int) Validation::runValidators($text, $callbacks);
+                }
+            }
+        }
+        if ($expectd !== $actual) {
+            $msg = Validation::getMessages();
+        } else {
+            // TODO: filter form data
+            $msg = Email::processPost($config, $inputs, $body);
+            $store    = $config['STORAGE']['db_enabled'] ?? FALSE;
+            $store    = (bool) $store;
+            // store message in database
+            if ($store) {
+                $storage = new Storage($config);
+                $storage->save('contacts', $inputs);
+            }
+            // log body + message
+            $body .= ($msg) ? "\n$msg\n" : '';
+            if ($body) {
+                file_put_contents($log, $body, FILE_APPEND);
+            }
+        }
     }
 }
 // generate CAPTCHA
@@ -28,8 +54,6 @@ $captcha = new Captcha($config['CAPTCHA']);
 $images  = $captcha->writeImages($token);
 $hash    = password_hash($captcha->phrase, PASSWORD_BCRYPT);
 $_SESSION[$hashKey] = $hash;
-// form config
-$form_config = $config['COMPANY_EMAIL']['fields'] ?? [];
 ?>
   <!-- Header -->
   <header class="bg-primary py-5 mb-5">
@@ -58,10 +82,10 @@ $form_config = $config['COMPANY_EMAIL']['fields'] ?? [];
             <!-- Contacts Form -->
             <form class="contact_form" action="mail.php">
                 <div class="row">
-                    <?php if (empty($form_config)) : ?>
+                    <?php if (empty($fields)) : ?>
                         <?php include __DIR__ . '/../layout/contact.html'; ?>
                     <?php else : ?>
-                        <?php foreach ($form_config as $key => $item) : ?>
+                        <?php foreach ($fields as $key => $item) : ?>
                             <?php $type = $item['attributes']['type'] ?? 'text'; ?>
                             <?php $name = $item['attributes']['name'] ?? 'unknown'; ?>
                             <?php $attr = $item['attributes'] ?? []; ?>

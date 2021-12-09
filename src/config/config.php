@@ -1,5 +1,4 @@
 <?php
-use FileCMS\Common\Security\{Filter, Validation};
 $config = [
     'CARDS'  => 'cards',
     'LAYOUT' => BASE_DIR . '/templates/layout/layout.html',
@@ -16,11 +15,12 @@ $config = [
         ],
     ],
     'SUPER' => [
-        'username'  => 'admin',
-        'password'  => 'password',
+        'username'  => 'REPL_SUPER_NAME',  // fill in your username here
+        'password'  => 'REPL_SUPER_PWD',   // fill in your password here
         'attempts'  => 3,
         'message'   => 'Sorry! Unable to login.  Please contact your administrator',
         // array of $_SERVER keys to store in session if authenticated
+        // helps prevent forged attacks
         'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE','HTTP_COOKIE'],
         // change the values to reflect the names of fields in your login.phtml form
         'login_fields' => [
@@ -29,11 +29,18 @@ $config = [
             'other'    => 'other',
             'phrase'   => 'phrase',     // CAPTCHA phrase
         ],
+        /*
+         * extra login validation fields
+         * change key/value pairs as desired
+         * add as many as you want
+         * they're selected at random when asked to login
+         */
         'validation'   => [
             'City'        => 'London',
             'Postal Code' => 'NW1 6XE',
             'Last Name'   => 'Holmes',
         ],
+        // only files with these extensions can be edited
         'allowed_ext'  => ['html','htm'],
         'ckeditor'     => [
             'width'  => '100%',
@@ -45,17 +52,27 @@ $config = [
         'backup_dir' => BASE_DIR . '/backups',
         'backup_cmd' => BASE_DIR . 'zip -r %%BACKUP_FN%% %%BACKUP_SRC%%',
     ],
+    /*
+     * Storage settings are optional
+     * Can be used if you want to also incorporate a database
+     */
     'STORAGE' => [
+        // set this to 1 to enable database
+        'db_enabled' => 0,
         'db_host' => 'localhost',
         'db_name' => 'REPL_DB_NAME',
         'db_user' => 'REPL_DB_USER',
         'db_pwd'  => 'REPL_DB_PWD',
-        // backup command for your database
-        'db_cmd' => 'mysqldump -u%%REPL_DB_USER%% -p%%REPL_DB_PWD%% %%REPL_DB_NAME%%',
         // set this to 1 to enable automated backups using /backup.sh
         'db_backup_enabled' => 0,
         'db_backup_dir' => BASE_DIR . '/backups',
+        // backup command for your database
+        'db_cmd' => 'mysqldump -u%%REPL_DB_USER%% -p%%REPL_DB_PWD%% %%REPL_DB_NAME%%',
     ],
+    /*
+     * These settings are primarily used for the email contact form
+     * Sample form can be found at /templates/site/contact.phtml
+     */
     'COMPANY_EMAIL' => [
         'to'   => '',
         'cc'   => '',
@@ -72,95 +89,115 @@ $config = [
             'smtp_secure'   => 'tls',               // Supported SMTP secure connection - 'none, 'ssl', or 'tls'
         ],
         'fields' => [
-            'contacts' => [
-                'name'    => [
-                    'label' => 'Your Name',
-                    'attributes' => [
-                        ['type' => 'text', 'class' => 'form-control', 'required' => '""', 'placeholder' => 'John Doe'],
-                    ],
-                    'validator' => [
-                        ['callback' => Validation::alpha, 'params' => ['allowed' => [' ']]],
-                    ],
-                    'filter' => [
-                        ['callback' => Filter::truncate, 'params' => ['length' => 64]],
-                        ['callback' => Filter::trim],
-                        ['callback' => Filter::stripTags],
-                    ],
+            // Key is used for the "name" and "id" attributes of the HTML input tags
+            'name'    => [
+                // Optional: appears next to the HTML input tag
+                'label' => 'Your Name',
+                // "attributes" are placed inside the HTML input tag
+                'attributes' => [
+                    'type' => 'text',
+                    'class' => 'form-control',
+                    'required' => '""',
+                    'placeholder' => 'John Doe',
                 ],
-                'email'   => [
-                    'label' => 'Your Email Address',
-                    'attributes' => [
-                        ['type' => 'email', 'class' => 'form-control', 'required' => '""', 'placeholder' => 'john@gmail.com'],
-                    ],
-                    'validator' => [
-                        ['callback' => Validation::email],
-                    ],
-                    'filter' => [
-                        ['callback' => Filter::truncate, 'params' => ['length' => 255]],
-                        ['callback' => Filter::trim],
-                        ['callback' => Filter::stripTags],
-                    ],
+                // "validator" and "filter" are used to sanitize received form data
+                // "validator => KEY" : KEY must be a method inside Common\Security\Validation
+                'validator' => [
+                    'alpha' => ['allowed' => [' ']],
                 ],
-                'phone'   => [
-                    'label' => 'Your Phone Number (optional)',
-                    'attributes' => [
-                        ['type' => 'text', 'class' => 'form-control', 'required' => '""', 'placeholder' => '+1-800-643-4500'],
-                    ],
-                    'validator' => [
-                        ['callback' => Validation::phone, 'params' => ['allowed' => ['+','-',' ']]],
-                    ],
-                    'filter' => [
-                        ['callback' => Filter::truncate, 'params' => ['length' => 32]],
-                        ['callback' => Filter::trim],
-                        ['callback' => Filter::stripTags],
-                    ],
+                // "filter => KEY" : KEY must be a method inside Common\Security\Filter
+                'filter' => [
+                    'trim'      => [],
+                    'stripTags' => [],
+                    'truncate'  => ['length' => 64],
                 ],
-                'subject' => [
-                    'label' => 'What\'s This About?',
-                    'attributes' => [
-                        ['type' => 'text', 'class' => 'form-control', 'required' => '""', 'placeholder' => 'Subject line for the email you wish to send'],
-                    ],
-                    'validator' => [
-                        ['callback' => Validation::alpha, 'params' => ['allowed' => [',','-',' ',':']]],
-                    ],
-                    'filter' => [
-                        ['callback' => Filter::truncate, 'params' => ['length' => 64]],
-                        ['callback' => Filter::trim],
-                        ['callback' => Filter::stripTags],
-                    ],
+            ],
+            'email'   => [
+                'label' => 'Your Email Address',
+                'attributes' => [
+                    'type' => 'email',
+                    'class' => 'form-control',
+                    'required' => '""',
+                    'placeholder' => 'john@gmail.com',
                 ],
-                'source'  => [
-                    'label' => 'URL of Where You Heard About Us',
-                    'attributes' => [
-                        ['type' => 'text', 'class' => 'form-control', 'required' => '""', 'placeholder' => 'https://unlikelysource.com'],
-                    ],
-                    'validator' => [
-                        ['callback' => Validation::url],
-                    ],
-                    'filter' => [
-                        ['callback' => Filter::truncate, 'params' => ['length' => 64]],
-                        ['callback' => Filter::trim],
-                        ['callback' => Filter::stripTags],
-                    ],
+                'validator' => [
+                    'email' => [],
                 ],
-                'message' => [
-                    'label' => 'What Would You Like to Tell Us?',
-                    'attributes' => [
-                        ['type' => 'textarea', 'rows' => '4', 'placeholder' => 'Hello, I would like to ...'],
-                    ],
-                    'filter' => [
-                        ['callback' => Filter::truncate, 'params' => ['length' => 4096]],
-                        ['callback' => Filter::trim],
-                        ['callback' => Filter::stripTags],
-                    ],
+                'filter' => [
+                    'trim'      => [],
+                    'stripTags' => [],
+                    'truncate'  => ['length' => 255],
                 ],
-                'created' => [
-                    'attributes' => [
-                        ['type' => 'hidden'],
-                    ],
-                    'filter' => [
-                        ['callback' => Filter::date],
-                    ],
+            ],
+            'phone'   => [
+                'label' => 'Your Phone Number (optional)',
+                'attributes' => [
+                    'type' => 'text',
+                    'class' => 'form-control',
+                    'required' => '""',
+                    'placeholder' => '+1-800-643-4500',
+                ],
+                'validator' => [
+                    'phone' => ['allowed' => ['+','-',' ']],
+                ],
+                'filter' => [
+                    'trim'      => [],
+                    'stripTags' => [],
+                    'truncate'  => ['length' => 32],
+                ],
+            ],
+            'subject' => [
+                'label' => 'What\'s This About?',
+                'attributes' => [
+                    'type' => 'text',
+                    'class' => 'form-control',
+                    'required' => '""',
+                    'placeholder' => 'Subject line for the email you wish to send',
+                ],
+                'validator' => [
+                    'alpha' => ['allowed' => [',','-',' ',':']],
+                ],
+                'filter' => [
+                    'trim'      => [],
+                    'stripTags' => [],
+                    'truncate'  => ['length' => 64],
+                ],
+            ],
+            'source'  => [
+                'label' => 'URL of Where You Heard About Us',
+                'attributes' => [
+                    'type' => 'text',
+                    'class' => 'form-control',
+                    'placeholder' => 'https://unlikelysource.com',
+                ],
+                'validator' => [
+                    'url' => [],
+                ],
+                'filter' => [
+                    'trim'      => [],
+                    'stripTags' => [],
+                    'truncate'  => ['length' => 64],
+                ],
+            ],
+            'message' => [
+                'label' => 'What Would You Like to Tell Us?',
+                'attributes' => [
+                    'type' => 'textarea',
+                    'rows' => '4',
+                    'placeholder' => 'Hello, I would like to ...',
+                ],
+                'filter' => [
+                    'trim'      => [],
+                    'stripTags' => [],
+                    'truncate'  => ['length' => 4096],
+                ],
+            ],
+            'created' => [
+                'attributes' => [
+                    'type' => 'hidden',
+                ],
+                'filter' => [
+                    'date' => ['format' => 'Y-m-d H:i:s'],
                 ],
             ],
         ],
