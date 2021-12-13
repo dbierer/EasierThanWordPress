@@ -10,21 +10,21 @@ class Email extends Base
     const DEFAULT_ERROR   = 'ERROR: unable to send email';
     /**
      * @param array $config : from /src/config/config.php
-     * @param array $post   : $_POST
+     * @param array $inputs : filtered and validated $_POST data
      * @param string $body  : message body is passed back by reference
      * @param string $table : database table for filters
      * @return string $msg  : any error or other messages
      */
-    public static function processPost(array $config, array $post, string &$body, string $table = Storage::DEFAULT_TABLE)
+    public static function processPost(array $config, array $inputs, string &$body, string $table = Storage::DEFAULT_TABLE)
     {
         $msg = '';
         // sanitize email
         $email = $_POST['email'] ?? '';
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-        $inputs = self::filter($table, $post, $config);
+        // $inputs = self::filter($table, $post, $config);
         $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
         $phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
-        if ($_POST) {
+        if (!empty($_POST)) {
             $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
             if (!empty($email)) {
                 $body    = "\n";

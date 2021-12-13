@@ -30,7 +30,16 @@ if ($_POST) {
         if ($expectd !== $actual) {
             $msg = Validation::getMessages();
         } else {
-            // TODO: filter form data
+            // filter form data
+            foreach ($fields as $name => $settings) {
+                $text = &$inputs[$name] ?? '';
+                if (!empty($text)) {
+                    $callbacks = $settings['filter'] ?? [];
+                    if (!empty($callbacks))
+                        $text = Filter::runFilters($text, $callbacks);
+                }
+            }
+            // send sanitized email data
             $msg = Email::processPost($config, $inputs, $body);
             $store    = $config['STORAGE']['db_enabled'] ?? FALSE;
             $store    = (bool) $store;
