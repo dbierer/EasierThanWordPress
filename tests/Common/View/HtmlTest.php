@@ -13,7 +13,7 @@ class HtmlTest extends TestCase
     public $config = [];
     public function setup() : void
     {
-        $this->config = include BASE_DIR . '/src/config/config.php';
+        $this->config = include BASE_DIR . '/tests/config/test.config.php';
         $this->html   = new Html($this->config, '/home', BASE_DIR . '/templates/site');
     }
     public function testConfigHasDelimCardsAndLayoutKeys()

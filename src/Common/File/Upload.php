@@ -119,7 +119,6 @@ class Upload
         }
         // looks good ... move the file
         $uploadpath = str_replace('//', '/', $upload_dir . '/' . $fn);
-        error_log(__METHOD__ . ':' . __LINE__ . ':' . $uploadpath);
         if (move_uploaded_file($_FILES['upload']['tmp_name'], $uploadpath)) {
             chmod($uploadpath, self::UPLOAD_PERMISSIONS);
             $url = str_replace('//', '/', $url . '/' . $fn);

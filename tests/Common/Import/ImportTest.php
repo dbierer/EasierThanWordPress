@@ -12,10 +12,12 @@ class ImportTest extends TestCase
 {
     public $testFileDir = '';
     public $testBackupDir = '';
+    public $config = [];
     public function setUp() : void
     {
         $this->testFileDir = realpath(__DIR__ . '/../../test_files');
         $this->testBackupDir = realpath(__DIR__ . '/../../backups');
+        $this->config = include BASE_DIR . '/tests/config/test.config.php';
     }
     public function testGetDelimitedStartDoesNotExist()
     {
@@ -102,13 +104,12 @@ class ImportTest extends TestCase
     }
     public function testDoImportKicksOutUntrustedSource()
     {
-        $config = include __DIR__ . '/../../../src/config/config.php';
         $url = 'https://bad.company.com';
         $trusted = ['https://unlikelysource.com'];
         $transform = [];
         $delim_start = '<body>';
         $delim_stop = '</body>';
-        $edit = new Edit($config);
+        $edit = new Edit($this->config);
         $message = Messages::getInstance();
         $tidy = TRUE;
         $expected = FALSE;
@@ -120,13 +121,13 @@ class ImportTest extends TestCase
     {
         $target_fn = $this->testFileDir . '/test8.html';
         if (file_exists($target_fn)) unlink($target_fn);
-        $config = include __DIR__ . '/../../../src/config/config.php';
+        $this->config = include BASE_DIR . '/tests/config/test.config.php';
         $url = 'https://test.unlikelysource.com/test8.html';
         $trusted = ['https://test.unlikelysource.com'];
         $transform = [];
         $delim_start = '<body>';
         $delim_stop = '</body>';
-        $edit = new Edit($config);
+        $edit = new Edit($this->config);
         $message = Messages::getInstance();
         $tidy = TRUE;
         echo "\nMaking request to $url\n";

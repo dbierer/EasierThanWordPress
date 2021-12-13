@@ -13,7 +13,7 @@ class EditTest extends TestCase
     {
         $this->testFileDir = realpath(__DIR__ . '/../../test_files');
         $this->backupDir = realpath($this->testFileDir . '/../backups');
-        $config = include __DIR__ . '/../../../src/config/config.php';
+        $config = include BASE_DIR . '/tests/config/test.config.php';
         $this->edit = new Edit($config);
         $this->new_dir = $this->testFileDir . '/new';
         $new = glob($this->new_dir . '/*');

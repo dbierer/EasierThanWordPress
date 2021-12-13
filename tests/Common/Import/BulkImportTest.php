@@ -13,7 +13,7 @@ class BulkImportTest extends TestCase
     public $testBackupDir = '';
     public function setUp() : void
     {
-        $this->config = require __DIR__ . '/../../../src/config/config.php';
+        $this->config = include BASE_DIR . '/tests/config/test.config.php';
         $this->testFileDir = realpath(__DIR__ . '/../../test_files');
         $this->testBackupDir = realpath(__DIR__ . '/../../backups');
         $path = $this->testFileDir . '/bulk';

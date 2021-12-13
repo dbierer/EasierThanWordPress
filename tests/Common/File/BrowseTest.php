@@ -17,7 +17,7 @@ class BrowseTest extends TestCase
         $this->testFileDir = realpath(__DIR__ . '/../../test_files');
         $this->testImgDir = $this->testFileDir . '/images';
         $this->testImgFileList = file($this->testFileDir . '/list_of_images.txt');
-        $this->config = include __DIR__ . '/../../../src/config/config.php';
+        $this->config = include BASE_DIR . '/tests/config/test.config.php';
         $this->config['UPLOADS']['img_dir'] = $this->testFileDir . '/images';
         $this->config['UPLOADS']['thumb_dir']  = $this->testFileDir . '/thumb';
     }

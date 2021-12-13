@@ -12,7 +12,7 @@ class UploadTest extends TestCase
     public function setUp() : void
     {
         $this->testFileDir = realpath(__DIR__ . '/../../test_files');
-        $this->config = include __DIR__ . '/../../../src/config/config.php';
+        $this->config = include BASE_DIR . '/tests/config/test.config.php';
     }
     public function testUploadThrowsInvalidArgumentException()
     {
