@@ -155,9 +155,13 @@ class Html
             // is a number?
             } elseif (ctype_digit((string) $qualifier)) {
                 $iter = $this->getCardIterator($dir, $this->cardDir);
-                $temp = clone $iter;
-                $iter = new LimitIterator($temp, 0, (int) $qualifier);
-                $iter->rewind();
+                if (empty($iter)) {
+                    $iter = FALSE;
+                } else {
+                    $temp = clone $iter;
+                    $iter = new LimitIterator($temp, 0, (int) $qualifier);
+                    $iter->rewind();
+                }
             // is a single card?
             } elseif (strlen($qualifier) > 0) {
                 $iter = $this->getOrderedCardIterator($dir, $qualifier);

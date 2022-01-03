@@ -1,9 +1,19 @@
 {
     "name": "unlikelysource/filecms-core",
     "description": "File-based content management system.  Does not require a database.",
-    "license": "Apache v2",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Doug Bierer",
+            "email": "doug@unlikelysource.com",
+            "homepage": "https://unlikelysource.com/",
+            "role": "Developer"
+        }
+    ],
     "keywords": [
         "unlikelysource",
+        "CMS",
+        "file based",
         "FileCMS"
     ],
     "homepage": "https://unlikelysource.com/filecms",
