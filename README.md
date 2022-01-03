@@ -11,6 +11,7 @@ Really simple PHP app that builds HTML files from HTML widgets.
 * No database required!
 
 License: Apache v2
+Version: v0.1
 
 ## Initial Installation
 1. Clone [https://github.com/dbierer/filecms-website](https://github.com/dbierer/filecms-website) to the project root of your new website.
