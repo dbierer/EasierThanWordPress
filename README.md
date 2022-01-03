@@ -1,4 +1,4 @@
-# FileCMS
+# FileCMS Core
 Really simple PHP app that builds HTML files from HTML widgets.
 * Includes a class that can generate and validate CAPTCHAs (uses the GD extension).
 * Includes the CKEditor for full-featured editing.
@@ -8,12 +8,13 @@ Really simple PHP app that builds HTML files from HTML widgets.
 * Entirely file-based: does not require a database!
 * Very fast and flexible.
 * Once you've got it up and running, just upload HTML snippets and/or modify the configuration file.
+* No database required!
 
 License: Apache v2
 
 ## Initial Installation
-1. Clone this repository to the project root of your new website.
-2. Use composer to install 3rd party source code (e.g. PHPMailer)
+1. Clone [https://github.com/dbierer/filecms-website](https://github.com/dbierer/filecms-website) to the project root of your new website.
+2. Use composer to install `unlikelysource/filecms-core` and 3rd party source code (e.g. PHPMailer)
 ```
 wget https://getcomposer.org/download/latest-stable/composer.phar
 php composer.phar self-update
@@ -110,16 +111,31 @@ Here is a summary of the three key constants defined by `/bootstrap.php`.  Chang
 | SRC_DIR  | `/src` | Location of source code |
 
 
+## Pre-Processing
+Before the final HTML view is rendered, `/public/index.php` includes `/src/processsing.php`.
+In this file you can include any pre-processing you need done.
+* The request URL is available as the variable `$uri`
+* This is where the admin URL is captured and sent to processing
+
 ## Templates
 By default templates are stored in `/templates/site`.  You can alter this in the config file.
+
 ### Config File
 Default: `/src/config/config.php`
 * Delimiter: `DELIM` defaults to `%%`
 * "Cards" `CARDS` defaults to `cards`
   * Represents the subdirectory under which view renderer expects to file HTML "cards"
+
 ### Layout
 The overall website look-and-feel is in a single HTML file, by default in `/templates/layout/layout.phtml`.
 * The view rendered by requests is injected into the layout by replacing `%%CONTENTS%%`.
+
+### Super
+All admin functionality is by default located in `/templates/super`.  The current admin pages are:
+* `/super/choose` lets you choose an existing page, based upon the config setting `SUPER => allowed_ext`, create a new page, or delete an existing page
+* `/super/edit` brings up the CKEditor to edit a page
+* `/super/import` lets you import one or more pages from a URL that allowed by the config setting `IMPORT => trusted_src`
+* `/super/transform` performs transformations on existing page(s)
 
 ### HTML
 You can create HTML snippets designed to fit into `layout.phtml` any place in the designated HTML directory.
@@ -183,6 +199,11 @@ Example configuration for super user:
         'width' => '100%',
         'height' => 400,
     ],
+    'super_dir'  => BASE_DIR . '/templates', // IMPORTANT: needs to have a subdir === "super_url" setting
+    'super_url'  => '/super',                // IMPORTANT: needs to be a subdir off the "super_dir" setting
+    'super_menu' => BASE_DIR . '/templates/layout/super_menu.html',
+    'backup_dir' => BASE_DIR . '/backups',
+    'backup_cmd' => BASE_DIR . 'zip -r %%BACKUP_FN%% %%BACKUP_SRC%%',
 ],
 // other config not shown
 ```
@@ -199,6 +220,11 @@ Here's a breakdown of the `SUPER` config keys
 | validation   | You can specify as many of these as you want.  If the login attemp exceeds `attempts`, the SimpleHtml framework will automatically add a random field drawn from this list. |
 | allowed_ext  | Only files with an extension on this list can be edited. |
 | ckeditor     | Default width and height of the CKeditor screen |
+| super_dir'   | Location of the "super" admin pages.  Default is `/templates`. IMPORTANT: needs to have a subdir === "super_url" setting |
+| super_url    | URL to enter to access admin pages.  Default is `/super`. IMPORTANT: needs to be a subdir off the "super_dir" setting |
+| super_menu'  | Location of HTML file that contains the admin menu, present on all admin pages.  Default is `/templates/layout/super_menu.html` |
+| backup_dir'  | Location of directory where backups of pages are created when performing edits.  Default is `BASE_DIR . '/backups'` |
+| backup_cmd'  | Command used to create a global backup of the website.  Default is `zip -r %%BACKUP_FN%% %%BACKUP_SRC%%'` |
 
 ## Contact Form
 The skeleton app includes under `/templates` a file `contact.phtml` that implements an email contact form with a CAPTCHA
@@ -255,8 +281,3 @@ Here are some notes on config file settings under the `TRANSFORM` config key:
 * `TRANSFORM::transform_file_field`
   * Name of the form field that is used if you want to upload a set of transforms
 
-## Pre-Processing
-Before the final HTML view is rendered, `/public/index.php` includes `/src/processsing.php`.
-In this file you can include any pre-processing you need done.
-* The request URL is available as the variable `$uri`
-* This is where the admin URL is captured and sent to processing
