@@ -29,6 +29,11 @@
     "require-dev": {
         "phpunit/phpunit": "^9.5"
     },
+    "autoload-dev" : {
+        "psr-4" : {
+            "FileCMSTest\\" : "tests/"
+        }
+    },
     "autoload" : {
         "psr-4" : {
             "FileCMS\\" : "src/"

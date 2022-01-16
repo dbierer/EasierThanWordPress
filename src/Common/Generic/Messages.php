@@ -15,6 +15,7 @@ class Messages
     protected static $_instance = NULL;
     private function __construct()
     {
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
         if (!empty($_SESSION[self::MSG_KEY])) {
             $this->messages = unserialize($_SESSION[self::MSG_KEY]);
         }

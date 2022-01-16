@@ -52,22 +52,10 @@ $config = [
         'backup_dir' => BASE_DIR . '/backups',
         'backup_cmd' => BASE_DIR . 'zip -r %%BACKUP_FN%% %%BACKUP_SRC%%',
     ],
-    /*
-     * Storage settings are optional
-     * Can be used if you want to also incorporate a database
-     */
     'STORAGE' => [
-        // set this to 1 to enable database
-        'db_enabled' => 0,
-        'db_host' => 'localhost',
-        'db_name' => 'REPL_DB_NAME',
-        'db_user' => 'REPL_DB_USER',
-        'db_pwd'  => 'REPL_DB_PWD',
-        // set this to 1 to enable automated backups using /backup.sh
-        'db_backup_enabled' => 0,
-        'db_backup_dir' => BASE_DIR . '/backups',
-        // backup command for your database
-        'db_cmd' => 'mysqldump -u%%REPL_DB_USER%% -p%%REPL_DB_PWD%% %%REPL_DB_NAME%%',
+        'storage_fmt' => 'php',  // can be php|json
+        'storage_dir' => BASE_DIR . '/data',
+        'storage_fn'  => 'storage.txt',
     ],
     /*
      * These settings are primarily used for the email contact form

@@ -38,7 +38,7 @@ class Captcha
      * @param bool $numbers  : numbers only
      * @return array $images : filenames of CAPTCHA images produced
      */
-    public function writeImages(string $token, bool $numbers = TRUE)
+    public function writeImages(string $token, bool $numbers = FALSE)
     {
         // generate random hex number for CAPTCHA
         if ($numbers) {
@@ -50,6 +50,7 @@ class Captcha
         $images = [];
         for ($x = 0; $x < $length; $x++) {
             $char = new SingleChar($phrase[$x], static::$font_file);
+            $char->randFgColor();
             $char->writeFill();
             shuffle(static::$strategies);
             foreach (self::$strategies as $item) {

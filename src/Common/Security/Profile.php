@@ -36,6 +36,9 @@ class Profile
 {
     const PROFILE_KEY = 'profile';
     const PROFILE_DEFAULT = 'default';
+    const PROFILE_AUTH_UNABLE = 'ERROR: unable to authenticate';
+    const DEFAULT_INACTIVE = 3600;   // # seconds after which automatic logout is triggered (1 hour)
+    public static $sessOpts = [];
     /**
      * Produces an MD5 hash of key $_SERVER info
      * Also stores hash in $_SESSION[PROFILE_KEY]
@@ -84,6 +87,15 @@ class Profile
         return $_SESSION[self::PROFILE_KEY] ?? '';
     }
     /**
+     * Returns session options (used in `session_start()`)
+     *
+     * @return array $sessOpts
+     */
+    public static function getSessOpts() : array
+    {
+        return self::$sessOpts;
+    }
+    /**
      * Verifies profile against stored
      *
      * @param array $config
@@ -93,6 +105,11 @@ class Profile
     {
         $stored = self::get();
         $actual = self::build($config);
-        return ($stored === $actual);
+        $verify = ($stored === $actual);
+        if ($verify) {
+            $interval = $config['SUPER']['inactive_interval'] ?? self::DEFAULT_INACTIVE;
+            self::$sessOpts['cookie_lifetime'] = $interval;
+        }
+        return $verify;
     }
 }

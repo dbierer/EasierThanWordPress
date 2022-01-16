@@ -65,6 +65,20 @@ class SingleChar
         $this->bgColor  = $this->colorAlloc(self::DEFAULT_BG);
     }
     /**
+     * Randomizes FG color
+     * Stores value in $this->fgColor
+     *
+     *
+     * @return void
+     */
+    public function randFgColor()
+    {
+        $r = rand(0x22, 0x88);
+        $g = rand(0x22, 0x88);
+        $b = rand(0x22, 0x88);
+        $this->fgColor = $this->colorAlloc([$r, $g, $b]);
+    }
+    /**
      * Allocates a color resource
      *
      * @param array|int $r,
