@@ -1,5 +1,5 @@
 <?php
-namespace FileCMS\Common\Data\Php;
+namespace FileCMS\Common\Data\Strategy;
 /*
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -33,25 +33,26 @@ namespace FileCMS\Common\Data\Php;
  * Stores/fetches information in designated file using PHP serialization
  */
 use Throwable;
+use SplFileObject;
 use FileCMS\Common\Data\FormatStrategyInterface;
-class Native implements FormatStrategyInterface
+class Csv implements FormatStrategyInterface
 {
     /**
-     * Stores info into storage using PHP serialize
+     * Stores info into storage using fputcsv()
      *
      * @param string $fn   : filename
-     * @param mixed $data  : data to be stored
+     * @param array $data  : data to be stored; forces $data to type "array"
      * @param bool $append : if TRUE, append to existing storage, otherwise overwrite
      * @return bool
      */
     public static function save(string $fn, $data, bool $append = TRUE) : bool
     {
         try {
-            $serial = serialize($data);
-            $serial .= PHP_EOL;
-            $result = ($append)
-                    ? file_put_contents($fn, $serial, FILE_APPEND)
-                    : file_put_contents($fn, $serial);
+            $obj = ($append)
+                 ? new SplFileObject($fn, 'a')
+                 : new SplFileObject($fn, 'w');
+            if (!is_array($data)) $data = (array) $data;
+            $result = $obj->fputcsv($data);
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . $t->getMessage());
             $result = FALSE;
@@ -59,10 +60,10 @@ class Native implements FormatStrategyInterface
         return (bool) $result;
     }
     /**
-     * Retrieves info from storage using PHP unserialize
+     * Retrieves info from storage using fgetcsv()
      *
      * @param string $fn   : filename
-     * @param bool $array  : if TRUE, returns data as array
+     * @param bool $array  : parameter ignored: maintained for compatibility with other strategy classes
      * @param bool $erase  : if TRUE, erase existing storage after retrieval
      * @return array $data : array of mixed stored data
      */
@@ -71,10 +72,15 @@ class Native implements FormatStrategyInterface
         $data = [];
         if (!file_exists($fn)) return $data;
         try {
-            $lines = file($fn);
-            foreach ($lines as $contents)
-                $data[] = unserialize($contents);
-            if ($erase) unlink($fn);
+            $obj = new SplFileObject($fn, 'r');
+            while (!$obj->eof()) {
+                $row = $obj->fgetcsv();
+                if (!empty($row) && $row[0] !== NULL) $data[] = $row;
+            }
+            if ($erase) {
+                unset($obj);
+                unlink($fn);
+            }
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . $t->getMessage());
         }

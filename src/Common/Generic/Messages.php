@@ -34,7 +34,7 @@ class Messages
     public function getMessages()
     {
         if (empty($this->messages)) {
-            $msg = NULL;
+            $msg = '';
         } else {
             $msg = implode("<br />\n", array_reverse($this->messages));
             $this->messages = [];

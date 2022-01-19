@@ -1,5 +1,5 @@
 <?php
-namespace FileCMS\Common\Data\Json;
+namespace FileCMS\Common\Data\Strategy;
 /*
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -34,10 +34,10 @@ namespace FileCMS\Common\Data\Json;
  */
 use Throwable;
 use FileCMS\Common\Data\FormatStrategyInterface;
-class Json implements FormatStrategyInterface
+class Native implements FormatStrategyInterface
 {
     /**
-     * Stores info into storage using json_encode()
+     * Stores info into storage using PHP serialize
      *
      * @param string $fn   : filename
      * @param mixed $data  : data to be stored
@@ -47,20 +47,19 @@ class Json implements FormatStrategyInterface
     public static function save(string $fn, $data, bool $append = TRUE) : bool
     {
         try {
-            $serial = json_encode($data);
+            $serial = serialize($data);
             $serial .= PHP_EOL;
             $result = ($append)
                     ? file_put_contents($fn, $serial, FILE_APPEND)
                     : file_put_contents($fn, $serial);
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . $t->getMessage());
-            error_log(__METHOD__ . ':' . json_last_error_msg());
             $result = FALSE;
         }
         return (bool) $result;
     }
     /**
-     * Retrieves info from storage using json_encode()
+     * Retrieves info from storage using PHP unserialize
      *
      * @param string $fn   : filename
      * @param bool $array  : if TRUE, returns data as array
@@ -74,11 +73,10 @@ class Json implements FormatStrategyInterface
         try {
             $lines = file($fn);
             foreach ($lines as $contents)
-                $data[] = json_decode($contents, $array);
+                $data[] = unserialize($contents);
             if ($erase) unlink($fn);
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . $t->getMessage());
-            error_log(__METHOD__ . ':' . json_last_error_msg());
         }
         return $data;
     }

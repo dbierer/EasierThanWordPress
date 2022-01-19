@@ -1,7 +1,7 @@
 <?php
-namespace FileCMSTest\Common\Data\Php;
+namespace FileCMSTest\Common\Data\Strategy;
 
-use FileCMS\Common\Data\Csv\Csv;
+use FileCMS\Common\Data\Strategy\Csv;
 use FileCMSTest\Common\Data\StorageBase;
 class CsvTest extends StorageBase
 {

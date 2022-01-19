@@ -1,7 +1,7 @@
 <?php
-namespace FileCMSTest\Common\Data\Php;
+namespace FileCMSTest\Common\Data\Strategy;
 
-use FileCMS\Common\Data\Php\Native;
+use FileCMS\Common\Data\Strategy\Native;
 use FileCMSTest\Common\Data\StorageBase;
 class NativeTest extends StorageBase
 {

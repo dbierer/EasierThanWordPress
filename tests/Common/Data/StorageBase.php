@@ -18,7 +18,7 @@ class StorageBase extends TestCase
         $this->testImgFileList = file($this->testFileDir . '/list_of_images.txt');
         self::$tmpFn = tempnam($this->testStorageDir, 'test_');
         $this->config = include BASE_DIR . '/tests/config/test.config.php';
-        $this->config['STORAGE']['storage_fn']  = self::$tmpFn;
+        $this->config['STORAGE']['storage_fn']  = basename(self::$tmpFn);
         $this->config['STORAGE']['storage_dir'] = $this->testStorageDir;
         $this->storage = new Storage($this->config);
     }

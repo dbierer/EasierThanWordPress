@@ -1,7 +1,7 @@
 <?php
-namespace FileCMSTest\Common\Data\Json;
+namespace FileCMSTest\Common\Data\Strategy;
 
-use FileCMS\Common\Data\Json\Json;
+use FileCMS\Common\Data\Strategy\Json;
 use FileCMSTest\Common\Data\StorageBase;
 class JsonTest extends StorageBase
 {

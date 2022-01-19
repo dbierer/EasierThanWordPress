@@ -36,9 +36,7 @@ use SplFileObject;
 use Closure;
 use Throwable;
 use RuntimeException;
-use FileCMS\Common\Data\Csv\Csv;
-use FileCMS\Common\Data\Json\Json;
-use FileCMS\Common\Data\Php\Native;
+use FileCMS\Common\Data\Strategy\{Csv,Json,Native};
 class Storage
 {
     const DEFAULT_FN  = 'contacts.txt';
@@ -49,7 +47,7 @@ class Storage
     const FMT_JSON    = 'json';
     const ERR_UNABLE  = 'ERROR: unable to access storage. Permissions issue?';
     public $fn       = '';
-    public $format   = 'php';    // "json" otherwise
+    public $format   = '';
     public $strategy = NULL;
     public $config   = [];
     /**
@@ -61,13 +59,12 @@ class Storage
         $storage_fn   = $this->config['storage_fn']  ?? self::DEFAULT_FN;
         $storage_dir  = $this->config['storage_dir'] ?? self::DEFAULT_DIR;
         $format       = $this->config['storage_fmt'] ?? self::DEFAULT_FMT;
-        $this->setFormat($format);
+        $this->setStrategy($format);
         try {
             if (!file_exists($storage_dir)) {
                 mkdir($storage_dir, 0775, TRUE);
             }
             $this->fn = str_replace('//', '/', $storage_dir . '/' . $storage_fn);
-            touch($this->fn);
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . $t->getMessage());
             throw new RuntimeException(self::ERR_UNABLE);
@@ -82,48 +79,47 @@ class Storage
      * @param string $fmt : csv|php|json
      * @return string $fmt : csv|php|json
      */
-    public function setFormat(string $fmt)
+    public function setStrategy(string $fmt)
     {
         switch ($fmt) {
             case self::FMT_PHP :
                 $val = self::FMT_PHP;
-                $this->strategy = 'Native';
+                $this->strategy = Native::class;
                 break;
             case self::FMT_JSON :
                 $val = self::FMT_JSON;
-                $this->strategy = 'Json';
+                $this->strategy = Json::class;
                 break;
             case self::FMT_CSV :
             default :
                 $val = self::FMT_CSV;
-                $this->strategy = 'Csv';
+                $this->strategy = Csv::class;
                 break;
         }
     }
     /**
      * Stores info into storage using Closure
      *
-     * @param string $fn   : filename
      * @param array $data  : data to be stored; forces $data to type "array"
      * @param bool $append : if TRUE, append to existing storage, otherwise overwrite
      * @return bool
      */
-    public static function save(string $fn, $data, bool $append = TRUE)
+    public function save($data, bool $append = TRUE)
     {
-        return (bool) $this->$strategy::save($fn, $data, $append);
+        $strategy = $this->strategy;
+        return (bool) $strategy::save($this->fn, $data, $append);
     }
     /**
      * Retrieves info from storage using fgetcsv()
      *
-     * @param string $fn   : filename
      * @param bool $array  : if TRUE, returns data as array
      * @param bool $erase  : if TRUE, erase existing storage after retrieval
      * @return array $data : array of mixed stored data
      */
-    public static function fetch(string $fn, bool $array = TRUE, bool $erase = FALSE)
+    public function fetch(bool $array = TRUE, bool $erase = FALSE)
     {
-        $result = $this->$strategy::fetch($fn, $array, $erase);
-        if ($erase) file_put_contents($fn, '');
+        $strategy = $this->strategy;
+        $result = $strategy::fetch($this->fn, $array, $erase);
         return $result;
     }
 }

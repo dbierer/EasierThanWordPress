@@ -52,8 +52,16 @@ $config = [
         'backup_dir' => BASE_DIR . '/backups',
         'backup_cmd' => BASE_DIR . 'zip -r %%BACKUP_FN%% %%BACKUP_SRC%%',
     ],
+    /*
+     * File based storage
+     * Can be used if you need persistent storage
+     *
+     * If "storage_fmt" param === "php" uses native PHP serialization
+     * If "storage_fmt" param === "json" uses JSON encoding
+     * If "storage_fmt" param === "csv" uses JSON encoding
+     */
     'STORAGE' => [
-        'storage_fmt' => 'php',  // can be php|json
+        'storage_fmt' => 'csv',  // can be php|json|csv
         'storage_dir' => BASE_DIR . '/data',
         'storage_fn'  => 'storage.txt',
     ],

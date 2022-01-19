@@ -1,5 +1,5 @@
 <?php
-namespace FileCMS\Common\Data\Csv;
+namespace FileCMS\Common\Data\Strategy;
 /*
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -33,37 +33,37 @@ namespace FileCMS\Common\Data\Csv;
  * Stores/fetches information in designated file using PHP serialization
  */
 use Throwable;
-use SplFileObject;
 use FileCMS\Common\Data\FormatStrategyInterface;
-class Csv implements FormatStrategyInterface
+class Json implements FormatStrategyInterface
 {
     /**
-     * Stores info into storage using fputcsv()
+     * Stores info into storage using json_encode()
      *
      * @param string $fn   : filename
-     * @param array $data  : data to be stored; forces $data to type "array"
+     * @param mixed $data  : data to be stored
      * @param bool $append : if TRUE, append to existing storage, otherwise overwrite
      * @return bool
      */
     public static function save(string $fn, $data, bool $append = TRUE) : bool
     {
         try {
-            $obj = ($append)
-                 ? new SplFileObject($fn, 'a')
-                 : new SplFileObject($fn, 'w');
-            if (!is_array($data)) $data = (array) $data;
-            $result = $obj->fputcsv($data);
+            $serial = json_encode($data);
+            $serial .= PHP_EOL;
+            $result = ($append)
+                    ? file_put_contents($fn, $serial, FILE_APPEND)
+                    : file_put_contents($fn, $serial);
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . $t->getMessage());
+            error_log(__METHOD__ . ':' . json_last_error_msg());
             $result = FALSE;
         }
         return (bool) $result;
     }
     /**
-     * Retrieves info from storage using fgetcsv()
+     * Retrieves info from storage using json_encode()
      *
      * @param string $fn   : filename
-     * @param bool $array  : parameter ignored: maintained for compatibility with other strategy classes
+     * @param bool $array  : if TRUE, returns data as array
      * @param bool $erase  : if TRUE, erase existing storage after retrieval
      * @return array $data : array of mixed stored data
      */
@@ -72,17 +72,13 @@ class Csv implements FormatStrategyInterface
         $data = [];
         if (!file_exists($fn)) return $data;
         try {
-            $obj = new SplFileObject($fn, 'r');
-            while (!$obj->eof()) {
-                $row = $obj->fgetcsv();
-                if (!empty($row) && $row[0] !== NULL) $data[] = $row;
-            }
-            if ($erase) {
-                unset($obj);
-                unlink($fn);
-            }
+            $lines = file($fn);
+            foreach ($lines as $contents)
+                $data[] = json_decode($contents, $array);
+            if ($erase) unlink($fn);
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . $t->getMessage());
+            error_log(__METHOD__ . ':' . json_last_error_msg());
         }
         return $data;
     }
