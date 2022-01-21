@@ -35,10 +35,7 @@ namespace FileCMS\Common\Security;
 class Profile
 {
     const PROFILE_KEY = 'profile';
-    const PROFILE_DEFAULT = 'default';
     const PROFILE_AUTH_UNABLE = 'ERROR: unable to authenticate';
-    const DEFAULT_INACTIVE = 3600;   // # seconds after which automatic logout is triggered (1 hour)
-    public static $sessOpts = [];
     /**
      * Produces an MD5 hash of key $_SERVER info
      * Also stores hash in $_SESSION[PROFILE_KEY]
@@ -48,15 +45,16 @@ class Profile
      */
     public static function build(array $config)
     {
-        $info = '';
-        $keys = $config['super']['profile'] ?? [];
+        $info = [];
+        $keys = $config['SUPER']['profile'] ?? [];
         if (empty($keys)) {
-            $info = $_SERVER['HTTP_USER_AGENT'] ?? self::PROFILE_DEFAULT;
+            $info[] = $_SERVER['HTTP_USER_AGENT'] ?? date('Y-m-d');
         } else {
             foreach ($keys as $idx)
-                $info .= $_SERVER[$idx] ?? self::PROFILE_DEFAULT;
+                $info[] = $_SERVER[$idx] ?? date('Y-m-d');
         }
-        return md5($info);
+        $hash = md5(implode('|', $info));
+        return $hash;
     }
     /**
      * Sets $_SESSION[PROFILE_KEY] to NULL
@@ -80,20 +78,11 @@ class Profile
     /**
      * Returns MD5 hash from $_SESSION[PROFILE_KEY]
      *
-     * @return string $hash : stored MD5 hash | default
+     * @return string $hash : stored MD5 hash | empty string
      */
     public static function get()
     {
         return $_SESSION[self::PROFILE_KEY] ?? '';
-    }
-    /**
-     * Returns session options (used in `session_start()`)
-     *
-     * @return array $sessOpts
-     */
-    public static function getSessOpts() : array
-    {
-        return self::$sessOpts;
     }
     /**
      * Verifies profile against stored
@@ -106,10 +95,6 @@ class Profile
         $stored = self::get();
         $actual = self::build($config);
         $verify = ($stored === $actual);
-        if ($verify) {
-            $interval = $config['SUPER']['inactive_interval'] ?? self::DEFAULT_INACTIVE;
-            self::$sessOpts['cookie_lifetime'] = $interval;
-        }
         return $verify;
     }
 }

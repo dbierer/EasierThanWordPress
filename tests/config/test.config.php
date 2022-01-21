@@ -21,7 +21,7 @@ $config = [
         'message'   => 'Sorry! Unable to login.  Please contact your administrator',
         // array of $_SERVER keys to store in session if authenticated
         // helps prevent forged attacks
-        'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE','HTTP_COOKIE'],
+        'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE'],
         // change the values to reflect the names of fields in your login.phtml form
         'login_fields' => [
             'name'     => 'name',

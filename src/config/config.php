@@ -10,6 +10,8 @@ $config = [
     'DELIM'  => '%%',
     // use '' for CACHE if you want to disable it
     'CACHE'  => BASE_DIR . '/data/cache.txt',
+    'MSG_MARKER'  => '<!-- %%MESSAGES%% -->',
+    'CONTACT_LOG' => BASE_DIR . '/logs/contact.log',
     'META' => [
         'default' => [
             'title' => 'FileCMS',
@@ -17,16 +19,21 @@ $config = [
             'description'  => 'Once installed all you need to do is to upload HTML snippets into the site templates folder',
         ],
     ],
+    'CAPTCHA' => [
+        'input_tag_name' => 'phrase',
+        'sess_hash_key'  => 'hash',
+        'font_file'      => SRC_DIR . '/fonts/FreeSansBold.ttf',
+        'img_dir'        => BASE_DIR . '/public/img/captcha',
+        'num_bytes'      => 2,
+    ],
     'SUPER' => [
         'username'  => 'REPL_SUPER_NAME',  // fill in your username here
         'password'  => 'REPL_SUPER_PWD',   // fill in your password here
         'attempts'  => 3,
         'message'   => 'Sorry! Unable to login.  Please contact your administrator',
-        // no. seconds inactive before automatic logout is triggered
-        'inactive_interval' => 3600,
         // array of $_SERVER keys to store in session if authenticated
         // helps prevent forged attacks
-        'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE','HTTP_COOKIE'],
+        'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE'],
         // change the values to reflect the names of fields in your login.phtml form
         'login_fields' => [
             'name'     => 'name',
@@ -202,15 +209,6 @@ $config = [
                 ],
             ],
         ],
-    ],
-    'MSG_MARKER'  => '<!-- %%MESSAGES%% -->',
-    'CONTACT_LOG' => BASE_DIR . '/logs/contact.log',
-    'CAPTCHA' => [
-        'input_tag_name' => 'phrase',
-        'sess_hash_key'  => 'hash',
-        'font_file'      => SRC_DIR . '/fonts/FreeSansBold.ttf',
-        'img_dir'        => BASE_DIR . '/public/img/captcha',
-        'num_bytes'      => 2,
     ],
     'UPLOADS' => [
         'restrict_size' => TRUE,    // set to FALSE to ignore size restrictions
