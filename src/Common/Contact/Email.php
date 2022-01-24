@@ -43,14 +43,13 @@ class Email
      * @param array $config : from /src/config/config.php
      * @param array $inputs : filtered and validated $_POST data
      * @param string $body  : message body is passed back by reference
-     * @param string $table : database table for filters
      * @return string $msg  : any error or other messages
      */
-    public static function processPost(array $config, array $inputs, string &$body, string $table = Storage::DEFAULT_TABLE)
+    public static function processPost(array $config, array $inputs, string &$body)
     {
         $msg = '';
         // sanitize email
-        $email = $_POST['email'] ?? '';
+        $email = $inputs['email'] ?? '';
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
         // $inputs = self::filter($table, $post, $config);
         $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
@@ -69,8 +68,17 @@ class Email
         }
         return $msg;
     }
+    /**
+     * Sends email using PHPMailer
+     *
+     * @param string $from    : sender's email address
+     * @param array $config   : primary config file
+     * @param string $subject : email subject line
+     * @param string $body    : email message
+     * @return string $msg    : success/failure message
+     */
     public static function confirmAndSend(
-        string $email,
+        string $from,
         array $config,
         string $subject,
         string $body)
@@ -83,11 +91,10 @@ class Email
         $to        = $config['COMPANY_EMAIL']['to'];
         $cc        = $config['COMPANY_EMAIL']['cc'] ?? '';
         $bcc       = $config['COMPANY_EMAIL']['bcc'] ?? '';
-        $from      = $config['COMPANY_EMAIL']['from'];
         $phpmailerConfig = $config['COMPANY_EMAIL']['phpmailer'];
         if (password_verify($phrase, $hash)) {
             // validate email
-            if (PHPMailer::validateAddress($email)) {
+            if (PHPMailer::validateAddress($from)) {
                 // send request for 30 day trial
                 try {
                     // set up SMTP
@@ -103,9 +110,9 @@ class Email
                     }
                     // set up mail obj
                     $mail->setFrom($from);
-                    $mail->addAddress($to);
-                    if ($cc) $mail->addCC($cc);
-                    if ($bcc) $mail->addBCC($bcc);
+                    self::queueOutbound($to, 'to', $mail);
+                    self::queueOutbound($cc, 'cc', $mail);
+                    self::queueOutbound($bcc, 'bcc', $mail);
                     $mail->Subject = $subject;
                     $mail->Body    = $body;
                     //send the message, check for errors
@@ -127,5 +134,36 @@ class Email
             error_log(basename(__FILE__) . ': CAPTCHA does not verify');
         }
         return $msg;
+    }
+    /**
+     * If $data is an array, calls $method for each element
+     *
+     * @param mixed $data : data to be added to queued items
+     * @param string $method : to|cc|bcc
+     * @param PHPMailer $mail : PHPMailer instance
+     * @return void
+     */
+    public static function queueOutbound($data, string $method, PHPMailer $mail) : void
+    {
+        if (!empty($data)) {
+            switch ($method) {
+                case 'cc' :
+                    $method = 'addCC';
+                    break;
+                case 'bcc' :
+                    $method = 'addBCC';
+                    break;
+                case 'to' :
+                default :
+                    $method = 'addAddress';
+                    break;
+            }
+            if (is_array($data)) {
+                foreach ($data as $item)
+                    $mail->$method($item);
+            } else {
+                $mail->$method($data);
+            }
+        }
     }
 }
