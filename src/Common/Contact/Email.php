@@ -48,13 +48,13 @@ class Email
     public static function processPost(array $config, array $inputs, string &$body)
     {
         $msg = '';
-        // sanitize email
+        // sanitize "from" email
         $email = $inputs['email'] ?? '';
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
         // $inputs = self::filter($table, $post, $config);
         $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
         $phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
-        if (!empty($_POST)) {
+        if (!empty($inputs)) {
             $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
             if (!empty($email)) {
                 $body    = "\n";

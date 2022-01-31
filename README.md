@@ -1,5 +1,7 @@
 # FileCMS Website
-Really simple PHP app that builds HTML files from HTML widgets.
+NOTE: formerly called _SimpleHtml_
+
+Simple PHP framework that builds HTML files from HTML widgets.
 * Includes a class that can generate and validate CAPTCHAs (uses the GD extension).
 * Includes the CKEditor for full-featured editing.
 * Includes an email contact form that uses PHPMailer.

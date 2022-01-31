@@ -6,68 +6,72 @@ use FileCMS\Common\Security\Profile;
 use PHPUnit\Framework\TestCase;
 class ProfileTest extends TestCase
 {
+    public function setUp() : void
+    {
+        session_reset();
+    }
     public function testProfileBuildUsesDateAsDefault()
     {
-        $expected = md5(date('Y-m-d'));
+        $expected = ['HTTP_USER_AGENT' => date('Y-m-d')];
         $actual   = Profile::build([]);
         $this->assertEquals($expected, $actual);
     }
     public function testProfileBuildUsesExpectedKeys()
     {
+        $date = date('Y-m-d');
+        $_SERVER = [];
+        $expected = [];
         $config = include BASE_DIR . '/tests/config/test.config.php';
         foreach ($config['SUPER']['profile'] as $key) {
-            $_SERVER[$key] = date('Y-m-d');
+            $_SERVER[$key] = $date;
+            $expected[$key] = $date;
         }
-        $profile = [
-            date('Y-m-d'),
-            date('Y-m-d'),
-            date('Y-m-d')
-        ];
-        $expected = md5(implode('|', $profile));
         $actual   = Profile::build($config);
         $this->assertEquals($expected, $actual);
     }
     public function testProfileBuildUsesExpectedServerAgentIfKeyIsEmpty()
     {
-        $_SERVER['HTTP_USER_AGENT'] = date('Y-m-d') . 'ABCDEF';
+        $key = date('Y-m-d') . 'ABCDEF';
+        $_SERVER = ['HTTP_USER_AGENT' => $key];
         $config = include BASE_DIR . '/tests/config/test.config.php';
         $config['SUPER']['profile'] = [];
-        $expected = md5($_SERVER['HTTP_USER_AGENT']);
+        $expected['HTTP_USER_AGENT'] = $key;
         $actual   = Profile::build($config);
         $this->assertEquals($expected, $actual);
     }
     public function testSetStoresProfileInSession()
     {
-        $hash = md5(date('Y-m-d'));
-        Profile::set($hash);
-        $expected = $hash;
+        $test = ['test' => 'TEST'];
+        Profile::set($test);
+        $expected = $test;
         $actual   = $_SESSION[Profile::PROFILE_KEY] ?? 'NOT';
         $this->assertEquals($expected, $actual);
     }
     public function testGetReturnsCorrectValueFromSession()
     {
-        $hash = md5(date('Y-m-d'));
-        Profile::set($hash);
-        $expected = $hash;
+        $test = ['test' => 'TEST'];
+        Profile::set($test);
+        $expected = $test;
         $actual   = Profile::get();
         $this->assertEquals($expected, $actual);
     }
     public function testVerify()
     {
+        $name = 'Fred';
         $config = include BASE_DIR . '/tests/config/test.config.php';
-        foreach ($config['SUPER']['profile'] as $key) {
-            $_SERVER[$key] = date('Y-m-d');
-        }
-        $profile = [
-            date('Y-m-d'),
-            date('Y-m-d'),
-            date('Y-m-d')
-        ];
-        $hash = md5(implode('|', $profile));
-        Profile::set($hash);
-        Profile::build($config);
+        Profile::init($config, $name);
         $expected = TRUE;
         $actual   = Profile::verify($config);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testInit()
+    {
+        $name = 'Fred';
+        $config = include BASE_DIR . '/tests/config/test.config.php';
+        Profile::init($config, $name);
+        $expected = Profile::build($config);
+        $expected[Profile::USER_KEY] = $name;
+        $actual   = Profile::get($config);
         $this->assertEquals($expected, $actual);
     }
 }

@@ -36,9 +36,24 @@ class Profile
 {
     const PROFILE_KEY = 'profile';
     const PROFILE_AUTH_UNABLE = 'ERROR: unable to authenticate';
+    const USER_KEY = 'profile_username';
+    const DEFAULT_USER = 'Unknown';
+    public static $debug = FALSE;
     /**
-     * Produces an MD5 hash of key $_SERVER info
-     * Also stores hash in $_SESSION[PROFILE_KEY]
+     * Builds initial login profile + stores username
+     *
+     * @param array $config
+     * @param string $username
+     * @return void
+     */
+    public static function init(array $config, string $username = self::DEFAULT_USER) : void
+    {
+        $info = self::build($config);
+        $info[self::USER_KEY] = $username;
+        self::set($info);
+    }
+    /**
+     * Pulls $_SERVER keys into array
      *
      * @param array $config
      * @return string $hash : md5() hash
@@ -48,41 +63,40 @@ class Profile
         $info = [];
         $keys = $config['SUPER']['profile'] ?? [];
         if (empty($keys)) {
-            $info[] = $_SERVER['HTTP_USER_AGENT'] ?? date('Y-m-d');
+            $info['HTTP_USER_AGENT'] = $_SERVER['HTTP_USER_AGENT'] ?? date('Y-m-d');
         } else {
             foreach ($keys as $idx)
-                $info[] = $_SERVER[$idx] ?? date('Y-m-d');
+                $info[$idx] = $_SERVER[$idx] ?? date('Y-m-d');
         }
-        $hash = md5(implode('|', $info));
-        return $hash;
+        return $info;
     }
     /**
      * Sets $_SESSION[PROFILE_KEY] to NULL
      *
      * @return void
      */
-    public static function logout()
+    public static function logout() : void
     {
         $_SESSION[self::PROFILE_KEY] = NULL;
     }
     /**
-     * Saves MD5 hash in $_SESSION[PROFILE_KEY]
+     * Saves login into in $_SESSION[PROFILE_KEY]
      *
-     * @param string $hash : generated hash
+     * @param array $info
      * @return void
      */
-    public static function set(string $hash)
+    public static function set(array $info)
     {
-        $_SESSION[self::PROFILE_KEY] = $hash;
+        $_SESSION[self::PROFILE_KEY] = $info;
     }
     /**
-     * Returns MD5 hash from $_SESSION[PROFILE_KEY]
+     * Returns into from $_SESSION[PROFILE_KEY]
      *
-     * @return string $hash : stored MD5 hash | empty string
+     * @return array $info : stored login info
      */
-    public static function get()
+    public static function get() : array
     {
-        return $_SESSION[self::PROFILE_KEY] ?? '';
+        return $_SESSION[self::PROFILE_KEY] ?? [];
     }
     /**
      * Verifies profile against stored
@@ -92,9 +106,10 @@ class Profile
      */
     public static function verify(array $config) : bool
     {
+        $name   = $_SESSION[self::PROFILE_KEY][Profile::USER_KEY] ?? rand(1000,9999);
         $stored = self::get();
         $actual = self::build($config);
-        $verify = ($stored === $actual);
-        return $verify;
+        $actual[self::USER_KEY] = $name;
+        return ($stored === $actual);
     }
 }
