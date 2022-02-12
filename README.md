@@ -1,4 +1,4 @@
-# FileCMS Website
+# FileCMS Website (v0.1.8)
 NOTE: formerly called _SimpleHtml_
 
 Simple PHP framework that builds HTML files from HTML widgets.
