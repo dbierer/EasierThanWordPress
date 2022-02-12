@@ -238,25 +238,30 @@ class Edit
      * @param string $backup_dir : backup directory
      * @param string $path      : starting path (if other than HTML_DIR)
      * @param bool   $tidy      : If set TRUE, fixes using Tidy extension
+     * @param bool   $strip     : If using Tidy, set TRUE if you want to strip off everything outside of <body>.*</body>
      * @return bool TRUE if save was successful; FALSE otherwise
      */
-    public function save(string $key, string $contents, string $backup_dir, string $path = HTML_DIR, bool $tidy = FALSE) : bool
+    public function save(string $key, string $contents, string $backup_dir, string $path = HTML_DIR, bool $tidy = FALSE, bool $strip = FALSE) : bool
     {
-        // use Tidy to sanitize
         $contents = trim($contents);
         if (empty($contents)) return FALSE;
         $ok = 0;
+        // use Tidy to sanitize if flag is set
         if (function_exists('tidy_repair_string') && $tidy) {
             $fixed = tidy_repair_string($contents);
-            // extract content between <body>*</body> tags
-            $temp = preg_split('!<body.*?>!', $fixed);
-            if (empty($temp[1])) {
-                $last = '';
+            if (!$strip) {
+                $contents = $fixed;
             } else {
-                $last = $temp[1];
+                // extract content between <body>*</body> tags
+                $temp = preg_split('!<body.*?>!', $fixed);
+                if (empty($temp[1])) {
+                    $last = '';
+                } else {
+                    $last = $temp[1];
+                }
+                $pos = strpos($last, '</body>');
+                $contents = ($pos !== FALSE) ? substr($last, 0, $pos) : '';
             }
-            $pos = strpos($last, '</body>');
-            $contents = ($pos !== FALSE) ? substr($last, 0, $pos) : '';
             $contents = trim($contents);
             if (empty($contents)) return FALSE;
         }

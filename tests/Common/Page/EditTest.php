@@ -194,12 +194,23 @@ class EditTest extends TestCase
         $actual   = file_get_contents($this->testFileDir . '/testX.html');
         $this->assertEquals($expected, $actual, 'Edit::save() did overwrite original');
     }
-    public function testSaveFixesUsingTidy()
+    public function testSaveFixesUsingTidyNoStrip()
     {
         $contents = file_get_contents($this->testFileDir . '/test1.html');
         file_put_contents($this->testFileDir . '/testX.html', $contents);
         $contents = str_replace('Test 1', 'Test X', $contents);
-        $response = $this->edit->save('/testX', $contents, $this->backupDir, $this->testFileDir, TRUE);
+        $response = $this->edit->save('/testX', $contents, $this->backupDir, $this->testFileDir, TRUE, FALSE);
+        $expected = '<!DOCTYPE html>';
+        $contents = file($this->testFileDir . '/testX.html');
+        $actual   = trim($contents[0]);
+        $this->assertEquals($expected, $actual, 'Edit::save() did not fix using Tidy');
+    }
+    public function testSaveFixesUsingTidyWithStrip()
+    {
+        $contents = file_get_contents($this->testFileDir . '/test1.html');
+        file_put_contents($this->testFileDir . '/testX.html', $contents);
+        $contents = str_replace('Test 1', 'Test X', $contents);
+        $response = $this->edit->save('/testX', $contents, $this->backupDir, $this->testFileDir, TRUE, TRUE);
         $expected = '<h1>Test X</h1>';
         $actual   = trim(file_get_contents($this->testFileDir . '/testX.html'));
         $this->assertEquals($expected, $actual, 'Edit::save() did not fix using Tidy');

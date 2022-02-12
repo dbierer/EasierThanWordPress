@@ -2,9 +2,9 @@
 namespace FileCMS\Transform;
 
 /*
- * FileCMS\Transform\Clean
+ * FileCMS\Transform\RemoveBlock
  *
- * @description Removes blocks based up search criteria, start and stop strings
+ * @description Removes blocks based upon search criteria, start and stop strings
  *
  * @author doug@unlikelysource.com
  * @date 2021-10-04
@@ -41,7 +41,7 @@ use InvalidArgumentException;
 use FileCMS\Common\Transform\Base;
 class RemoveBlock extends Base
 {
-    const DESCRIPTION = 'Remove blocks based up search criteria, start and stop strings. "items" parameter is optional and is used to verify that the block identified by start and stop is the one you wish to remove.  You can enter multiple items by separating the text with commas.';
+    const DESCRIPTION = 'Remove blocks based upon search criteria, start and stop strings. "items" parameter is optional and is used to verify that the block identified by start and stop is the one you wish to remove.  You can enter multiple items by separating the text with commas.';
     const ERR_PARAMS = 'ERROR: parameter array must contain the keys "start", "stop" and "items"';
     public $start = NULL;  // starting string
     public $stop  = NULL;  // ending string
