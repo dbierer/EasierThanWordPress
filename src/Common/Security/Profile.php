@@ -106,10 +106,11 @@ class Profile
      */
     public static function verify(array $config) : bool
     {
-        $name   = $_SESSION[self::PROFILE_KEY][Profile::USER_KEY] ?? rand(1000,9999);
         $stored = self::get();
         $actual = self::build($config);
-        $actual[self::USER_KEY] = $name;
-        return ($stored === $actual);
+        $ok = ($stored === $actual);
+        if (!$ok)
+            error_log(__METHOD__ . ':STORED:' . var_export($stored, TRUE) . ':ACTUAL:' . var_export($actual,TRUE));
+        return $ok;
     }
 }
