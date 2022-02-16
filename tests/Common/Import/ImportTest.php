@@ -112,9 +112,10 @@ class ImportTest extends TestCase
         $edit = new Edit($this->config);
         $message = Messages::getInstance();
         $tidy = TRUE;
+        $strip = TRUE;
         $expected = FALSE;
         echo "\nMaking request to $url\n";
-        $actual = Import::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $this->testBackupDir, $this->testFileDir, $tidy);
+        $actual = Import::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $this->testBackupDir, $this->testFileDir, $tidy, $strip);
         $this->assertEquals($expected, $actual);
     }
     public function testDoImportProducesExpectedResult()
@@ -130,8 +131,9 @@ class ImportTest extends TestCase
         $edit = new Edit($this->config);
         $message = Messages::getInstance();
         $tidy = TRUE;
+        $strip = TRUE;
         echo "\nMaking request to $url\n";
-        $key = Import::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $this->testBackupDir, $this->testFileDir, $tidy);
+        $key = Import::do_import($url, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $this->testBackupDir, $this->testFileDir, $tidy, $strip);
         $expected = '<h1>Test 8</h1>';
         $actual = (file_exists($target_fn)) ? file_get_contents($target_fn) : '';
         $this->assertEquals('/test8', $key, 'Key not OK');

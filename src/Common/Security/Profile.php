@@ -36,20 +36,16 @@ class Profile
 {
     const PROFILE_KEY = 'profile';
     const PROFILE_AUTH_UNABLE = 'ERROR: unable to authenticate';
-    const USER_KEY = 'profile_username';
-    const DEFAULT_USER = 'Unknown';
     public static $debug = FALSE;
     /**
      * Builds initial login profile + stores username
      *
      * @param array $config
-     * @param string $username
      * @return void
      */
-    public static function init(array $config, string $username = self::DEFAULT_USER) : void
+    public static function init(array $config) : void
     {
         $info = self::build($config);
-        $info[self::USER_KEY] = $username;
         self::set($info);
     }
     /**

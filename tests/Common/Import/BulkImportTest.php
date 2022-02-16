@@ -35,6 +35,8 @@ class BulkImportTest extends TestCase
         $message     = Messages::getInstance();
         $path        = $this->testFileDir . '/bulk';
         $backup_dir  = $this->testBackupDir;
+        $tidy        = TRUE;
+        $strip       = TRUE;
         $bulk        = [];
         $temp = <<<EOT
 https://test.unlikelysource.com/test1.html
@@ -42,7 +44,7 @@ https://test.unlikelysource.com/test2.html
 https://test.unlikelysource.com/test3.html
 EOT;
         $list = explode(PHP_EOL, trim($temp));
-        $result = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $backup_dir, $path);
+        $result = Import::do_bulk_import($list, $trusted, $transform, $delim_start, $delim_stop, $edit, $message, $backup_dir, $path, $tidy, $strip);
         $expected = [
             $path . '/test1.html',
             $path . '/test2.html',

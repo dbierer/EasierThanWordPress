@@ -57,20 +57,17 @@ class ProfileTest extends TestCase
     }
     public function testVerify()
     {
-        $name = 'Fred';
         $config = include BASE_DIR . '/tests/config/test.config.php';
-        Profile::init($config, $name);
+        Profile::init($config);
         $expected = TRUE;
         $actual   = Profile::verify($config);
         $this->assertEquals($expected, $actual);
     }
     public function testInit()
     {
-        $name = 'Fred';
         $config = include BASE_DIR . '/tests/config/test.config.php';
-        Profile::init($config, $name);
+        Profile::init($config);
         $expected = Profile::build($config);
-        $expected[Profile::USER_KEY] = $name;
         $actual   = Profile::get($config);
         $this->assertEquals($expected, $actual);
     }

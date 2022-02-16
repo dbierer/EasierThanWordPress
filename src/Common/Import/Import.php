@@ -146,27 +146,30 @@ class Import
      * Performs actual import
      *
      * @param string $url
-     * @param array $trusted : prefixes of URLs from which to allow import
-     * @param array $transform : tranformation filter rules
+     * @param array $trusted      : prefixes of URLs from which to allow import
+     * @param array $transform    : tranformation filter rules
      * @param string $delim_start : starting delimiter
      * @param string|array $delim_stop : ending delimiter(s)
-     * @param Edit $edit : used to save
-     * @param Messages $message
-     * @param string $backup_dir : backup directory
-     * @param string $path : where to save files; default === HTML_DIR
-     * @param bool $tidy : set TRUE to use Tidy extension to cleanup upon save
+     * @param Edit $edit          : used to save
+     * @param Messages $message   : retains messages between requests
+     * @param string $backup_dir  : backup directory
+     * @param string $path        : where to save files; default === HTML_DIR
+     * @param bool $tidy          : set TRUE to use Tidy extension to cleanup upon save
+     * @param bool $strip         : If using Tidy, set TRUE if you want to strip off everything outside of <body>.*</body>
      * @return boolean TRUE if OK; FALSE otherwise
      */
-    public static function do_import(string $url,
-                       array $trusted,
-                       array $transform,
-                       string $delim_start,
-                       $delim_stop,
-                       Edit $edit,
-                       Messages $message,
-                       string $backup_dir,
-                       string $path = HTML_DIR,
-                       bool $tidy = TRUE)
+    public static function do_import(
+        string $url,
+        array $trusted,
+        array $transform,
+        string $delim_start,
+        $delim_stop,
+        Edit $edit,
+        Messages $message,
+        string $backup_dir,
+        string $path = HTML_DIR,
+        bool $tidy = TRUE,
+        bool $strip = TRUE)
     {
         if (!Import::is_trusted($url, $trusted)) return FALSE;
         set_time_limit(30);
@@ -176,7 +179,7 @@ class Import
             $message->addMessage(Import::ERROR_URL_EMPTY);
         } else {
             $key  = $edit->getKeyFromURL($url, $path);
-            if ($edit->save($key, $html, $backup_dir, $path, $tidy)) {
+            if ($edit->save($key, $html, $backup_dir, $path, $tidy, $strip)) {
                 $message->addMessage(Edit::SUCCESS_SAVE . ' ' . $key);
                 $ok = TRUE;
             } else {
@@ -188,16 +191,17 @@ class Import
     /**
      * Process bulk imports
      *
-     * @param array $list : list of URLs to be imported
-     * @param array $trusted : prefixes of URLs from which to allow import
-     * @param array $transform : tranformation filter rules
-     * @param string $delim_start : starting delimiter
+     * @param array $list        : list of URLs to be imported
+     * @param array $trusted     : prefixes of URLs from which to allow import
+     * @param array $transform   : tranformation filter rules
+     * @param string $delim_start: starting delimiter
      * @param string|array $delim_stop : ending delimiter(s)
-     * @param Edit $edit : used to save
+     * @param Edit $edit         : used to save
      * @param Messages $message
      * @param string $backup_dir : backup directory
-     * @param string $path : where to save files; default === HTML_DIR
-     * @param bool $tidy : set TRUE to use Tidy extension to cleanup upon save
+     * @param string $path       : where to save files; default === HTML_DIR
+     * @param bool $tidy         : set TRUE to use Tidy extension to cleanup upon save
+     * @param bool $strip        : If using Tidy, set TRUE if you want to strip off everything outside of <body>.*</body>
      * @return array $bulk : list of URLs that were imported: 0 => [failed], 1 => [succeeded]
      */
     public static function do_bulk_import(
@@ -210,7 +214,8 @@ class Import
         Messages $message,
         string $backup_dir,
         string $path = HTML_DIR,
-        bool $tidy = TRUE)
+        bool $tidy = TRUE,
+        bool $strip = TRUE)
     {
         $bulk = [];
         foreach ($list as $url) {

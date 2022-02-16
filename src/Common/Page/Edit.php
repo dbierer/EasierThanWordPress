@@ -241,13 +241,19 @@ class Edit
      * @param bool   $strip     : If using Tidy, set TRUE if you want to strip off everything outside of <body>.*</body>
      * @return bool TRUE if save was successful; FALSE otherwise
      */
-    public function save(string $key, string $contents, string $backup_dir, string $path = HTML_DIR, bool $tidy = FALSE, bool $strip = FALSE) : bool
+    public function save(
+        string $key,
+        string $contents,
+        string $backup_dir,
+        string $path = HTML_DIR,
+        bool $tidy = FALSE,
+        bool $strip = FALSE) : bool
     {
         $contents = trim($contents);
         if (empty($contents)) return FALSE;
         $ok = 0;
         // use Tidy to sanitize if flag is set
-        if (function_exists('tidy_repair_string') && $tidy) {
+        if ($tidy && function_exists('tidy_repair_string')) {
             $fixed = tidy_repair_string($contents);
             if (!$strip) {
                 $contents = $fixed;
