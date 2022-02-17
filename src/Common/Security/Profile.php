@@ -45,8 +45,7 @@ class Profile
      */
     public static function init(array $config) : void
     {
-        $info = self::build($config);
-        self::set($info);
+        self::set(self::build($config));
     }
     /**
      * Pulls $_SERVER keys into array

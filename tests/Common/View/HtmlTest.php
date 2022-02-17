@@ -3,6 +3,7 @@ namespace FileCMSTest\Common\View;
 
 use FileCMS\Common\Transform\TransformInterface;
 use FileCMS\Common\View\Html;
+use FileCMS\Common\Generic\Messages;
 use PHPUnit\Framework\TestCase;
 class HtmlTest extends TestCase
 {
@@ -122,12 +123,36 @@ EOT;
         $actual   = $matches[1] ?? 'Fail';
         $this->assertEquals($expected, $actual, 'Single card by name not injected');
     }
+    public function testPartialIgnoresCardsIfCardsFlagSet()
+    {
+        $body     = '<html><body>%%BLOG=1%%</body></html>';
+        $actual   = $this->html->partial($body, FALSE);
+        $expected = $body;
+        $this->assertEquals($expected, $actual, 'Card injected despite flag being set FALSE');
+    }
     public function testRender()
     {
         $expected = TRUE;
         $html     = $this->html->render();
         $actual   = (bool) strpos($html, 'Business Name or Tagline');
         $this->assertEquals($expected, $actual);
+    }
+    public function testRenderReplacesMessageMarker()
+    {
+        $layout = HTML_DIR . '/testM.html';
+        $this->config['LAYOUT'] = $layout;
+        $this->html   = new Html($this->config, 'testM', HTML_DIR);
+        $marker = $this->config['MSG_MARKER'];
+        $body = file_get_contents($layout);
+        $expected = <<<EOT
+<h1>Test M</h1>
+<hr />
+<p>Messages</p>
+TEST
+EOT;
+        $this->html->msg = 'TEST';
+        $actual = $this->html->render($body);
+        $this->assertEquals($expected, trim($actual));
     }
 }
 

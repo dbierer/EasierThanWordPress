@@ -149,6 +149,13 @@ class EditTest extends TestCase
         $actual   = $this->edit->getContentsFromPage('/test1', $this->testFileDir);
         $this->assertEquals($expected, $actual, 'Edit::getContentsFromPage() did not return expected HTML');
     }
+    public function testGetContentsFromPageDoesNotRemoveContentsTag()
+    {
+        $expected = TRUE;
+        $contents = $this->edit->getContentsFromPage('/testW', $this->testFileDir);
+        $actual   = (strpos($contents, '%%CONTENTS%%') !== FALSE);
+        $this->assertEquals($expected, $actual, 'Edit::getContentsFromPage() removed %%CONTENTS%%');
+    }
     public function testGetPageFromURL()
     {
         $expected = file_get_contents($this->testFileDir . '/test1.html');

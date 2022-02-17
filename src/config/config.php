@@ -1,6 +1,6 @@
 <?php
 // change settings as needed and then copy to /src/config/config.php on your main website
-// use the skeleton project to set up your website (ttps://github.com/dbierer/filecms-website)
+// use the skeleton project to set up your website (https://github.com/dbierer/filecms-website)
 // the skeleton project contains a copy of this file
 $config = [
     'CARDS'  => 'cards',
@@ -8,6 +8,7 @@ $config = [
     'HOME'   => 'home.phtml',   // default home page
     'HOST'   => '',
     'DELIM'  => '%%',
+    'CONTENTS' => '%%CONTENTS%%',
     // use '' for CACHE if you want to disable it
     'CACHE'  => BASE_DIR . '/data/cache.txt',
     'MSG_MARKER'  => '<!-- %%MESSAGES%% -->',

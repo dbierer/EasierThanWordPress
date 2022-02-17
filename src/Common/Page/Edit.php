@@ -197,7 +197,7 @@ class Edit
         if (!empty($pages[$key]))
             if (file_exists($pages[$key]))
                 $html = file_get_contents($pages[$key]);
-            return $html;
+        return $html;
     }
     /**
      * Creates backup of existing page
