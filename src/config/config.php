@@ -9,23 +9,25 @@ $config = [
     'HOST'   => '',
     'DELIM'  => '%%',
     'CONTENTS' => '%%CONTENTS%%',
-    // use '' for CACHE if you want to disable it
-    'CACHE'  => BASE_DIR . '/data/cache.txt',
+    'AUTH_DIR' => BASE_DIR . '/logs',
+    'CLICK_CSV' => BASE_DIR . '/logs/clicks.csv',
     'MSG_MARKER'  => '<!-- %%MESSAGES%% -->',
     'CONTACT_LOG' => BASE_DIR . '/logs/contact.log',
-    'META' => [
-        'default' => [
-            'title' => 'FileCMS',
-            'keywords' => 'php, html, simple',
-            'description'  => 'Once installed all you need to do is to upload HTML snippets into the site templates folder',
-        ],
-    ],
+    // use '' for CACHE if you want to disable it
+    'CACHE'  => BASE_DIR . '/data/cache.txt',
     'CAPTCHA' => [
         'input_tag_name' => 'phrase',
         'sess_hash_key'  => 'hash',
         'font_file'      => SRC_DIR . '/fonts/FreeSansBold.ttf',
         'img_dir'        => BASE_DIR . '/public/img/captcha',
         'num_bytes'      => 2,
+    ],
+    'META' => [
+        'default' => [
+            'title' => 'FileCMS',
+            'keywords' => 'php, html, simple',
+            'description'  => 'Once installed all you need to do is to upload HTML snippets into the site templates folder',
+        ],
     ],
     'SUPER' => [
         'username'  => 'REPL_SUPER_NAME',  // fill in your username here
@@ -49,9 +51,9 @@ $config = [
          * they're selected at random when asked to login
          */
         'validation'   => [
-            'City'        => 'REPL_CITY',
-            'Postal Code' => 'REPL_POST_CODE',
-            'Last Name'   => 'REPL_LAST_NAME',
+            'City'        => 'London',
+            'Postal Code' => 'NW1 6XE',
+            'Last Name'   => 'Holmes',
         ],
         // only files with these extensions can be edited
         'allowed_ext'  => ['html','htm'],
@@ -59,8 +61,8 @@ $config = [
             'width'  => '100%',
             'height' => 400,
         ],
-        'super_dir'  => BASE_DIR . '/templates', // IMPORTANT: needs to have a subdir === "super_url" setting
         'super_url'  => '/super',                // IMPORTANT: needs to be a subdir off the "super_dir" setting
+        'super_dir'  => BASE_DIR . '/templates', // IMPORTANT: needs to have a subdir === "super_url" setting
         'super_menu' => BASE_DIR . '/templates/layout/super_menu.html',
         'backup_dir' => BASE_DIR . '/backups',
         'backup_cmd' => BASE_DIR . 'zip -r %%BACKUP_FN%% %%BACKUP_SRC%%',
@@ -71,12 +73,12 @@ $config = [
      *
      * If "storage_fmt" param === "php" uses native PHP serialization
      * If "storage_fmt" param === "json" uses JSON encoding
-     * If "storage_fmt" param === "csv" uses JSON encoding
+     * If "storage_fmt" param === "csv" uses CSV encoding
      */
     'STORAGE' => [
         'storage_fmt' => 'csv',  // can be php|json|csv
         'storage_dir' => BASE_DIR . '/data',
-        'storage_fn'  => 'storage.txt',
+        'storage_fn'  => 'contacts.txt',
     ],
     /*
      * These settings are primarily used for the email contact form
@@ -223,7 +225,7 @@ $config = [
         'img_url'     => '/images',
         'thumb_dir'   => BASE_DIR . '/public/thumb',
         'thumb_url'   => '/thumb',
-        'allowed_types' => ['image/'],
+        'allowed_types' => ['image/'],  // allowed MIME type prefix
     ],
     'TRANSFORM' => [
         'enable' => TRUE,                      // change this to FALSE to disable this feature
@@ -241,7 +243,6 @@ $config = [
         // you can also add your own anonymous functions as transforms as long as the signature
         // matches the one specified by FileCMS\Transform\TransformInterface
         'transform' => [
-            // examples:
             /*
             'clean' => [
                 'callback' => 'FileCMS\Transform\Clean',

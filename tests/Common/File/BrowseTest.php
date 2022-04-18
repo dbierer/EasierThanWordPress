@@ -40,7 +40,20 @@ class BrowseTest extends TestCase
         $browse = new Browse($this->config);
         $img_url = '/images/blog-1.jpg';
         $img_fn  = $this->testFileDir . $img_url;
+        $thumb_fn = $this->testFileDir . '/thumb/blog-1.jpg';
+        copy($img_fn, $thumb_fn);
         $expected = '/thumb/blog-1.jpg';
+        $actual = $browse->getThumbUrlFromImageUrl($img_url, $img_fn);
+        $this->assertEquals($expected, $actual, 'Thumb image URL not created correctly');
+    }
+    public function testGetThumbUrlFromImageUrlIfThumbFileDoesNotExist()
+    {
+        $thumb_fn = $this->testFileDir . '/thumb/blog-1.jpg';
+        if (file_exists($thumb_fn)) unlink($thumb_fn);
+        $browse = new Browse($this->config);
+        $img_url = '/images/blog-1.jpg';
+        $img_fn  = $this->testFileDir . $img_url;
+        $expected = $img_url;
         $actual = $browse->getThumbUrlFromImageUrl($img_url, $img_fn);
         $this->assertEquals($expected, $actual, 'Thumb image URL not created correctly');
     }

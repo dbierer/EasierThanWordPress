@@ -58,7 +58,7 @@ class Transform
      */
     public static function transform(string $contents, array $callbacks = [])
     {
-        $text = str_replace(PHP_EOL, '', trim($contents));
+        $text = str_replace(["\r","\n"], '', trim($contents));
         if (!empty($text) && !empty($callbacks)) {
             foreach ($callbacks as $key => $item) {
                 $class  = $item['callback'] ?? '';

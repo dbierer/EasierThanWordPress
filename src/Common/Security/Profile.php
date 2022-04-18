@@ -34,18 +34,39 @@ namespace FileCMS\Common\Security;
 
 class Profile
 {
-    const PROFILE_KEY = 'profile';
+
     const PROFILE_AUTH_UNABLE = 'ERROR: unable to authenticate';
-    public static $debug = FALSE;
+    const DEFAULT_AUTH_DIR    = BASE_DIR . '/logs';
+    const DEFAULT_AUTH_PREFIX = 'AUTH_';
+    const AUTH_FILE_TTL       = 86400;     // # seconds old auth files can remain (86400 secs == 24 hours)
+
+    public static $debug   = FALSE;
+    public static $authDir = '';
+
     /**
-     * Builds initial login profile + stores username
+     * Creates unique auth file name based on profile
+     *
+     * @param array $config
+     * @param array $info : profile info
+     * @return string $authFilename
+     */
+    public static function getAuthFileName(array $config, array $info)
+    {
+        self::$authDir = $config['AUTH_DIR'] ?? self::DEFAULT_AUTH_DIR;
+        $fn = self::DEFAULT_AUTH_PREFIX . md5(implode('', $info));
+        return str_replace('//', '/', self::$authDir . '/' . $fn);
+    }
+    /**
+     * Builds initial login profile + sets up auth file
      *
      * @param array $config
      * @return void
      */
     public static function init(array $config) : void
     {
-        self::set(self::build($config));
+        $info = self::build($config);
+        $fn   = self::getAuthFileName($config, $info);
+        file_put_contents($fn, json_encode($info, JSON_PRETTY_PRINT));
     }
     /**
      * Pulls $_SERVER keys into array
@@ -66,32 +87,36 @@ class Profile
         return $info;
     }
     /**
-     * Sets $_SESSION[PROFILE_KEY] to NULL
+     * Removes auth file
      *
+     * @param array $config
      * @return void
      */
-    public static function logout() : void
+    public static function logout(array $config) : void
     {
-        $_SESSION[self::PROFILE_KEY] = NULL;
-    }
-    /**
-     * Saves login into in $_SESSION[PROFILE_KEY]
-     *
-     * @param array $info
-     * @return void
-     */
-    public static function set(array $info)
-    {
-        $_SESSION[self::PROFILE_KEY] = $info;
-    }
-    /**
-     * Returns into from $_SESSION[PROFILE_KEY]
-     *
-     * @return array $info : stored login info
-     */
-    public static function get() : array
-    {
-        return $_SESSION[self::PROFILE_KEY] ?? [];
+        $info = self::build($config);
+        $fn   = self::getAuthFileName($config, $info);
+        if (file_exists($fn)) unlink($fn);
+        // clean out old auth files
+        $path = str_replace('//', '/', self::$authDir . '/' . self::DEFAULT_AUTH_PREFIX . '*');
+        $iter = glob($path);
+        $now = time();
+        $expired = $now - self::AUTH_FILE_TTL;
+        foreach ($iter as $name) {
+            // find files older than 24 hours
+            if (is_file($name) && filectime($name) < $expired) {
+                unlink($name);
+            }
+        }
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params['path'], $params['domain'],
+                $params['secure'], $params['httponly']
+            );
+        }
+        session_destroy();
     }
     /**
      * Verifies profile against stored
@@ -101,11 +126,11 @@ class Profile
      */
     public static function verify(array $config) : bool
     {
-        $stored = self::get();
-        $actual = self::build($config);
-        $ok = ($stored === $actual);
+        $info = self::build($config);
+        $fn   = self::getAuthFileName($config, $info);
+        $ok = file_exists($fn);
         if (!$ok)
-            error_log(__METHOD__ . ':STORED:' . var_export($stored, TRUE) . ':ACTUAL:' . var_export($actual,TRUE));
+            error_log(__METHOD__ . ':AUTH FILE:' . $fn . ':INFO:' . var_export($info, TRUE));
         return $ok;
     }
 }

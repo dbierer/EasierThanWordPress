@@ -127,7 +127,7 @@ class Edit
                 parent::__construct($iter);
                 $this->allowed = $allowed;
             }
-            public function accept()
+            public function accept() : bool
             {
                 $ok  = FALSE;
                 $obj = $this->current() ?? FALSE;

@@ -6,9 +6,11 @@ use FileCMS\Common\Security\Profile;
 use PHPUnit\Framework\TestCase;
 class ProfileTest extends TestCase
 {
+    public $config = [];
     public function setUp() : void
     {
         session_reset();
+        $this->config = include BASE_DIR . '/tests/config/test.config.php';
     }
     public function testProfileBuildUsesDateAsDefault()
     {
@@ -21,54 +23,44 @@ class ProfileTest extends TestCase
         $date = date('Y-m-d');
         $_SERVER = [];
         $expected = [];
-        $config = include BASE_DIR . '/tests/config/test.config.php';
-        foreach ($config['SUPER']['profile'] as $key) {
+        foreach ($this->config['SUPER']['profile'] as $key) {
             $_SERVER[$key] = $date;
             $expected[$key] = $date;
         }
-        $actual   = Profile::build($config);
+        $actual   = Profile::build($this->config);
         $this->assertEquals($expected, $actual);
     }
     public function testProfileBuildUsesExpectedServerAgentIfKeyIsEmpty()
     {
         $key = date('Y-m-d') . 'ABCDEF';
         $_SERVER = ['HTTP_USER_AGENT' => $key];
-        $config = include BASE_DIR . '/tests/config/test.config.php';
-        $config['SUPER']['profile'] = [];
+        $this->config['SUPER']['profile'] = [];
         $expected['HTTP_USER_AGENT'] = $key;
-        $actual   = Profile::build($config);
-        $this->assertEquals($expected, $actual);
-    }
-    public function testSetStoresProfileInSession()
-    {
-        $test = ['test' => 'TEST'];
-        Profile::set($test);
-        $expected = $test;
-        $actual   = $_SESSION[Profile::PROFILE_KEY] ?? 'NOT';
-        $this->assertEquals($expected, $actual);
-    }
-    public function testGetReturnsCorrectValueFromSession()
-    {
-        $test = ['test' => 'TEST'];
-        Profile::set($test);
-        $expected = $test;
-        $actual   = Profile::get();
+        $actual   = Profile::build($this->config);
         $this->assertEquals($expected, $actual);
     }
     public function testVerify()
     {
-        $config = include BASE_DIR . '/tests/config/test.config.php';
-        Profile::init($config);
+        Profile::init($this->config);
         $expected = TRUE;
-        $actual   = Profile::verify($config);
+        $actual   = Profile::verify($this->config);
         $this->assertEquals($expected, $actual);
     }
-    public function testInit()
+    public function testInitCreatesAuthFile()
     {
-        $config = include BASE_DIR . '/tests/config/test.config.php';
-        Profile::init($config);
-        $expected = Profile::build($config);
-        $actual   = Profile::get($config);
+        Profile::init($this->config);
+        $path     = str_replace('//', '/', $this->config['AUTH_DIR'] . '/' . Profile::DEFAULT_AUTH_PREFIX . '*');
+        $list     = glob($path);
+        $expected = TRUE;
+        $actual   = empty($list);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testLogoutWipesOutSession()
+    {
+        $_SESSION['test'] = 'TEST';
+        Profile::logout($this->config);
+        $expected = TRUE;
+        $actual   = empty($_SESSION['test']);
         $this->assertEquals($expected, $actual);
     }
 }

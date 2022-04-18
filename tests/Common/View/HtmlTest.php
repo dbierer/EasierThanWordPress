@@ -125,16 +125,26 @@ EOT;
     }
     public function testPartialIgnoresCardsIfCardsFlagSet()
     {
-        $body     = '<html><body>%%BLOG=1%%</body></html>';
+        $body     = '<html><body>%%BLOG%%</body></html>';
         $actual   = $this->html->partial($body, FALSE);
         $expected = $body;
         $this->assertEquals($expected, $actual, 'Card injected despite flag being set FALSE');
+        $expected = TRUE;
+        $actual   = (bool) strpos($actual, '%%BLOG%%');
+        $this->assertEquals($expected, $actual, 'Cards marker is missing');
     }
     public function testRender()
     {
         $expected = TRUE;
         $html     = $this->html->render();
         $actual   = (bool) strpos($html, 'Business Name or Tagline');
+        $this->assertEquals($expected, $actual);
+    }
+    public function testRenderDoesNotInjectCardsIfFlagSet()
+    {
+        $expected = TRUE;
+        $html     = $this->html->render('', FALSE);
+        $actual   = (bool) strpos($html, '%%BLOG=3%%');
         $this->assertEquals($expected, $actual);
     }
     public function testRenderReplacesMessageMarker()
