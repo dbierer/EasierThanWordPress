@@ -27,7 +27,8 @@ class ProfileTest extends TestCase
             $_SERVER[$key] = $date;
             $expected[$key] = $date;
         }
-        $actual   = Profile::build($this->config);
+        Profile::$config = $this->config;
+        $actual   = Profile::build();
         $this->assertEquals($expected, $actual);
     }
     public function testProfileBuildUsesExpectedServerAgentIfKeyIsEmpty()
@@ -35,15 +36,16 @@ class ProfileTest extends TestCase
         $key = date('Y-m-d') . 'ABCDEF';
         $_SERVER = ['HTTP_USER_AGENT' => $key];
         $this->config['SUPER']['profile'] = [];
+        Profile::$config = $this->config;
         $expected['HTTP_USER_AGENT'] = $key;
-        $actual   = Profile::build($this->config);
+        $actual   = Profile::build();
         $this->assertEquals($expected, $actual);
     }
     public function testVerify()
     {
         Profile::init($this->config);
         $expected = TRUE;
-        $actual   = Profile::verify($this->config);
+        $actual   = Profile::verify();
         $this->assertEquals($expected, $actual);
     }
     public function testInitCreatesAuthFile()
@@ -58,7 +60,7 @@ class ProfileTest extends TestCase
     public function testLogoutWipesOutSession()
     {
         $_SESSION['test'] = 'TEST';
-        Profile::logout($this->config);
+        Profile::logout();
         $expected = TRUE;
         $actual   = empty($_SESSION['test']);
         $this->assertEquals($expected, $actual);

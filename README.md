@@ -1,4 +1,4 @@
-# FileCMS Website (v0.2.2)
+# FileCMS Website (v0.2.3)
 NOTE: formerly called _SimpleHtml_
 
 Simple PHP framework that builds HTML files from HTML widgets.
@@ -287,3 +287,13 @@ Records the following information into a CSV file:
 * 1
 The "1" can be used in a spreadsheet to create totals by any of the other fields.
 After logging in as the admin user, go to `/super/clicks`.
+
+## Change Log
+### tag: v0.2.2 / v0.2.3
+* 2022-04-22 DB: Finished testing modifications to Profile
+* 2022-04-18 DB: Updated tests
+* 2022-02-17 DB: Added option to prevent %%CARDS%% tags from being overwritten + implemented messages marker replacement for static HTML pages + expanded tests
+### tag: v0.2.1
+* 2022-02-16 DB: Updated tests + removed user key from Common\Security\Profile
+### tag: v0.2.0
+* 2022-02-13 DB: Fixed bug whereby you can never login

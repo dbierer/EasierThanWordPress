@@ -42,17 +42,17 @@ class Profile
 
     public static $debug   = FALSE;
     public static $authDir = '';
+    public static $config  = [];
 
     /**
      * Creates unique auth file name based on profile
      *
-     * @param array $config
      * @param array $info : profile info
      * @return string $authFilename
      */
-    public static function getAuthFileName(array $config, array $info)
+    public static function getAuthFileName(array $info)
     {
-        self::$authDir = $config['AUTH_DIR'] ?? self::DEFAULT_AUTH_DIR;
+        self::$authDir = self::$config['AUTH_DIR'] ?? self::DEFAULT_AUTH_DIR;
         $fn = self::DEFAULT_AUTH_PREFIX . md5(implode('', $info));
         return str_replace('//', '/', self::$authDir . '/' . $fn);
     }
@@ -64,20 +64,20 @@ class Profile
      */
     public static function init(array $config) : void
     {
-        $info = self::build($config);
-        $fn   = self::getAuthFileName($config, $info);
+        self::$config = $config;
+        $info = self::build();
+        $fn   = self::getAuthFileName($info);
         file_put_contents($fn, json_encode($info, JSON_PRETTY_PRINT));
     }
     /**
      * Pulls $_SERVER keys into array
      *
-     * @param array $config
      * @return string $hash : md5() hash
      */
-    public static function build(array $config)
+    public static function build()
     {
         $info = [];
-        $keys = $config['SUPER']['profile'] ?? [];
+        $keys = self::$config['SUPER']['profile'] ?? [];
         if (empty($keys)) {
             $info['HTTP_USER_AGENT'] = $_SERVER['HTTP_USER_AGENT'] ?? date('Y-m-d');
         } else {
@@ -89,13 +89,12 @@ class Profile
     /**
      * Removes auth file
      *
-     * @param array $config
      * @return void
      */
-    public static function logout(array $config) : void
+    public static function logout() : void
     {
-        $info = self::build($config);
-        $fn   = self::getAuthFileName($config, $info);
+        $info = self::build();
+        $fn   = self::getAuthFileName($info);
         if (file_exists($fn)) unlink($fn);
         // clean out old auth files
         $path = str_replace('//', '/', self::$authDir . '/' . self::DEFAULT_AUTH_PREFIX . '*');
@@ -121,13 +120,12 @@ class Profile
     /**
      * Verifies profile against stored
      *
-     * @param array $config
      * @return bool TRUE if match | FALSE otherwise
      */
-    public static function verify(array $config) : bool
+    public static function verify() : bool
     {
-        $info = self::build($config);
-        $fn   = self::getAuthFileName($config, $info);
+        $info = self::build();
+        $fn   = self::getAuthFileName($info);
         $ok = file_exists($fn);
         if (!$ok)
             error_log(__METHOD__ . ':AUTH FILE:' . $fn . ':INFO:' . var_export($info, TRUE));
