@@ -1,4 +1,4 @@
-# FileCMS Website (v0.1.8)
+# FileCMS Website (v0.2.2)
 NOTE: formerly called _SimpleHtml_
 
 Simple PHP framework that builds HTML files from HTML widgets.
@@ -10,6 +10,7 @@ Simple PHP framework that builds HTML files from HTML widgets.
 * Entirely file-based: does not require a database!
 * Very fast and flexible.
 * Once you've got it up and running, just upload HTML snippets and/or modify the configuration file.
+* Works on PHP 8.1
 
 License: Apache v2
 
@@ -37,7 +38,7 @@ All references are from `/path/to/website`:
 * Open `/src/config/config.php`
   * Modify configuration to suit your needs
   * Use `/src/config/config.php.dist` as a guide
-* Open `/public/index.php`
+* Open `/bootstrap.php`
   * Modify the three global constants to suit your needs:
     * `BASE_DIR`
     * `HTML_DIR`
@@ -112,7 +113,7 @@ Set the website document root to `/public`
 * If you are using *nginx* you will need to incorporate the same logic into your primary config file
 * `/public/index.php` first loads the *bootstrap* file `/bootstrap.php`
   * This file defines three key constants used throughout the program (summarized in the table shown next)
-  * The bootstrap file also load the Composer autoloader
+  * The bootstrap file also loads the Composer autoloader
   * If you add your own classes under `/src` be sure to update `composer.json` and refresh Composer autoloading:
 ```
 composer dump-autoload
@@ -125,6 +126,11 @@ Here is a summary of the three key constants defined by `/bootstrap.php`.  Chang
 | HTML_DIR | `/templates/site` | Location of HTML snippets |
 | SRC_DIR  | `/src` | Location of source code |
 
+## Pre-Processing
+Before the final HTML view is rendered, `/public/index.php` includes `/src/processsing.php`.
+In this file you can include any pre-processing you need done.
+* The request URL is available as the variable `$uri`
+* This is where the admin URL (e.g. `/super`) is captured and sent to processing
 
 ## Templates
 By default templates are stored in `/templates/site`.  You can alter this in the config file.
@@ -181,7 +187,7 @@ Example configuration for super user:
     'attempts' => 3,
     'message'  => 'Sorry! Unable to login.  Please contact your administrator',
     // array of $_SERVER keys to store in session if authenticated
-    'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE','HTTP_COOKIE'],
+    'profile'  => ['REMOTE_ADDR','HTTP_ACCEPT_LANGUAGE'],
     // change the values to reflect the names of fiels in your login.phtml form
     'login_fields' => [
         'name'     => 'name',
@@ -271,8 +277,13 @@ Here are some notes on config file settings under the `TRANSFORM` config key:
 * `TRANSFORM::transform_file_field`
   * Name of the form field that is used if you want to upload a set of transforms
 
-## Pre-Processing
-Before the final HTML view is rendered, `/public/index.php` includes `/src/processsing.php`.
-In this file you can include any pre-processing you need done.
-* The request URL is available as the variable `$uri`
-* This is where the admin URL is captured and sent to processing
+## Clicks
+A class `FileCMS\Common\Stats\Clicks` was added as of version 0.2.1.
+Records the following information into a CSV file:
+* URL
+* Date
+* Time
+* IP address
+* 1
+The "1" can be used in a spreadsheet to create totals by any of the other fields.
+After logging in as the admin user, go to `/super/clicks`.

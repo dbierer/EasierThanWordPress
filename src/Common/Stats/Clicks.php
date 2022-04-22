@@ -5,7 +5,7 @@ use SplFileObject;
 use Throwable;
 class Clicks
 {
-    const HOME = '/home';
+    public const HOME = '/home';
     /**
      * Records page counts by url, year, month day
      * Doesn't record clicks that match self::IGNORE_URLS
