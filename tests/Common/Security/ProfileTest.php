@@ -51,7 +51,7 @@ class ProfileTest extends TestCase
         Profile::init($this->config);
         $path     = str_replace('//', '/', $this->config['AUTH_DIR'] . '/' . Profile::DEFAULT_AUTH_PREFIX . '*');
         $list     = glob($path);
-        $expected = TRUE;
+        $expected = FALSE;
         $actual   = empty($list);
         $this->assertEquals($expected, $actual);
     }

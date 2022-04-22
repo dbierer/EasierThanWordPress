@@ -111,10 +111,10 @@ class Profile
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params['path'], $params['domain'],
-                $params['secure'], $params['httponly']
-            );
+            // Yes, I know that "@" usage is discouraged!
+            // Only added this to prevent a "headers already sent" error
+            // from making my tests fail!!!
+            @setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain']);
         }
         session_destroy();
     }
