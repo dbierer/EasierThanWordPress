@@ -39,6 +39,9 @@ class Email
     const DEFAULT_SUBJECT = 'Customer Request';
     const DEFAULT_SUCCESS = 'SUCCESS: email sent';
     const DEFAULT_ERROR   = 'ERROR: unable to send email';
+    const DEBUG_MSG       = 'DEBUG mode enabled: mail not sent';
+    public static $error  = FALSE;
+    public static $phpMailer = NULL;
     /**
      * @param array $config : from /src/config/config.php
      * @param array $inputs : filtered and validated $_POST data
@@ -75,13 +78,15 @@ class Email
      * @param array $config   : primary config file
      * @param string $subject : email subject line
      * @param string $body    : email message
+     * @param bool   $debug   : set TRUE to set debug mode: doesn't send mail
      * @return string $msg    : success/failure message
      */
     public static function confirmAndSend(
         string $from,
         array $config,
         string $subject,
-        string $body)
+        string $body,
+        bool $debug = FALSE)
     {
         $msg       = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
         $phraseKey = $config['captcha']['input_tag_name'] ?? 'phrase';
@@ -95,36 +100,8 @@ class Email
         if (password_verify($phrase, $hash)) {
             // validate email
             if (PHPMailer::validateAddress($from)) {
-                // send request for 30 day trial
-                try {
-                    // set up SMTP
-                    $mail = new PHPMailer();
-                    if ($phpmailerConfig['smtp']) {
-                        $mail->IsSMTP();
-                        $mail->Host       = $phpmailerConfig['smtp_host'] ?? '';
-                        $mail->Port       = $phpmailerConfig['smtp_port'];
-                        $mail->SMTPAuth   = $phpmailerConfig['smtp_auth'];
-                        $mail->Username   = $phpmailerConfig['smtp_username'] ?? '';
-                        $mail->Password   = $phpmailerConfig['smtp_password'] ?? '';
-                        $mail->SMTPSecure = $phpmailerConfig['smtp_secure'] ?? 'tls';
-                    }
-                    // set up mail obj
-                    $mail->setFrom($from);
-                    self::queueOutbound($to, 'to', $mail);
-                    self::queueOutbound($cc, 'cc', $mail);
-                    self::queueOutbound($bcc, 'bcc', $mail);
-                    $mail->Subject = $subject;
-                    $mail->Body    = $body;
-                    //send the message, check for errors
-                    if ($mail->send()) {
-                        $msg = $config['COMPANY_EMAIL']['SUCCESS'] ?? self::DEFAULT_SUCCESS;
-                    } else {
-                        $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-                    }
-                } catch (\Exception $e) {
-                    $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-                    error_log(__METHOD__ . ':' . $e->getMessage());
-                }
+                // send request
+                $msg = self::trustedSend($config, $to, $from, $subject, $body, $cc, $bcc, $debug);
             } else {
                 $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
                 error_log(basename(__FILE__) . ': email does not verify');
@@ -132,6 +109,81 @@ class Email
         } else {
             $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
             error_log(basename(__FILE__) . ': CAPTCHA does not verify');
+        }
+        return $msg;
+    }
+    /**
+     * Uses PHPMailer to validate email address
+     *
+     * @param string $email : email address to validate
+     * @return bool
+     */
+    public static function validateEmail(string $email)
+    {
+        return PHPMailer::validateAddress($email);
+    }
+    /**
+     * Sends email using PHPMailer
+     * Trusts that all validation is done
+     *
+     * @param array $config   : primary config file
+     * @param string $to      : recipient's email address
+     * @param string $from    : sender's email address
+     * @param string $subject : email subject line
+     * @param string $body    : email message
+     * @param string $cc      : optional CC list
+     * @param string $bcc     : optional BCC list
+     * @param bool   $debug   : set TRUE to set debug mode: doesn't send mail
+     * @return string $msg    : success/failure message
+     */
+    public static function trustedSend(
+        array $config,
+        string $to,
+        string $from,
+        string $subject,
+        string $body,
+        string $cc = '',
+        string $bcc = '',
+        bool $debug = FALSE)
+    {
+        $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
+        $phpmailerConfig = $config['COMPANY_EMAIL']['phpmailer'];
+        // send request
+        try {
+            // set up SMTP
+            $mail = new PHPMailer();
+            if (isset($phpmailerConfig['smtp'])) {
+                $mail->IsSMTP();
+                $mail->Host       = $phpmailerConfig['smtp_host'] ?? '';
+                $mail->Port       = $phpmailerConfig['smtp_port'];
+                $mail->SMTPAuth   = $phpmailerConfig['smtp_auth'];
+                $mail->Username   = $phpmailerConfig['smtp_username'] ?? '';
+                $mail->Password   = $phpmailerConfig['smtp_password'] ?? '';
+                $mail->SMTPSecure = $phpmailerConfig['smtp_secure'] ?? 'tls';
+            }
+            // set up mail obj
+            $mail->setFrom($from);
+            self::queueOutbound($to, 'to', $mail);
+            self::queueOutbound($cc, 'cc', $mail);
+            self::queueOutbound($bcc, 'bcc', $mail);
+            $mail->Subject = $subject;
+            $mail->Body    = $body;
+            if ($debug === TRUE) {
+                self::$phpMailer = $mail;
+                $msg = self::DEBUG_MSG;
+            } else {
+                //send the message, check for errors
+                if ($mail->send()) {
+                    $msg = $config['COMPANY_EMAIL']['SUCCESS'] ?? self::DEFAULT_SUCCESS;
+                } else {
+                    $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
+                    self::$error = TRUE;
+                }
+            }
+        } catch (\Exception $e) {
+            self::$error = TRUE;
+            $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
+            error_log(__METHOD__ . ':' . $e->getMessage());
         }
         return $msg;
     }
