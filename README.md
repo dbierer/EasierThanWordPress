@@ -295,5 +295,12 @@ After logging in as the admin user, go to `/super/clicks`.
 * 2022-02-17 DB: Added option to prevent %%CARDS%% tags from being overwritten + implemented messages marker replacement for static HTML pages + expanded tests
 ### tag: v0.2.1
 * 2022-02-16 DB: Updated tests + removed user key from Common\Security\Profile
-### tag: v0.2.0
+### tag: v0.2.2
 * 2022-02-13 DB: Fixed bug whereby you can never login
+### tag: v0.2.4
+2022-05-12 DB:
+* Created `Email::trustedSend()` that allows you to directly call the core email send function
+* Refactored `Email::confirmAndSend()` to call `trustedSend()`
+* Added `$debug` option to facilitate testing and debugging
+  * If set `TRUE` the email is not actually sent, and a `PHPMailer` instance is set to `Email::$phpMailer`
+* Added `FileCMSTest\Common\Contact\EmailTest` test class
