@@ -46,28 +46,29 @@ class Email
      * @param array $config : from /src/config/config.php
      * @param array $inputs : filtered and validated $_POST data
      * @param string $body  : message body is passed back by reference
+     * @param bool   $debug   : set TRUE to set debug mode: doesn't send mail
      * @return string $msg  : any error or other messages
      */
-    public static function processPost(array $config, array $inputs, string &$body)
+    public static function processPost( array $config,
+                                        array $inputs,
+                                        string &$body,
+                                        bool $debug = FALSE)
     {
-        $msg = '';
+        $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
         // sanitize "from" email
         $email = $inputs['email'] ?? '';
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
         // $inputs = self::filter($table, $post, $config);
         $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
         $phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
-        if (!empty($inputs)) {
-            $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-            if (!empty($email)) {
-                $body    = "\n";
-                foreach ($inputs as $key => $value)
-                    $body .= sprintf(self::BODY_PATTERN, ucfirst($key), $value);
-                $subject = $inputs['subject']
-                         ?? $config['COMPANY_EMAIL']['default_subject']
-                         ?? self::DEFAULT_SUBJECT;
-                $msg = Email::confirmAndSend($email, $config, $subject, $body);
-            }
+        if (!empty($inputs)&& !empty($email)) {
+            $body    = "\n";
+            foreach ($inputs as $key => $value)
+                $body .= sprintf(self::BODY_PATTERN, ucfirst($key), $value);
+            $subject = $inputs['subject']
+                     ?? $config['COMPANY_EMAIL']['default_subject']
+                     ?? self::DEFAULT_SUBJECT;
+            $msg = Email::confirmAndSend($email, $config, $subject, $body, $debug);
         }
         return $msg;
     }
@@ -81,16 +82,15 @@ class Email
      * @param bool   $debug   : set TRUE to set debug mode: doesn't send mail
      * @return string $msg    : success/failure message
      */
-    public static function confirmAndSend(
-        string $from,
-        array $config,
-        string $subject,
-        string $body,
-        bool $debug = FALSE)
+    public static function confirmAndSend(  string $from,
+                                            array $config,
+                                            string $subject,
+                                            string $body,
+                                            bool $debug = FALSE)
     {
         $msg       = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-        $phraseKey = $config['captcha']['input_tag_name'] ?? 'phrase';
-        $hashKey   = $config['captcha']['sess_hash_key'] ?? 'hash';
+        $phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
+        $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
         $phrase    = $_REQUEST[$phraseKey] ?? '';
         $hash      = $_SESSION[$hashKey] ?? 'UNKNOWN';
         $to        = $config['COMPANY_EMAIL']['to'];
@@ -136,15 +136,14 @@ class Email
      * @param bool   $debug   : set TRUE to set debug mode: doesn't send mail
      * @return string $msg    : success/failure message
      */
-    public static function trustedSend(
-        array $config,
-        string $to,
-        string $from,
-        string $subject,
-        string $body,
-        string $cc = '',
-        string $bcc = '',
-        bool $debug = FALSE)
+    public static function trustedSend( array $config,
+                                        string $to,
+                                        string $from,
+                                        string $subject,
+                                        string $body,
+                                        string $cc = '',
+                                        string $bcc = '',
+                                        bool $debug = FALSE)
     {
         $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
         $phpmailerConfig = $config['COMPANY_EMAIL']['phpmailer'];
