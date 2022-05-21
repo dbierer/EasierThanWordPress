@@ -141,7 +141,7 @@ class Email
         try {
             // set up SMTP
             $mail = new PHPMailer();
-            if (isset($phpmailerConfig['smtp'])) {
+            if (!empty($phpmailerConfig['smtp'])) {
                 $mail->IsSMTP();
                 $mail->Host       = $phpmailerConfig['smtp_host'] ?? '';
                 $mail->Port       = $phpmailerConfig['smtp_port'];

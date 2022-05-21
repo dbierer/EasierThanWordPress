@@ -312,3 +312,9 @@ After logging in as the admin user, go to `/super/clicks`.
 * `FileCMS\Common\Import\Import`
   * Added message if URL not found
   * Wrapped `file_get_contents($url)` call in `try` / `catch` to prevent expected errors from messing up test results
+### tag: v0.2.6
+* `FileCMS\Common\Contact\Email::trustedSend()`
+  * Fixed bug whereby PHPMailer was always set to SMTP regardless of config settings
+* Updated `FileCMSTest\Common\Contact\EmailTest`
+  * Added tests to see if PHPMailer instance is set to "smtp" or "mail"
+

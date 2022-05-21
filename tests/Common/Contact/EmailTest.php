@@ -67,6 +67,36 @@ class EmailTest extends TestCase
         $actual   = $msg;
         $this->assertEquals($expected, $actual);
     }
+    public function testTrustedSendDoesNotUseSMTP()
+    {
+        $to = 'doug@unlikelysource.com';
+        $from = 'test@unlikelysource.com';
+        $subject = 'TEST ' . date('Y-m-d H:i:s');
+        $body = $subject;
+        $cc = '';
+        $bcc = '';
+        $debug = TRUE;
+        $this->config['COMPANY_EMAIL']['phpmailer']['smtp'] = FALSE;
+        $msg = Email::trustedSend($this->config, $to, $from, $subject, $body, $cc, $bcc, $debug);
+        $expected = 'mail';
+        $actual   = get_object_vars(Email::$phpMailer)['Mailer'];
+        $this->assertEquals($expected, $actual);
+    }
+    public function testTrustedSendUsesSMTPIfConfigSet()
+    {
+        $to = 'doug@unlikelysource.com';
+        $from = 'test@unlikelysource.com';
+        $subject = 'TEST ' . date('Y-m-d H:i:s');
+        $body = $subject;
+        $cc = '';
+        $bcc = '';
+        $debug = TRUE;
+        $this->config['COMPANY_EMAIL']['phpmailer']['smtp'] = TRUE;
+        $msg = Email::trustedSend($this->config, $to, $from, $subject, $body, $cc, $bcc, $debug);
+        $expected = 'smtp';
+        $actual   = get_object_vars(Email::$phpMailer)['Mailer'];
+        $this->assertEquals($expected, $actual);
+    }
     public function testConfirmAndSendFailsOnInvalidPassword()
     {
         $from = 'test@unlikelysource.com';

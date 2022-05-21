@@ -3,3 +3,15 @@
   'HTTP_USER_AGENT' => '2022-05-21ABCDEF',
   'HTTP_ACCEPT_LANGUAGE' => '2022-05-21',
 )
+[21-May-2022 04:14:52 UTC] Email.php: CAPTCHA does not verify
+[21-May-2022 04:14:52 UTC] Email.php: email does not verify
+[21-May-2022 04:15:19 UTC] Email.php: CAPTCHA does not verify
+[21-May-2022 04:15:20 UTC] Email.php: email does not verify
+[21-May-2022 04:22:23 UTC] Email.php: CAPTCHA does not verify
+[21-May-2022 04:22:23 UTC] Email.php: email does not verify
+[21-May-2022 04:23:23 UTC] Email.php: CAPTCHA does not verify
+[21-May-2022 04:23:23 UTC] Email.php: email does not verify
+[21-May-2022 04:23:35 UTC] Email.php: CAPTCHA does not verify
+[21-May-2022 04:23:35 UTC] Email.php: email does not verify
+[21-May-2022 04:23:42 UTC] Email.php: CAPTCHA does not verify
+[21-May-2022 04:23:42 UTC] Email.php: email does not verify
