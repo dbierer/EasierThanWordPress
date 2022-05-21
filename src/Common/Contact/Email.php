@@ -113,16 +113,6 @@ class Email
         return $msg;
     }
     /**
-     * Uses PHPMailer to validate email address
-     *
-     * @param string $email : email address to validate
-     * @return bool
-     */
-    public static function validateEmail(string $email)
-    {
-        return PHPMailer::validateAddress($email);
-    }
-    /**
      * Sends email using PHPMailer
      * Trusts that all validation is done
      *
@@ -131,8 +121,8 @@ class Email
      * @param string $from    : sender's email address
      * @param string $subject : email subject line
      * @param string $body    : email message
-     * @param string $cc      : optional CC list
-     * @param string $bcc     : optional BCC list
+     * @param mixed  $cc      : optional CC list
+     * @param mixed  $bcc     : optional BCC list
      * @param bool   $debug   : set TRUE to set debug mode: doesn't send mail
      * @return string $msg    : success/failure message
      */
@@ -141,8 +131,8 @@ class Email
                                         string $from,
                                         string $subject,
                                         string $body,
-                                        string $cc = '',
-                                        string $bcc = '',
+                                        $cc = '',
+                                        $bcc = '',
                                         bool $debug = FALSE)
     {
         $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
@@ -216,5 +206,15 @@ class Email
                 $mail->$method($data);
             }
         }
+    }
+    /**
+     * Uses PHPMailer to validate email address
+     *
+     * @param string $email : email address to validate
+     * @return bool
+     */
+    public static function validateEmail(string $email)
+    {
+        return PHPMailer::validateAddress($email);
     }
 }

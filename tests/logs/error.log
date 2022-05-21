@@ -1,0 +1,5 @@
+[21-May-2022 03:36:49 UTC] FileCMS\Common\Security\Profile::verify:AUTH FILE:/home/ned/Repos/FileCMS/filecms-core/tests/config/../test_files/AUTH_a7630508c07d89c21301a42e71e5d5fb:INFO:array (
+  'REMOTE_ADDR' => '2022-05-21',
+  'HTTP_USER_AGENT' => '2022-05-21ABCDEF',
+  'HTTP_ACCEPT_LANGUAGE' => '2022-05-21',
+)

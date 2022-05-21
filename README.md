@@ -304,3 +304,11 @@ After logging in as the admin user, go to `/super/clicks`.
 * Added `$debug` option to facilitate testing and debugging
   * If set `TRUE` the email is not actually sent, and a `PHPMailer` instance is set to `Email::$phpMailer`
 * Added `FileCMSTest\Common\Contact\EmailTest` test class
+### tag: v0.2.5
+* `FileCMS\Common\Contact\Email::trustedSend()`
+  * Fixed bug whereby you were only allowed to send a string to `$cc` and `$bcc`
+  * These inputs now allowed `mixed` types (expected string|array)
+* Updated `FileCMSTest\Common\Contact\EmailTest` and `FileCMSTest\Common\Security\ProfileTest`
+* `FileCMS\Common\Import\Import`
+  * Added message if URL not found
+  * Wrapped `file_get_contents($url)` call in `try` / `catch` to prevent expected errors from messing up test results

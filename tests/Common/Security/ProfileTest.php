@@ -48,6 +48,20 @@ class ProfileTest extends TestCase
         $actual   = Profile::verify();
         $this->assertEquals($expected, $actual);
     }
+    public function testVerifyLogsIfFlagSet()
+    {
+        Profile::init($this->config);
+        $err_log = ini_get('error_log');
+        file_put_contents($err_log, '');
+        Profile::verify(TRUE);
+        $contents = file_get_contents($err_log);
+        $expected = TRUE;
+        $actual   = is_string($contents);
+        $this->assertEquals($expected, $actual, 'Contents not a string');
+        $expected = TRUE;
+        $actual   = strpos($contents, date('Y-m-d') !== FALSE);
+        $this->assertEquals($expected, $actual, 'Does not contain expected contents');
+    }
     public function testInitCreatesAuthFile()
     {
         Profile::init($this->config);

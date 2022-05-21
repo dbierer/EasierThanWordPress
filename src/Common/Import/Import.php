@@ -81,6 +81,7 @@ class Import
             }
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . $t->getMessage());
+            (Messages::getInstance())->addMessage(self::ERROR_URL_EMPTY);
         }
         return $html;
     }

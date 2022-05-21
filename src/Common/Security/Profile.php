@@ -120,14 +120,15 @@ class Profile
     /**
      * Verifies profile against stored
      *
+     * @param bool $log : set TRUE if you want to log verifications
      * @return bool TRUE if match | FALSE otherwise
      */
-    public static function verify() : bool
+    public static function verify(bool $log = FALSE) : bool
     {
         $info = self::build();
         $fn   = self::getAuthFileName($info);
         $ok = file_exists($fn);
-        if (!$ok)
+        if ($log)
             error_log(__METHOD__ . ':AUTH FILE:' . $fn . ':INFO:' . var_export($info, TRUE));
         return $ok;
     }
