@@ -1,17 +1,5 @@
-[21-May-2022 03:36:49 UTC] FileCMS\Common\Security\Profile::verify:AUTH FILE:/home/ned/Repos/FileCMS/filecms-core/tests/config/../test_files/AUTH_a7630508c07d89c21301a42e71e5d5fb:INFO:array (
-  'REMOTE_ADDR' => '2022-05-21',
-  'HTTP_USER_AGENT' => '2022-05-21ABCDEF',
-  'HTTP_ACCEPT_LANGUAGE' => '2022-05-21',
+[06-Jun-2022 04:22:59 UTC] FileCMS\Common\Security\Profile::verify:AUTH FILE:/home/ned/Repos/FileCMS/filecms-core/tests/config/../test_files/AUTH_620d4822729b46cc29daab55996871f1:INFO:array (
+  'REMOTE_ADDR' => '2022-06-06',
+  'HTTP_USER_AGENT' => '2022-06-06ABCDEF',
+  'HTTP_ACCEPT_LANGUAGE' => '2022-06-06',
 )
-[21-May-2022 04:14:52 UTC] Email.php: CAPTCHA does not verify
-[21-May-2022 04:14:52 UTC] Email.php: email does not verify
-[21-May-2022 04:15:19 UTC] Email.php: CAPTCHA does not verify
-[21-May-2022 04:15:20 UTC] Email.php: email does not verify
-[21-May-2022 04:22:23 UTC] Email.php: CAPTCHA does not verify
-[21-May-2022 04:22:23 UTC] Email.php: email does not verify
-[21-May-2022 04:23:23 UTC] Email.php: CAPTCHA does not verify
-[21-May-2022 04:23:23 UTC] Email.php: email does not verify
-[21-May-2022 04:23:35 UTC] Email.php: CAPTCHA does not verify
-[21-May-2022 04:23:35 UTC] Email.php: email does not verify
-[21-May-2022 04:23:42 UTC] Email.php: CAPTCHA does not verify
-[21-May-2022 04:23:42 UTC] Email.php: email does not verify

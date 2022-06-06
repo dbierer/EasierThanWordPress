@@ -91,7 +91,8 @@ $config = [
         'SUCCESS' => '<span style="color:green;font-weight:700;">Thanks!  Your request has been sent.</span>',
         'ERROR'   => '<span style="color:red;font-weight:700;">Sorry!  Your question, comment or request info was not received.</span>',
         'phpmailer' => [
-            'smtp'          => TRUE,                // Use SMTP (true) or PHP Mail() function (false)
+            'html'          => TRUE,                // set FALSE if you want plain text
+            'smtp'          => FALSE,                // Use SMTP (true) or PHP Mail() function (false)
             'smtp_host'     => 'REPL_SMTP_HOST',    // SMTP server address - URL or IP
             'smtp_port'     => 587,                 // 25 (standard), 465 (SSL), or 587 (TLS)
             'smtp_auth'     => TRUE,                // SMTP Authentication - PLAIN

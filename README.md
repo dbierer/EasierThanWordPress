@@ -284,9 +284,19 @@ Records the following information into a CSV file:
 * Date
 * Time
 * IP address
+* Referrer
 * 1
 The "1" can be used in a spreadsheet to create totals by any of the other fields.
 After logging in as the admin user, go to `/super/clicks`.
+### Statistical Methods
+The following methods are available for your use:
+#### Clicks::get(string $click_fn) : array
+Returns an array keyed and sorted by URL, with hit grand totals.
+#### Clicks::get_by_page_by_day(string $click_fn) : array
+Returns an array keyed and sorted by URL + Y-m-d, with hit totals for each day
+#### Clicks::get_by_path(string $click_fn, string $path) : array
+Returns the same as `get_by_page_by_day()` except that it filters results based on `$path`.
+Use this to return stats on URLs such as `/practice/dr_tom/`.
 
 ## Change Log
 ### tag: v0.2.2 / v0.2.3

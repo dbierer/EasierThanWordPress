@@ -82,6 +82,36 @@ class EmailTest extends TestCase
         $actual   = get_object_vars(Email::$phpMailer)['Mailer'];
         $this->assertEquals($expected, $actual);
     }
+    public function testTrustedSendIsHtmlIfConfigSet()
+    {
+        $to = 'doug@unlikelysource.com';
+        $from = 'test@unlikelysource.com';
+        $subject = 'TEST ' . date('Y-m-d H:i:s');
+        $body = '<p>' . $subject . '</p>';
+        $cc = '';
+        $bcc = '';
+        $debug = TRUE;
+        $this->config['COMPANY_EMAIL']['phpmailer']['html'] = TRUE;
+        $msg = Email::trustedSend($this->config, $to, $from, $subject, $body, $cc, $bcc, $debug);
+        $expected = 'text/html';
+        $actual   = get_object_vars(Email::$phpMailer)['ContentType'];
+        $this->assertEquals($expected, $actual);
+    }
+    public function testTrustedSendIsNotHtmlIfConfigSetFalse()
+    {
+        $to = 'doug@unlikelysource.com';
+        $from = 'test@unlikelysource.com';
+        $subject = 'TEST ' . date('Y-m-d H:i:s');
+        $body = '<p>' . $subject . '</p>';
+        $cc = '';
+        $bcc = '';
+        $debug = TRUE;
+        $this->config['COMPANY_EMAIL']['phpmailer']['html'] = FALSE;
+        $msg = Email::trustedSend($this->config, $to, $from, $subject, $body, $cc, $bcc, $debug);
+        $expected = 'text/plain';
+        $actual   = get_object_vars(Email::$phpMailer)['ContentType'];
+        $this->assertEquals($expected, $actual);
+    }
     public function testTrustedSendUsesSMTPIfConfigSet()
     {
         $to = 'doug@unlikelysource.com';

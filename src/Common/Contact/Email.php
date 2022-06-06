@@ -150,6 +150,8 @@ class Email
                 $mail->Password   = $phpmailerConfig['smtp_password'] ?? '';
                 $mail->SMTPSecure = $phpmailerConfig['smtp_secure'] ?? 'tls';
             }
+            // HTML email?
+            if (!empty($phpmailerConfig['html'])) $mail->isHTML(TRUE);
             // set up mail obj
             $mail->setFrom($from);
             self::queueOutbound($to, 'to', $mail);
