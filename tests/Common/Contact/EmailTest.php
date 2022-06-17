@@ -133,9 +133,6 @@ class EmailTest extends TestCase
         $subject = 'TEST ' . date('Y-m-d H:i:s');
         $body = $subject;
         $debug = FALSE;
-        $hash = password_hash('password', PASSWORD_DEFAULT);
-        $_REQUEST[$this->config['CAPTCHA']['input_tag_name']] = 'bad password';
-        $_SESSION[$this->config['CAPTCHA']['sess_hash_key']] = $hash;
         $msg = Email::confirmAndSend($from, $this->config, $subject, $body, $debug);
         $expected = $this->config['COMPANY_EMAIL']['ERROR'];
         $actual   = $msg;
@@ -147,9 +144,6 @@ class EmailTest extends TestCase
         $subject = 'TEST ' . date('Y-m-d H:i:s');
         $body = $subject;
         $debug = FALSE;
-        $hash = password_hash('password', PASSWORD_DEFAULT);
-        $_REQUEST[$this->config['CAPTCHA']['input_tag_name']] = 'password';
-        $_SESSION[$this->config['CAPTCHA']['sess_hash_key']] = $hash;
         $msg = Email::confirmAndSend($from, $this->config, $subject, $body, $debug);
         $expected = $this->config['COMPANY_EMAIL']['ERROR'];
         $actual   = $msg;
@@ -160,9 +154,6 @@ class EmailTest extends TestCase
         $inputs = ['email' => ''];
         $body = 'TEST ' . date('Y-m-d H:i:s');
         $debug = FALSE;
-        $hash = password_hash('password', PASSWORD_DEFAULT);
-        $_REQUEST[$this->config['CAPTCHA']['input_tag_name']] = 'password';
-        $_SESSION[$this->config['CAPTCHA']['sess_hash_key']] = $hash;
         $msg = Email::processPost($this->config, $inputs, $body, $debug);
         $expected = $this->config['COMPANY_EMAIL']['ERROR'];
         $actual   = $msg;
@@ -173,9 +164,6 @@ class EmailTest extends TestCase
         $inputs = ['email' => 'doug@unlikelysource.com', 'one' => 111, 'two' => 222];
         $body = '';
         $debug = FALSE;
-        $hash = password_hash('password', PASSWORD_DEFAULT);
-        $_REQUEST[$this->config['CAPTCHA']['input_tag_name']] = 'password';
-        $_SESSION[$this->config['CAPTCHA']['sess_hash_key']] = $hash;
         $msg = Email::processPost($this->config, $inputs, $body, $debug);
         $expected = <<<EOT
 
@@ -192,9 +180,6 @@ EOT;
         $inputs = ['email' => 'doug@unlikelysource.com', 'one' => 111, 'two' => 222];
         $body = '';
         $debug = TRUE;
-        $hash = password_hash('password', PASSWORD_DEFAULT);
-        $_REQUEST[$this->config['CAPTCHA']['input_tag_name']] = 'password';
-        $_SESSION[$this->config['CAPTCHA']['sess_hash_key']] = $hash;
         $msg = Email::processPost($this->config, $inputs, $body, $debug);
         $text = <<<EOT
 'Body' => '

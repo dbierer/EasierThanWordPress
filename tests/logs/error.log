@@ -1,5 +1,6 @@
-[06-Jun-2022 04:22:59 UTC] FileCMS\Common\Security\Profile::verify:AUTH FILE:/home/ned/Repos/FileCMS/filecms-core/tests/config/../test_files/AUTH_620d4822729b46cc29daab55996871f1:INFO:array (
-  'REMOTE_ADDR' => '2022-06-06',
-  'HTTP_USER_AGENT' => '2022-06-06ABCDEF',
-  'HTTP_ACCEPT_LANGUAGE' => '2022-06-06',
+[16-Jun-2022 03:28:43 UTC] FileCMS\Common\Security\Profile::verify:AUTH FILE:/home/ned/Repos/FileCMS/filecms-core/tests/config/../test_files/AUTH_680b81b063ea34248b9c9a1a86f57a3b:INFO:array (
+  'REMOTE_ADDR' => '2022-06-16',
+  'HTTP_USER_AGENT' => '2022-06-16ABCDEF',
+  'HTTP_ACCEPT_LANGUAGE' => '2022-06-16',
 )
+[16-Jun-2022 03:29:46 UTC] Email.php: email does not verify

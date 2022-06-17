@@ -58,9 +58,6 @@ class Email
         // sanitize "from" email
         $email = $inputs['email'] ?? '';
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-        // $inputs = self::filter($table, $post, $config);
-        $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
-        $phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
         if (!empty($inputs)&& !empty($email)) {
             $body    = "\n";
             foreach ($inputs as $key => $value)
@@ -89,26 +86,17 @@ class Email
                                             bool $debug = FALSE)
     {
         $msg       = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-        $phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
-        $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
-        $phrase    = $_REQUEST[$phraseKey] ?? '';
-        $hash      = $_SESSION[$hashKey] ?? 'UNKNOWN';
         $to        = $config['COMPANY_EMAIL']['to'];
         $cc        = $config['COMPANY_EMAIL']['cc'] ?? '';
         $bcc       = $config['COMPANY_EMAIL']['bcc'] ?? '';
         $phpmailerConfig = $config['COMPANY_EMAIL']['phpmailer'];
-        if (password_verify($phrase, $hash)) {
-            // validate email
-            if (PHPMailer::validateAddress($from)) {
-                // send request
-                $msg = self::trustedSend($config, $to, $from, $subject, $body, $cc, $bcc, $debug);
-            } else {
-                $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-                error_log(basename(__FILE__) . ': email does not verify');
-            }
+        // validate email
+        if (PHPMailer::validateAddress($from)) {
+            // send request
+            $msg = self::trustedSend($config, $to, $from, $subject, $body, $cc, $bcc, $debug);
         } else {
             $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-            error_log(basename(__FILE__) . ': CAPTCHA does not verify');
+            error_log(basename(__FILE__) . ': email does not verify');
         }
         return $msg;
     }

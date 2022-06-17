@@ -1,4 +1,4 @@
-# FileCMS Website (v0.2.3)
+# FileCMS Website (v0.2.7)
 NOTE: formerly called _SimpleHtml_
 
 Simple PHP framework that builds HTML files from HTML widgets.
@@ -32,17 +32,15 @@ wget https://getcomposer.org/download/latest-stable/composer.phar
 php composer.phar self-update
 php composer.phar install
 ```
-3. IMPORTANT: make sure the settings
+
 ## Basic website config
-All references are from `/path/to/website`:
-* Open `/src/config/config.php`
-  * Modify configuration to suit your needs
-  * Use `/src/config/config.php.dist` as a guide
-* Open `/bootstrap.php`
-  * Modify the three global constants to suit your needs:
-    * `BASE_DIR`
-    * `HTML_DIR`
-    * `SRC_DIR`
+All references are from `/path/to/website`
+
+* Primary config file: `/src/config/config.php`
+* Bootstrap file: `/bootstrap.php`
+* Pre-processing code: `/src/processing.php`
+
+Additional documentation on these three follows.
 
 ## To Run Locally Using PHP
 From this directory, run the following command:
@@ -327,4 +325,8 @@ Use this to return stats on URLs such as `/practice/dr_tom/`.
   * Fixed bug whereby PHPMailer was always set to SMTP regardless of config settings
 * Updated `FileCMSTest\Common\Contact\EmailTest`
   * Added tests to see if PHPMailer instance is set to "smtp" or "mail"
-
+### tag: v0.2.8
+* `FileCMS\Common\Contact\Email::confirmAndSend()`
+  * Removed CAPTCHA verification logic and put into new `AntiSpam` class
+* `FileCMS\Common\Contact\AntiSpam`
+  * Added static function `verifyCaptcha($config)`
