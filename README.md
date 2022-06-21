@@ -330,3 +330,6 @@ Use this to return stats on URLs such as `/practice/dr_tom/`.
   * Removed CAPTCHA verification logic and put into new `AntiSpam` class
 * `FileCMS\Common\Contact\AntiSpam`
   * Added static function `verifyCaptcha($config)`
+### tag: v0.2.9
+* `FileCMS\Common\Security\Profile::verify()`
+  * Removed type-hint from method signature for backward compatibility

@@ -123,7 +123,7 @@ class Profile
      * @param bool $log : set TRUE if you want to log verifications
      * @return bool TRUE if match | FALSE otherwise
      */
-    public static function verify(bool $log = FALSE) : bool
+    public static function verify($log = FALSE) : bool
     {
         $info = self::build();
         $fn   = self::getAuthFileName($info);
