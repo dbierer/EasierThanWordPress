@@ -20,7 +20,7 @@ $config = [
         'sess_hash_key'  => 'hash',
         'font_file'      => SRC_DIR . '/fonts/FreeSansBold.ttf',
         'img_dir'        => BASE_DIR . '/public/img/captcha',
-        'num_bytes'      => 2,
+        'num_bytes'      => 3,  // each byte == 2 characters
     ],
     'META' => [
         'default' => [
@@ -34,9 +34,10 @@ $config = [
         'password'  => 'REPL_SUPER_PWD',   // fill in your password here
         'attempts'  => 3,
         'message'   => 'Sorry! Unable to login.  Please contact your administrator',
+        // reserved for future use:
+        'allowed_ip' => ['10.0.0.0/24','192.168.0.0/24'],
         // array of $_SERVER keys to store in session if authenticated
-        // helps prevent forged attacks
-        'profile'  => ['REMOTE_ADDR','HTTP_USER_AGENT','HTTP_ACCEPT_LANGUAGE'],
+        'profile'  => ['REMOTE_ADDR','HTTP_ACCEPT_LANGUAGE'],
         // change the values to reflect the names of fields in your login.phtml form
         'login_fields' => [
             'name'     => 'name',
@@ -85,14 +86,16 @@ $config = [
      * Sample form can be found at /templates/site/contact.phtml
      */
     'COMPANY_EMAIL' => [
-        'to'   => '',
+        'to'   => 'me@company.com',
         'cc'   => '',
-        'from' => '',
+        'from' => 'office@company.com',
+        'mx_check' => TRUE, // if set TRUE, runs "checkdnsrr()" for "MX" records
+        'default_subject' => 'Need a Quote',
         'SUCCESS' => '<span style="color:green;font-weight:700;">Thanks!  Your request has been sent.</span>',
         'ERROR'   => '<span style="color:red;font-weight:700;">Sorry!  Your question, comment or request info was not received.</span>',
         'phpmailer' => [
             'html'          => TRUE,                // set FALSE if you want plain text
-            'smtp'          => FALSE,                // Use SMTP (true) or PHP Mail() function (false)
+            'smtp'          => FALSE,               // Use SMTP (true) or PHP Mail() function (false)
             'smtp_host'     => 'REPL_SMTP_HOST',    // SMTP server address - URL or IP
             'smtp_port'     => 587,                 // 25 (standard), 465 (SSL), or 587 (TLS)
             'smtp_auth'     => TRUE,                // SMTP Authentication - PLAIN
@@ -100,6 +103,10 @@ $config = [
             'smtp_password' => 'REPL_SMTP_PASSWORD',// Password if smtp_auth is true
             'smtp_secure'   => 'tls',               // Supported SMTP secure connection - 'none, 'ssl', or 'tls'
         ],
+        // sprintf() pattern (mainly for non-HTML emails)
+        'pattern' => '%-20s : %s' . "\n",
+        // as of 2022-06-22 the only aspect of "fields" are the keys themselves (e.g. name, email, phone, etc.)
+        // the rest is for future use
         'fields' => [
             // Key is used for the "name" and "id" attributes of the HTML input tags
             'name'    => [

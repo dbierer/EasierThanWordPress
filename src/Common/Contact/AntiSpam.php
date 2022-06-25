@@ -36,19 +36,20 @@ use FileCMS\Common\Generic\Messages;
 class AntiSpam
 {
     const ERR_UNABLE = 'ERROR: unable to process request';
+    const ERR_NO_FILL = 'ERROR: this field should have no value: possible attack';
     /**
      * Verifies hash created using password_hash()
      * Mainly used to validate CAPTCHAs from $_POST
      *
-     * @param array $config : main config file
+     * @param array $config  : main config file
+     * @param string $phrase : the phrase received via $_POST
      * @return bool : TRUE if hash verifies, FALSE otherwise
      */
-    public static function verifyCaptcha(array $config) : bool
+    public static function verifyCaptcha(array $config, string $phrase = 'N/A') : bool
     {
         // process CAPTCHA
         $phraseKey = $config['CAPTCHA']['input_tag_name'] ?? 'phrase';
         $hashKey   = $config['CAPTCHA']['sess_hash_key'] ?? 'hash';
-        $phrase    = $_POST[$phraseKey] ?? '';
         $hash      = $_SESSION[$hashKey] ?? 'UNKNOWN';
         $result    = password_verify($phrase, $hash);
         if (empty($result)) {

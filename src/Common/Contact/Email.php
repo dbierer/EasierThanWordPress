@@ -40,18 +40,22 @@ class Email
     const DEFAULT_SUCCESS = 'SUCCESS: email sent';
     const DEFAULT_ERROR   = 'ERROR: unable to send email';
     const DEBUG_MSG       = 'DEBUG mode enabled: mail not sent';
-    public static $error  = FALSE;
+    // you can also directly set $pattern externally if you don't want to set it in config
+    public static $pattern   = self::BODY_PATTERN;
+    public static $error     = FALSE;
     public static $phpMailer = NULL;
     /**
-     * @param array $config : from /src/config/config.php
-     * @param array $inputs : filtered and validated $_POST data
-     * @param string $body  : message body is passed back by reference
-     * @param bool   $debug   : set TRUE to set debug mode: doesn't send mail
-     * @return string $msg  : any error or other messages
+     * @param array $config  : from /src/config/config.php
+     * @param array $inputs  : filtered and validated $_POST data
+     * @param string $body   : message body is passed back by reference
+     * @param bool $mx_check : if set TRUE, runs "checkdnsrr($email, 'MX')"
+     * @param bool $debug    : set TRUE to set debug mode: doesn't send mail
+     * @return string $msg   : any error or other messages
      */
     public static function processPost( array $config,
                                         array $inputs,
                                         string &$body,
+                                        bool $mx_check = FALSE,
                                         bool $debug = FALSE)
     {
         $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
@@ -59,44 +63,31 @@ class Email
         $email = $inputs['email'] ?? '';
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
         if (!empty($inputs)&& !empty($email)) {
-            $body    = "\n";
+            // set pattern
+            $pattern = $config['COMPANY_EMAIL']['pattern']
+                     ?? static::$pattern
+                     ?? static::BODY_PATTERN;
+            // create body
+            $body    = (!empty($body)) ? $body : "\n";
             foreach ($inputs as $key => $value)
                 $body .= sprintf(self::BODY_PATTERN, ucfirst($key), $value);
             $subject = $inputs['subject']
                      ?? $config['COMPANY_EMAIL']['default_subject']
-                     ?? self::DEFAULT_SUBJECT;
-            $msg = Email::confirmAndSend($email, $config, $subject, $body, $debug);
-        }
-        return $msg;
-    }
-    /**
-     * Sends email using PHPMailer
-     *
-     * @param string $from    : sender's email address
-     * @param array $config   : primary config file
-     * @param string $subject : email subject line
-     * @param string $body    : email message
-     * @param bool   $debug   : set TRUE to set debug mode: doesn't send mail
-     * @return string $msg    : success/failure message
-     */
-    public static function confirmAndSend(  string $from,
-                                            array $config,
-                                            string $subject,
-                                            string $body,
-                                            bool $debug = FALSE)
-    {
-        $msg       = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-        $to        = $config['COMPANY_EMAIL']['to'];
-        $cc        = $config['COMPANY_EMAIL']['cc'] ?? '';
-        $bcc       = $config['COMPANY_EMAIL']['bcc'] ?? '';
-        $phpmailerConfig = $config['COMPANY_EMAIL']['phpmailer'];
-        // validate email
-        if (PHPMailer::validateAddress($from)) {
-            // send request
-            $msg = self::trustedSend($config, $to, $from, $subject, $body, $cc, $bcc, $debug);
-        } else {
-            $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-            error_log(basename(__FILE__) . ': email does not verify');
+                     ?? static::DEFAULT_SUBJECT;
+            $msg  = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
+            $to   = $config['COMPANY_EMAIL']['to'];
+            $cc   = $config['COMPANY_EMAIL']['cc'] ?? '';
+            $bcc  = $config['COMPANY_EMAIL']['bcc'] ?? '';
+            $from = $inputs['from'] ?? 'Unknown';
+            $phpmailerConfig = $config['COMPANY_EMAIL']['phpmailer'];
+            // validate email
+            if (static::validateEmail($from, $mx_check)) {
+                // send request
+                $msg = self::trustedSend($config, $to, $from, $subject, $body, $cc, $bcc, $debug);
+            } else {
+                $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
+                error_log(basename(__FILE__) . ': email does not verify');
+            }
         }
         return $msg;
     }
@@ -200,11 +191,17 @@ class Email
     /**
      * Uses PHPMailer to validate email address
      *
-     * @param string $email : email address to validate
+     * @param string $email  : email address to validate
+     * @param bool $mx_check : set TRUE to also perform an MX check (takes longer)
      * @return bool
      */
-    public static function validateEmail(string $email)
+    public static function validateEmail(string $email, bool $mx_check = FALSE)
     {
-        return PHPMailer::validateAddress($email);
+        $valid = PHPMailer::validateAddress($email);
+        if ($valid && $mx_check === TRUE) {
+            [$user, $host] = explode('@', $email);
+            $valid = checkdnsrr($host, 'MX');
+        }
+        return $valid;
     }
 }
