@@ -39,7 +39,7 @@ use Throwable;
 class Clicks
 {
     public const HOME = '/home';
-    public const CLICK_HEADERS = ['url','date','time','ip','referrer','hits'];
+    public const CLICK_HEADERS = ['url','date','time','ip','referrer','get','hits'];
     public static $discrepancies = [];
     /**
      * Records page counts by url, year, month day
@@ -56,8 +56,9 @@ class Clicks
         try {
             $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
             $refer = $_SERVER['HTTP_REFERER'] ?? 'Unknown';
+            $get = (!empty($_GET)) ? json_encode($_GET) : '';
             $obj = new SplFileObject($click_fn, 'a');
-            $ok = (bool) $obj->fputcsv([$url, date('Y-m-d'), date('H:i:s'), $ip, $refer, 1]);
+            $ok = (bool) $obj->fputcsv([$url, date('Y-m-d'), date('H:i:s'), $ip, $refer,$get,1]);
             unset($obj);
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . $t->getMessage() . ':' . $t->getTraceAsString());
@@ -95,6 +96,7 @@ class Clicks
                     } else {
                         $clicks[$key]['hits']++;
                     }
+                $clicks[$key]['get'] = json_decode($clicks[$key]['get']);
                 }
             }
             asort($clicks);
