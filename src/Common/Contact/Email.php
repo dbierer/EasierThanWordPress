@@ -39,6 +39,7 @@ class Email
     const DEFAULT_SUBJECT = 'Customer Request';
     const DEFAULT_SUCCESS = 'SUCCESS: email sent';
     const DEFAULT_ERROR   = 'ERROR: unable to send email';
+    const ERR_MX          = 'ERROR: unable to determine email address';
     const DEBUG_MSG       = 'DEBUG mode enabled: mail not sent';
     // you can also directly set $pattern externally if you don't want to set it in config
     public static $pattern   = self::BODY_PATTERN;
@@ -47,6 +48,7 @@ class Email
     /**
      * @param array $config  : from /src/config/config.php
      * @param array $inputs  : filtered and validated $_POST data
+     *                       : $inputs['email'] === sender; $inputs['to'] === recipient
      * @param string $body   : message body is passed back by reference
      * @param bool $mx_check : if set TRUE, runs "checkdnsrr($email, 'MX')"
      * @param bool $debug    : set TRUE to set debug mode: doesn't send mail
@@ -60,9 +62,9 @@ class Email
     {
         $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
         // sanitize "from" email
-        $email = $inputs['email'] ?? '';
-        $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-        if (!empty($inputs)&& !empty($email)) {
+        $from = $inputs['email'] ?? $config['COMPANY_EMAIL']['from'] ?? '';
+        if (!empty($inputs)&& !empty($from) && static::validateEmail($from, $msg, $mx_check)) {
+            $from = filter_var($from, FILTER_SANITIZE_EMAIL);
             // set pattern
             $pattern = $config['COMPANY_EMAIL']['pattern']
                      ?? static::$pattern
@@ -75,18 +77,14 @@ class Email
                      ?? $config['COMPANY_EMAIL']['default_subject']
                      ?? static::DEFAULT_SUBJECT;
             $msg  = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-            $to   = $config['COMPANY_EMAIL']['to'];
-            $cc   = $config['COMPANY_EMAIL']['cc'] ?? '';
-            $bcc  = $config['COMPANY_EMAIL']['bcc'] ?? '';
-            $from = $inputs['from'] ?? 'Unknown';
+            $to   = $inputs['to']  ?? $config['COMPANY_EMAIL']['to'];
+            $cc   = $inputs['cc']  ?? $config['COMPANY_EMAIL']['cc']  ?? '';
+            $bcc  = $inputs['bcc'] ?? $config['COMPANY_EMAIL']['bcc'] ?? '';
             $phpmailerConfig = $config['COMPANY_EMAIL']['phpmailer'];
             // validate email
-            if (static::validateEmail($from, $mx_check)) {
+            if (static::validateEmail($to, $msg, $mx_check)) {
                 // send request
                 $msg = self::trustedSend($config, $to, $from, $subject, $body, $cc, $bcc, $debug);
-            } else {
-                $msg = $config['COMPANY_EMAIL']['ERROR'] ?? self::DEFAULT_ERROR;
-                error_log(basename(__FILE__) . ': email does not verify');
             }
         }
         return $msg;
@@ -192,16 +190,24 @@ class Email
      * Uses PHPMailer to validate email address
      *
      * @param string $email  : email address to validate
+     * @param string $msg    : pass message by reference
      * @param bool $mx_check : set TRUE to also perform an MX check (takes longer)
      * @return bool
      */
-    public static function validateEmail(string $email, bool $mx_check = FALSE)
+    public static function validateEmail(string $email, string &$msg = '', bool $mx_check = FALSE)
     {
-        $valid = PHPMailer::validateAddress($email);
-        if ($valid && $mx_check === TRUE) {
+        $expected = 1;
+        $actual   = 0;
+        $actual  += (int) PHPMailer::validateAddress($email);
+        if ($actual === 1 && $mx_check === TRUE) {
+            $expected++;
             [$user, $host] = explode('@', $email);
-            $valid = checkdnsrr($host, 'MX');
+            $actual += (int) checkdnsrr($host, 'MX');
+            $msg = static::ERR_MX;
         }
+        $valid = ($actual === $expected);
+        if (!$valid)
+            error_log(__METHOD__ . ':' . static::DEFAULT_ERROR . ':' . $email);
         return $valid;
     }
 }

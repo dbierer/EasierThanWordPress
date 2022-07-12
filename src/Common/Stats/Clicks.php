@@ -56,7 +56,7 @@ class Clicks
         try {
             $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
             $refer = $_SERVER['HTTP_REFERER'] ?? 'Unknown';
-            $get = (!empty($_GET)) ? json_encode($_GET) : '';
+            $get = (!empty($_GET)) ? json_encode($_GET) : '{}';
             $obj = new SplFileObject($click_fn, 'a');
             $ok = (bool) $obj->fputcsv([$url, date('Y-m-d'), date('H:i:s'), $ip, $refer,$get,1]);
             unset($obj);
@@ -96,7 +96,6 @@ class Clicks
                     } else {
                         $clicks[$key]['hits']++;
                     }
-                $clicks[$key]['get'] = json_decode($clicks[$key]['get']);
                 }
             }
             asort($clicks);

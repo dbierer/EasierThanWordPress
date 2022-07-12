@@ -15,19 +15,17 @@ class AntiSpamTest extends TestCase
     public function testVerifyCaptchaReturnsTrue()
     {
         $hash = password_hash('password', PASSWORD_DEFAULT);
-        $_POST[$this->config['CAPTCHA']['input_tag_name']] = 'password';
         $_SESSION[$this->config['CAPTCHA']['sess_hash_key']] = $hash;
         $expected = TRUE;
-        $actual   = AntiSpam::verifyCaptcha($this->config);
+        $actual   = AntiSpam::verifyCaptcha($this->config, 'password');
         $this->assertEquals($expected, $actual);
     }
     public function testVerifyCaptchaReturnsFalse()
     {
         $hash = password_hash('password', PASSWORD_DEFAULT);
-        $_POST[$this->config['CAPTCHA']['input_tag_name']] = 'bad password';
         $_SESSION[$this->config['CAPTCHA']['sess_hash_key']] = $hash;
         $expected = FALSE;
-        $actual   = AntiSpam::verifyCaptcha($this->config);
+        $actual   = AntiSpam::verifyCaptcha($this->config, 'password');
         $this->assertEquals($expected, $actual);
     }
     public function testVerifyCaptchaAddsMessage()
@@ -35,9 +33,8 @@ class AntiSpamTest extends TestCase
         $message = Messages::getInstance();
         $message->getMessages();
         $hash = password_hash('password', PASSWORD_DEFAULT);
-        $_POST[$this->config['CAPTCHA']['input_tag_name']] = 'bad password';
         $_SESSION[$this->config['CAPTCHA']['sess_hash_key']] = $hash;
-        AntiSpam::verifyCaptcha($this->config);
+        AntiSpam::verifyCaptcha($this->config, 'bad password');
         $expected = AntiSpam::ERR_UNABLE;
         $actual   = $message->getMessages();
         $this->assertEquals($expected, $actual);

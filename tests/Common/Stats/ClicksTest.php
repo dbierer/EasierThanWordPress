@@ -1,6 +1,7 @@
 <?php
 namespace FileCMSTest\Common\Stats;
 
+use DateTime;
 use SplFileObject;
 use FileCMS\Common\Stats\Clicks;
 use PHPUnit\Framework\TestCase;
@@ -10,6 +11,7 @@ class ClicksTest extends TestCase
     public $click_fn = '';
     public function setUp() : void
     {
+        $_GET = [];
         $this->config = include BASE_DIR . '/tests/config/test.config.php';
         $this->click_fn = BASE_DIR . '/tests/logs/click_test.csv';
         if (file_exists($this->click_fn)) unlink($this->click_fn);
@@ -27,6 +29,19 @@ class ClicksTest extends TestCase
         Clicks::add($url, $this->click_fn);
         $expected = TRUE;
         $actual   = file_exists($this->click_fn);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testAddStoresGetParams()
+    {
+        $_GET = [
+            'AAA' => 1,
+            'BBB' => 2,
+        ];
+        $url = '/test';
+        Clicks::add($url, $this->click_fn);
+        $contents = file_get_contents($this->click_fn);
+        $expected = TRUE;
+        $actual   = str_contains($contents, '{""AAA"":1,""BBB"":2}');
         $this->assertEquals($expected, $actual);
     }
     public function testGet()
@@ -138,6 +153,37 @@ class ClicksTest extends TestCase
         Clicks::add('/ccc/333', $this->click_fn);
         $expected = 3;
         $actual   = count(Clicks::get_by_path($this->click_fn, '/ccc/'));
+        $this->assertEquals($expected, $actual);
+    }
+    public function testGetByPageByDay()
+    {
+        $day[0] = (new DateTime('now'))->format('Y-m-d');
+        $day[1] = (new DateTime('tomorrow'))->format('Y-m-d');
+        // add three entries to build CSV
+        Clicks::add('/aaa', $this->click_fn);
+        Clicks::add('/aaa', $this->click_fn);
+        Clicks::add('/aaa', $this->click_fn);
+        // every other row === alternate days
+        $obj  = new SplFileObject($this->click_fn, 'r');
+        $tmp  = 0;
+        $test = [];
+        while ($row = $obj->fgetcsv()) {
+            $row[1] = $day[$tmp++ & 1];
+            $test[] = $row;
+        }
+        // write new dates back
+        $obj = new SplFileObject($this->click_fn, 'w');
+        foreach ($test as $row)
+            $obj->fputcsv($row);
+        unset($obj);
+        // # clicks by day 0 s/be 2
+        $clicks   = Clicks::get_by_page_by_day($this->click_fn);
+        $expected = $clicks['/aaa-' . $day[0]]['hits'];
+        $actual   = 2;
+        $this->assertEquals($expected, $actual);
+        // # clicks by day 1 s/be 1
+        $expected = $clicks['/aaa-' . $day[1]]['hits'];
+        $actual   = 1;
         $this->assertEquals($expected, $actual);
     }
 }

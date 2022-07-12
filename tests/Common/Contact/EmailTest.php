@@ -20,30 +20,34 @@ class EmailTest extends TestCase
     }
     public function testValidateEmailReturnsFalseIfBadEmail()
     {
+        $msg      = '';
         $email    = 'bad@email@bad.bad';
         $expected = FALSE;
-        $actual   = Email::validateEmail($email);
+        $actual   = Email::validateEmail($email, $msg);
         $this->assertEquals($expected, $actual);
     }
     public function testValidateEmailReturnsTrueIfGoodEmailNoMxCheck()
     {
+        $msg      = '';
         $email    = 'doug@unlikelysource.com';
         $expected = TRUE;
-        $actual   = Email::validateEmail($email, FALSE);
+        $actual   = Email::validateEmail($email, $msg, FALSE);
         $this->assertEquals($expected, $actual);
     }
     public function testValidateEmailReturnsFalseIfBadMxRecord()
     {
-        $email    = 'bad@unlikelysource.net';
+        $msg      = '';
+        $email    = 'bad@unlikelysource.biz';
         $expected = FALSE;
-        $actual   = Email::validateEmail($email, TRUE);
+        $actual   = Email::validateEmail($email, $msg, TRUE);
         $this->assertEquals($expected, $actual);
     }
     public function testValidateEmailReturnsTrueIfMxRecordExists()
     {
+        $msg      = '';
         $email    = 'doug@unlikelysource.com';
         $expected = TRUE;
-        $actual   = Email::validateEmail($email, TRUE);
+        $actual   = Email::validateEmail($email, $msg, TRUE);
         $this->assertEquals($expected, $actual);
     }
     public function testQueueOutboundAddsToCcBcc()
@@ -141,22 +145,6 @@ class EmailTest extends TestCase
         $actual   = get_object_vars(Email::$phpMailer)['Mailer'];
         $this->assertEquals($expected, $actual);
     }
-    public function testProcessPostFailsOnInvalidPassword()
-    {
-        $post = [
-            'email'      => 'doug@unlikelysource.com',
-            'first_name' => 'Fred',
-            'last_name'  => 'Flintstone',
-            'message'    => 'TEST ' . date('Y-m-d H:i:s'),
-        ];
-        $body     = '';
-        $mx_check = FALSE;
-        $debug    = TRUE;
-        $msg      = Email::processPost($this->config, $post, $body, $mx_check, $debug);
-        $expected = $this->config['COMPANY_EMAIL']['ERROR'];
-        $actual   = $msg;
-        $this->assertEquals($expected, $actual);
-    }
     public function testProcessPostReturnsExpectedErrorIfEmailInputMissing()
     {
         $inputs   = ['email' => ''];
@@ -181,12 +169,12 @@ class EmailTest extends TestCase
     }
     public function testProcessPostReturnsExpectedErrorIfEmailInvalidMx()
     {
-        $inputs   = ['email' => 'doug@unlikelysource.net'];
+        $inputs   = ['email' => 'doug@unlikelysource.biz'];
         $body     = 'TEST ' . date('Y-m-d H:i:s');
         $mx_check = TRUE;
         $debug    = TRUE;
         $msg      = Email::processPost($this->config, $inputs, $body, $mx_check, $debug);
-        $expected = $this->config['COMPANY_EMAIL']['ERROR'];
+        $expected = Email::ERR_MX;
         $actual   = $msg;
         $this->assertEquals($expected, $actual);
     }
