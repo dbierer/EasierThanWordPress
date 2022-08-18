@@ -344,5 +344,6 @@ Added new column
 * `add()` includes `json_encode($_GET)`
 * `raw_get()` does `json_decode()` on new column
 * Updated `CLICK_HEADERS`
-
-
+### tag: v0.2.12
+Date: Thu Aug 18 10:33:15 2022 +0700
+Modified FileCMS\Common\Stats\Clicks to track all URLs but allow users to add list of URLs to be ignored"
