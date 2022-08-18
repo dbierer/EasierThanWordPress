@@ -1,4 +1,4 @@
-# FileCMS Website (v0.2.7)
+# FileCMS
 NOTE: formerly called _SimpleHtml_
 
 Simple PHP framework that builds HTML files from HTML widgets.
@@ -333,3 +333,16 @@ Use this to return stats on URLs such as `/practice/dr_tom/`.
 ### tag: v0.2.9
 * `FileCMS\Common\Security\Profile::verify()`
   * Removed type-hint from method signature for backward compatibility
+### tag: v0.2.10
+Date:   Sat Jun 25 16:42:03 2022 +0700
+* 2022-06-25 DB: Enhancing security in Common\Contact\Email
+* 2022-06-21 DB: Minor fix to Common\Security\Profile::verify()
+### tag: v0.2.11
+Date:   Sun Jul 10 12:50:24 2022 +0700
+Update Clicks.php
+Added new column
+* `add()` includes `json_encode($_GET)`
+* `raw_get()` does `json_decode()` on new column
+* Updated `CLICK_HEADERS`
+
+

@@ -39,6 +39,7 @@ use Throwable;
 class Clicks
 {
     public const HOME = '/home';
+    public const IGNORE_URLS = [];
     public const CLICK_HEADERS = ['url','date','time','ip','referrer','get','hits'];
     public static $discrepancies = [];
     /**
@@ -47,12 +48,13 @@ class Clicks
      *
      * @param string $url      : URL to record
      * @param string $click_fn : file name of CSV file containing clicks
+     * @param array  $ignore   : list of URLs to ignore
      * @return boolean TRUE if OK; FALSE otherwise
      */
-    public static function add(string $url, string $click_fn) : bool
+    public static function add(string $url, string $click_fn, array $ignore = []) : bool
     {
         $ok = FALSE;
-        if ($url === '/' || $url === self::HOME) return TRUE;
+        if (!empty($ignore) && in_array($url, $ignore)) return $ok;
         try {
             $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
             $refer = $_SERVER['HTTP_REFERER'] ?? 'Unknown';

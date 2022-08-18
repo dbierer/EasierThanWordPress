@@ -44,6 +44,31 @@ class ClicksTest extends TestCase
         $actual   = str_contains($contents, '{""AAA"":1,""BBB"":2}');
         $this->assertEquals($expected, $actual);
     }
+    public function testAddIgnoresUrlsCorrectly()
+    {
+        $_GET = [
+            'AAA' => 1,
+            'BBB' => 2,
+        ];
+        $url = '/test';
+        $ignore = [$url];
+        Clicks::add($url, $this->click_fn,$ignore);
+        $expected = FALSE;
+        $actual   = file_exists($this->click_fn);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testAddReturnsFalseIfUrlIsIgnored()
+    {
+        $_GET = [
+            'AAA' => 1,
+            'BBB' => 2,
+        ];
+        $url = '/test';
+        $ignore = [$url];
+        $expected = FALSE;
+        $actual   = Clicks::add($url, $this->click_fn,$ignore);
+        $this->assertEquals($expected, $actual);
+    }
     public function testGet()
     {
         $url = '/test';
