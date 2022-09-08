@@ -39,6 +39,7 @@ use Throwable;
 class Clicks
 {
     public const HOME = '/home';
+    public const MONTH_FMT = 'M Y';
     public const IGNORE_URLS = [];
     public const CLICK_HEADERS = ['url','date','time','ip','referrer','get','hits'];
     public static $discrepancies = [];
@@ -109,7 +110,6 @@ class Clicks
     }
     /**
      * Returns array sorted by URL w/ totals
-     * $row = [0 => URL, 1 => date, 2 => time, 3 => IP, 4 => referrer, 5 => 1]
      *
      * @param string $click_fn : file name of CSV file containing clicks
      * @return array $clicks : sorted by URL + date w/ totals
@@ -121,7 +121,6 @@ class Clicks
     }
     /**
      * Returns array sorted by URL by day w/ totals
-     * $row = [0 => URL, 1 => date, 2 => time, 3 => IP, 4 => referrer, 5 => 1]
      *
      * @param string $click_fn : file name of CSV file containing clicks
      * @return array $clicks : sorted by URL + date w/ totals
@@ -130,7 +129,7 @@ class Clicks
     {
         $callback = function ($row) {
             $val = FALSE;
-            if (!empty($row[0]) && ! empty($row[1])) {
+            if (!empty($row[0]) && !empty($row[1])) {
                 $val = $row[0] . '-' . $row[1];
             }
             return $val;
@@ -138,8 +137,24 @@ class Clicks
         return self::raw_get($click_fn, $callback);
     }
     /**
+     * Returns array sorted by URL by month w/ totals
+     *
+     * @param string $click_fn : file name of CSV file containing clicks
+     * @return array $clicks : sorted by URL + date w/ totals
+     */
+    public static function get_by_page_by_month(string $click_fn) : array
+    {
+        $callback = function ($row) {
+            $val = FALSE;
+            if (!empty($row[0]) && !empty($row[1])) {
+                $val = $row[0] . '-' . substr($row[1], 0, 7);
+            }
+            return $val;
+        };
+        return self::raw_get($click_fn, $callback);
+    }
+    /**
      * Returns array sorted by URL by day w/ totals
-     * $row = [0 => URL, 1 => date, 2 => time, 3 => IP, 4 => referrer, 5 => 1]
      *
      * @param string $click_fn : file name of CSV file containing clicks
      * @param string $path     : URL path

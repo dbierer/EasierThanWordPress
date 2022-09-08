@@ -346,4 +346,14 @@ Added new column
 * Updated `CLICK_HEADERS`
 ### tag: v0.2.12
 Date: Thu Aug 18 10:33:15 2022 +0700
-Modified FileCMS\Common\Stats\Clicks to track all URLs but allow users to add list of URLs to be ignored"
+Modified FileCMS\Common\Stats\Clicks to track all URLs but allow users to add list of URLs to be ignored
+### tag: v0.2.13
+Date: Thu Sep 08 09:50:00
+FileCMS\Common\Stats\Clicks:
+* Added `get_by_page_by_month()`
+* Fixed `get_by_path()`
+FileCMS\Common\View\Table:
+* New class
+* Renders multi-dimensional array data
+* `render_table()` produces &lt;table> structure with optional CSS classes for table, tr, th and td
+* `render_as_div()` produces table structure using &lt;div class="row"> and &lt;div class="col">

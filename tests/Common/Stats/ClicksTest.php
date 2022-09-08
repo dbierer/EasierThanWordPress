@@ -182,12 +182,12 @@ class ClicksTest extends TestCase
     }
     public function testGetByPageByDay()
     {
+        $url    = '/aaa';
         $day[0] = (new DateTime('now'))->format('Y-m-d');
         $day[1] = (new DateTime('tomorrow'))->format('Y-m-d');
         // add three entries to build CSV
-        Clicks::add('/aaa', $this->click_fn);
-        Clicks::add('/aaa', $this->click_fn);
-        Clicks::add('/aaa', $this->click_fn);
+        for ($x = 0; $x < 3; $x++)
+            Clicks::add($url, $this->click_fn);
         // every other row === alternate days
         $obj  = new SplFileObject($this->click_fn, 'r');
         $tmp  = 0;
@@ -202,13 +202,48 @@ class ClicksTest extends TestCase
             $obj->fputcsv($row);
         unset($obj);
         // # clicks by day 0 s/be 2
+        $key      = $url . '-' . $day[0];
         $clicks   = Clicks::get_by_page_by_day($this->click_fn);
-        $expected = $clicks['/aaa-' . $day[0]]['hits'];
-        $actual   = 2;
+        $expected = 2;
+        $actual   = $clicks[$key]['hits'];
         $this->assertEquals($expected, $actual);
         // # clicks by day 1 s/be 1
-        $expected = $clicks['/aaa-' . $day[1]]['hits'];
-        $actual   = 1;
+        $key      = $url . '-' . $day[1];
+        $expected = 1;
+        $actual   = $clicks[$key]['hits'];
+        $this->assertEquals($expected, $actual);
+    }
+    public function testGetByPageByMonth()
+    {
+        $url    = '/aaa';
+        $day[0] = (new DateTime('now'))->format('Y-m-d');
+        $day[1] = (new DateTime('second monday of next month'))->format('Y-m-d');
+        // add six entries to build CSV
+        for ($x = 0; $x < 6; $x++)
+            Clicks::add($url, $this->click_fn);
+        // every other row === alternate days
+        $obj  = new SplFileObject($this->click_fn, 'r');
+        $tmp  = 0;
+        $test = [];
+        while ($row = $obj->fgetcsv()) {
+            $row[1] = $day[$tmp++ & 1];
+            $test[] = $row;
+        }
+        // write new dates back
+        $obj = new SplFileObject($this->click_fn, 'w');
+        foreach ($test as $row)
+            $obj->fputcsv($row);
+        unset($obj);
+        // # clicks by this month s/be 3
+        $clicks   = Clicks::get_by_page_by_month($this->click_fn);
+        $key      = $url . '-' . substr($day[0], 0, 7);
+        $expected = 3;
+        $actual   = $clicks[$key]['hits'];
+        $this->assertEquals($expected, $actual);
+        // # clicks by next month s/be 3
+        $key      = $url . '-' . substr($day[1], 0, 7);
+        $expected = 3;
+        $actual   = $clicks[$key]['hits'];
         $this->assertEquals($expected, $actual);
     }
 }
