@@ -165,7 +165,7 @@ class Clicks
         $callback = function ($row, $path) {
             if (empty($row[0])) return FALSE;
             if (stripos($row[0], $path) === FALSE) return FALSE;
-            return $row[0] . '_' . ($row[1] ?? '');
+            return $row[0] . '-' . substr($row[1], 0, 7);
         };
         return self::raw_get($click_fn, $callback, $path);
     }

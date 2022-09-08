@@ -58,7 +58,7 @@ class Table
                 if (empty($callbacks[$idx])) {
                     $html .= $row[$item] ?? '--';
                 } else {
-                    $html .= $callbacks[$idx]($row[$item],$headers[$idx]);
+                    $html .= $callbacks[$idx]($row[$item]);
                 }
                 $html .= '</div>' . PHP_EOL;
             }
@@ -95,11 +95,11 @@ class Table
         foreach ($data as $key => $row) {
             $html .= $getTag('tr', $css_class);
             foreach ($headers as $idx => $item) {
-                $html .= static::get_tag('td', $css_class);
+                $html .= $getTag('td', $css_class);
                 if (empty($callbacks[$idx])) {
                     $html .= $row[$item] ?? '--';
                 } else {
-                    $html .= $callbacks[$idx]($row[$item],$headers[$idx]);
+                    $html .= $callbacks[$idx]($row[$item]);
                 }
                 $html .= '</td>';
             }

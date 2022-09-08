@@ -339,7 +339,7 @@ Date:   Sat Jun 25 16:42:03 2022 +0700
 * 2022-06-21 DB: Minor fix to Common\Security\Profile::verify()
 ### tag: v0.2.11
 Date:   Sun Jul 10 12:50:24 2022 +0700
-Update Clicks.php
+FileCMS\Common\Stats\Clicks:
 Added new column
 * `add()` includes `json_encode($_GET)`
 * `raw_get()` does `json_decode()` on new column
@@ -348,7 +348,7 @@ Added new column
 Date: Thu Aug 18 10:33:15 2022 +0700
 Modified FileCMS\Common\Stats\Clicks to track all URLs but allow users to add list of URLs to be ignored
 ### tag: v0.2.13
-Date: Thu Sep 08 09:50:00
+Date:   Thu Sep 8 09:54:26 2022 +0700
 FileCMS\Common\Stats\Clicks:
 * Added `get_by_page_by_month()`
 * Fixed `get_by_path()`
