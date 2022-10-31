@@ -36,6 +36,7 @@ namespace FileCMS\Common\View;
  *
  */
 
+use function ctype_digit;
 use ArrayIterator;
 use LimitIterator;
 use RecursiveDirectoryIterator;
