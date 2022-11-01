@@ -41,11 +41,12 @@ use FileCMS\Common\Contact\Email;
 use FileCMS\Common\Generic\Messages;
 class Csv
 {
-    const ERR_CSV = 'ERROR: CSV file error';
-    public $pos   = FALSE;
-    public $lines = [];
-    public $csv_fn = '';
-    public $size   = 0;
+    const ERR_CSV   = 'ERROR: CSV file error';
+    public $pos     = FALSE;
+    public $lines   = [];
+    public $headers = [];
+    public $csv_fn  = '';
+    public $size    = 0;
     public function __construct(string $csv_fn)
     {
         $this->csv_fn = $csv_fn;
@@ -84,6 +85,7 @@ class Csv
             if (empty($headers)) {
                 $headers = $row;
                 $count = count($headers);
+                $this->headers = $headers;
             } elseif (!empty($row) && $count === count($row)) {
                 $data = array_combine($headers, $row);
                 // build key
@@ -122,19 +124,20 @@ class Csv
             if ($first && $this->size === 0) $obj->fputcsv($csv_fields);
             // align $_POST data to csv fields
             $data = [];
-            foreach (self::CSV_FIELDS as $name)
+            foreach ($csv_fields as $name)
                 $data[$name] = $post[$name] ?? '';
             $ok = (bool) $obj->fputcsv(array_values($data));
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . get_class($t) . ':' . $t->getMessage() . ':' . $t->getTraceAsString());
         }
+        unset($obj);
         return $ok;
     }
     /**
      * Finds key in CSV file
      * Assumes first row is headers unless $first === FALSE
-     * Stores contents on CSV file in $this->lines
-     * If found, sets $this->pos to the line number
+     * Stores contents of CSV file in $this->lines
+     * If found, sets $this->pos to the line number of the row found in $this->lines
      *
      * @param string $search  : any value that might be in the CSV file
      * @param bool $case      : TRUE: case sensitive; FALSE: [default] case insensitive search
@@ -143,24 +146,23 @@ class Csv
      */
     public function findItemInCSV(string $search, bool $case = FALSE, bool $first = TRUE) : array
     {
-        // return empty array if CSV file is 0 size
-        if ($this->size === 0) return [];
         // otherwise process as normal
         $func  = ($case) ? 'strpos' : 'stripos';
         $found = [];
-        $headers = [];
-        $count   = 0;
-        $lines   = file($this->csv_fn);
-        foreach($lines as $key => $row) {
+        $hdr_count = 0;
+        $this->pos = 0;
+        $this->headers = [];
+        $this->lines   = file($this->csv_fn);
+        foreach($this->lines as $key => $row) {
             if ($first && empty($headers)) {
-                $headers = str_getcsv($row);
-                $count   = count($headers);
+                $this->headers = str_getcsv($row);
+                $hdr_count = count($this->headers);
             } else {
                 if ($func($row, $search) !== FALSE) {
                     $found = str_getcsv($row);
                     $this->pos = $key;
-                    if ($first && $count === count($found)) {
-                        $found = array_combine($headers, $found);
+                    if ($first && $hdr_count === count($found)) {
+                        $found = array_combine($this->headers, $found);
                     }
                     break;
                 }
@@ -181,23 +183,17 @@ class Csv
      */
     public function updateRowInCsv(string $search, array $data, array $csv_fields = [], bool $case = FALSE) : bool
     {
-        // return FALSE if CSV file is 0 size
-        if ($this->size === 0) return FALSE;
-        $row = $this->findItemInCSV($this->csv_fn, $search, $case, (empty($csv_fields)));
+        $row = $this->findItemInCSV($search, $case, (!empty($csv_fields)));
+        echo "\n" . __METHOD__ . ':' . var_export($row, TRUE);
         if (empty($row)) return FALSE;
         if (!empty($csv_fields)) {
-            $headers = $this->lines[0] ?? [];
-            // create assoc array from headers + extracted row
-            if (!empty($headers) && count($headers) === count($row)) {
-                $row = array_combine($headers, $row);
-                foreach ($row as $key => $value)
-                    if (!empty($data[$key])) $row[$key] = $data[$key];
-            }
+            foreach ($row as $key => $value)
+                if (!empty($data[$key])) $row[$key] = $data[$key];
         }
         // remove row
         unset($this->lines[$this->pos]);
         // append row to $lines
-        $this->lines[] = static::array2csv($row) . PHP_EOL;
+        $this->lines[] = static::array2csv(array_values($row)) . PHP_EOL;
         // write CSV back out
         return (bool) file_put_contents($this->csv_fn, $this->lines);
     }
