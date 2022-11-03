@@ -46,16 +46,20 @@ class Csv
     public $lines   = [];
     public $headers = [];
     public $csv_fn  = '';
-    public $size    = 0;
     public function __construct(string $csv_fn)
     {
         $this->csv_fn = $csv_fn;
-        if (file_exists($csv_fn)) {
-            $this->size = filesize($csv_fn);
-        } else {
-            error_log(__METHOD__ . ':' . self::ERR_CSV . ':' . $csv_fn);
-            touch($csv_fn);
-        }
+        if (file_exists($csv_fn))
+            $this->lines  = file($csv_fn, FILE_SKIP_EMPTY_LINES);
+    }
+    /**
+     * Gets current size of $this->csv_fn
+     *
+     * @return int $size
+     */
+    public function getSize()
+    {
+        return count($this->lines);
     }
     /**
      * Gets list of items from CSV
@@ -65,9 +69,6 @@ class Csv
      */
     public function getItemsFromCsv($key_field = NULL) : array
     {
-        // return empty array if CSV file is 0 size
-        if ($this->size === 0) return [];
-        // otherwise process as normal
         $obj     = new SplFileObject($this->csv_fn, 'r');
         $select  = [];
         $headers = [];
@@ -112,25 +113,30 @@ class Csv
      * Write row to CSV
      *
      * @param array $post       : normally sanitized $_POST
-     * @param array $csv_fields : array of CSV headers
+     * @param array $csv_fields : array of CSV headers; leave blank if headers not used
      * @return bool             : TRUE if entry made OK
      */
-    public function writeRowToCsv(array $post, array $csv_fields, bool $first = TRUE) : bool
+    public function writeRowToCsv(array $post, array $csv_fields = []) : bool
     {
         $ok = FALSE;
         try {
             $obj = new SplFileObject($this->csv_fn, 'a');
-            // write headers if filesize is 0 and if $first === TRUE
-            if ($first && $this->size === 0) $obj->fputcsv($csv_fields);
-            // align $_POST data to csv fields
-            $data = [];
-            foreach ($csv_fields as $name)
-                $data[$name] = $post[$name] ?? '';
+            if (empty($csv_fields)) {
+                $data = $post;
+            } else {
+                // write headers if filesize is 0
+                if ($this->getSize() === 0) $obj->fputcsv($csv_fields);
+                // align $_POST data to csv fields
+                $data = [];
+                foreach ($csv_fields as $name)
+                    $data[$name] = $post[$name] ?? '';
+            }
             $ok = (bool) $obj->fputcsv(array_values($data));
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . get_class($t) . ':' . $t->getMessage() . ':' . $t->getTraceAsString());
         }
         unset($obj);
+        $this->lines = file($this->csv_fn, FILE_SKIP_EMPTY_LINES);
         return $ok;
     }
     /**
@@ -152,9 +158,9 @@ class Csv
         $hdr_count = 0;
         $this->pos = 0;
         $this->headers = [];
-        $this->lines   = file($this->csv_fn);
+        $this->lines   = file($this->csv_fn, FILE_SKIP_EMPTY_LINES);
         foreach($this->lines as $key => $row) {
-            if ($first && empty($headers)) {
+            if ($first && empty($this->headers)) {
                 $this->headers = str_getcsv($row);
                 $hdr_count = count($this->headers);
             } else {
@@ -184,7 +190,6 @@ class Csv
     public function updateRowInCsv(string $search, array $data, array $csv_fields = [], bool $case = FALSE) : bool
     {
         $row = $this->findItemInCSV($search, $case, (!empty($csv_fields)));
-        echo "\n" . __METHOD__ . ':' . var_export($row, TRUE);
         if (empty($row)) return FALSE;
         if (!empty($csv_fields)) {
             foreach ($row as $key => $value)
