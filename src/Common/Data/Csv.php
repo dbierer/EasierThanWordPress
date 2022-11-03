@@ -110,7 +110,7 @@ class Csv
         return $select;
     }
     /**
-     * Write row to CSV
+     * Writes row to CSV
      *
      * @param array $post       : normally sanitized $_POST
      * @param array $csv_fields : array of CSV headers; leave blank if headers not used

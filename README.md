@@ -296,6 +296,41 @@ Returns an array keyed and sorted by URL + Y-m-d, with hit totals for each day
 Returns the same as `get_by_page_by_day()` except that it filters results based on `$path`.
 Use this to return stats on URLs such as `/practice/dr_tom/`.
 
+## CSV
+You can use a CSV file just like a database using the new `FileCMS\Common\Data\Csv` class
+### public function getItemsFromCsv($key_field = NULL) : array
+* Gets list of items from CSV
+* @param string|array $key_field : header(s) to use as key; leave blank for numeric array
+* @return array $select : `[key => value]`; key === practice_key; value = $row
+### public function writeRowToCsv(array $post, array $csv_fields = `[]`) : bool
+* Writes row to CSV
+* @param array $post       : normally sanitized $_POST
+* @param array $csv_fields : array of CSV headers; leave blank if headers not used
+* @return bool             : TRUE if entry made OK
+### public function findItemInCSV(string $search, bool $case = FALSE, bool $first = TRUE) : array
+* Finds key in CSV file
+* Assumes first row is headers unless $first === FALSE
+* Stores contents of CSV file in $this->lines
+* If found, sets $this->pos to the line number of the row found in $this->lines
+* @param string $search  : any value that might be in the CSV file
+* @param bool $case      : TRUE: case sensitive; FALSE: `[default]` case insensitive search
+* @param bool $first_row : TRUE `[default]`: first row is headers; FALSE: first row is data
+* @return array
+### public function updateRowInCsv(string $search, array $data, array $csv_fields = [], bool $case = FALSE) : bool
+* Updates row in CSV file
+* If you don't supply $csv_fields, assumes no headers
+* If no headers, update does delete and then insert
+* @param string $search  : any value that might be in the CSV file
+* @param array $data     : array of items to update
+* @param array $csv_fields : array of fields names; leave blank if you don't use headers
+* @param bool $case      : TRUE: case sensitive; FALSE: `[default]` case insensitive search
+* @return bool             : TRUE if entry made OK
+### public static function array2csv(array $data) : string
+* This writes an array to CSV
+* Credits: https://stackoverflow.com/questions/13108157/php-array-to-csv
+* @param array $data : data to be written
+* @return string $csv_string
+
 ## Change Log
 ### tag: v0.2.2 / v0.2.3
 * 2022-04-22 DB: Finished testing modifications to Profile
@@ -357,3 +392,7 @@ FileCMS\Common\View\Table:
 * Renders multi-dimensional array data
 * `render_table()` produces &lt;table> structure with optional CSS classes for table, tr, th and td
 * `render_as_div()` produces table structure using &lt;div class="row"> and &lt;div class="col">
+### tag: v0.3.0
+Date:   Thu Nov 3 11:09:53 2022 +0700
+Added FileCMS\Common\Data\Csv
+* See documentation above for method information
