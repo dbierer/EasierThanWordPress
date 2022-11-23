@@ -12,7 +12,7 @@ class AntiSpamTest extends TestCase
     {
         $this->config = include BASE_DIR . '/tests/config/test.config.php';
     }
-    public function testVerifyCaptchaReturnsTrue()
+    public function testVerifyCaptchaReturnsTrueIfCorrectPhrase()
     {
         $hash = password_hash('password', PASSWORD_DEFAULT);
         $_SESSION[$this->config['CAPTCHA']['sess_hash_key']] = $hash;
@@ -20,12 +20,13 @@ class AntiSpamTest extends TestCase
         $actual   = AntiSpam::verifyCaptcha($this->config, 'password');
         $this->assertEquals($expected, $actual);
     }
-    public function testVerifyCaptchaReturnsFalse()
+    public function testVerifyCaptchaReturnsFalseIfWrongPhrase()
     {
-        $hash = password_hash('password', PASSWORD_DEFAULT);
-        $_SESSION[$this->config['CAPTCHA']['sess_hash_key']] = $hash;
+        $hash    = password_hash('password', PASSWORD_DEFAULT);
+        $hashKey = $this->config['CAPTCHA']['sess_hash_key'] ?? 'hash';
+        $_SESSION[$hashKey] = $hash;
         $expected = FALSE;
-        $actual   = AntiSpam::verifyCaptcha($this->config, 'password');
+        $actual   = AntiSpam::verifyCaptcha($this->config, 'xxx');
         $this->assertEquals($expected, $actual);
     }
     public function testVerifyCaptchaAddsMessage()

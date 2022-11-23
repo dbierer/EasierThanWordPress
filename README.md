@@ -180,29 +180,51 @@ Example configuration for super user:
 ```
 // other config not shown
 'SUPER' => [
-    'username' => 'admin',
-    'password' => 'password',
-    'attempts' => 3,
-    'message'  => 'Sorry! Unable to login.  Please contact your administrator',
+    'username'  => 'REPL_SUPER_NAME',  // fill in your username here
+    'password'  => 'REPL_SUPER_PWD',   // fill in your password here
+    /*
+     * extra login validation fields
+     * change key/value pairs as desired
+     * add as many as you want
+     * they're selected at random when asked to login
+     */
+    'validation'   => [
+        // if value is array, authentication needs to use "in_array()"
+        'City'        => ['London','Tokyo'],
+        'Postal Code' => 'NW1 6XE',
+        'Last Name'   => ['Holmes','Lincoln'],
+    ],
+    'alt_logins' => [
+        'REPL_OTHER_NAME' => [
+            'username'  => 'REPL_OTHER_NAME',  // fill in alt username here
+            'password'  => 'REPL_OTHER_PWD',   // fill in alt password here
+        ],
+        // add others as needed
+    ],
+    'attempts'  => 3,
+    'message'   => 'Sorry! Unable to login.  Please contact your administrator',
+    // reserved for future use:
+    'allowed_ip' => ['10.0.0.0/24','192.168.0.0/24'],
     // array of $_SERVER keys to store in session if authenticated
     'profile'  => ['REMOTE_ADDR','HTTP_ACCEPT_LANGUAGE'],
-    // change the values to reflect the names of fiels in your login.phtml form
+    // change the values to reflect the names of fields in your login.phtml form
     'login_fields' => [
         'name'     => 'name',
         'password' => 'password',
         'other'    => 'other',
         'phrase'   => 'phrase',     // CAPTCHA phrase
     ],
-    'validation'   => [
-        'City' => 'London',
-        'Postal Code' => '12345',
-        'Last Name' => 'Smith',
-    ],
+    // only files with these extensions can be edited
     'allowed_ext'  => ['html','htm'],
     'ckeditor'     => [
-        'width' => '100%',
+        'width'  => '100%',
         'height' => 400,
     ],
+    'super_url'  => '/super',                // IMPORTANT: needs to be a subdir off the "super_dir" setting
+    'super_dir'  => BASE_DIR . '/templates', // IMPORTANT: needs to have a subdir === "super_url" setting
+    'super_menu' => BASE_DIR . '/templates/layout/super_menu.html',
+    'backup_dir' => BASE_DIR . '/backups',
+    'backup_cmd' => BASE_DIR . 'zip -r %%BACKUP_FN%% %%BACKUP_SRC%%',
 ],
 // other config not shown
 ```
@@ -213,12 +235,15 @@ Here's a breakdown of the `SUPER` config keys
 | username | Super user login name |
 | password | Super user login password |
 | attempts | Maximum number of failed login attempts.  If this number is exceeded, a random third authentication field is required for login. |
+| validation | Set of key:value pairs randomly selected each time you login. Values can be in the form of an array. |
+| alt_logins | Additional usernames and passwords |
 | message  | Message that displayed if login fails |
 | profile  | Array of `$_SERVER` keys that form the super user's profile once logged in |
 | login_fields | Field names drawn from your `login.phtml` login form |
 | validation   | You can specify as many of these as you want.  If the login attemp exceeds `attempts`, the SimpleHtml framework will automatically add a random field drawn from this list. |
 | allowed_ext  | Only files with an extension on this list can be edited. |
 | ckeditor     | Default width and height of the CKeditor screen |
+| super_* | Settings pertaining to the location of the super admin user URL, templates and menu |
 
 ## Contact Form
 The skeleton app includes under `/templates` a file `contact.phtml` that implements an email contact form with a CAPTCHA
@@ -396,3 +421,25 @@ FileCMS\Common\View\Table:
 Date:   Thu Nov 3 11:09:53 2022 +0700
 Added FileCMS\Common\Data\Csv
 * See documentation above for method information
+### tag: v0.3.1
+FileCMS\Common\Security\Profile
+* Removed the following methods:
+  * `getAuthFileName()`
+  * `build()`
+* Removed the following constants:
+  * `DEFAULT_AUTH_DIR`
+  * `DEFAULT_AUTH_PREFIX`
+  * `AUTH_FILE_TTL`
+* Added these constants:
+  * `PROFILE_KEY = __CLASS__;`
+  * `PROFILE_DEF_SRC = 'HTTP_USER_AGENT';`
+* `Profile::init()`
+  * Revised to make backwards compatible
+  * Always adds `$_SERVER[Profile::PROFILE_DEF_SRC]` to profile
+  * If profile config keys are present, also adds these to profile
+  * All keys must be valid `$_SERVER` keys
+* `Profile::verify()`
+  * Revised to make backwards compatible
+  * Added config file as 2nd argument
+  * Always checks value of `$_SESSION[Profile::PROFILE_KEY][Profile::PROFILE_DEF_SRC]`
+  * If profile config keys are present, also confirms these values match

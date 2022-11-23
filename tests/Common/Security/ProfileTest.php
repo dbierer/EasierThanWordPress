@@ -12,40 +12,42 @@ class ProfileTest extends TestCase
         session_reset();
         $this->config = include BASE_DIR . '/tests/config/test.config.php';
     }
-    public function testProfileBuildUsesDateAsDefault()
+    public function testInitUsesConfigKeys()
     {
-        $expected = ['HTTP_USER_AGENT' => date('Y-m-d')];
-        $actual   = Profile::build([]);
+        $_SERVER['TEST'] = 'TEST';
+        $this->config['SUPER']['profile'] = ['TEST'];
+        Profile::init($this->config);
+        $expected = [
+            'TEST' => 'TEST',
+            'HTTP_USER_AGENT' => date('Y-m-d'),
+        ];
+        $actual   = $_SESSION[Profile::PROFILE_KEY];
         $this->assertEquals($expected, $actual);
     }
-    public function testProfileBuildUsesExpectedKeys()
-    {
-        $date = date('Y-m-d');
-        $_SERVER = [];
-        $expected = [];
-        foreach ($this->config['SUPER']['profile'] as $key) {
-            $_SERVER[$key] = $date;
-            $expected[$key] = $date;
-        }
-        Profile::$config = $this->config;
-        $actual   = Profile::build();
-        $this->assertEquals($expected, $actual);
-    }
-    public function testProfileBuildUsesExpectedServerAgentIfKeyIsEmpty()
-    {
-        $key = date('Y-m-d') . 'ABCDEF';
-        $_SERVER = ['HTTP_USER_AGENT' => $key];
-        $this->config['SUPER']['profile'] = [];
-        Profile::$config = $this->config;
-        $expected['HTTP_USER_AGENT'] = $key;
-        $actual   = Profile::build();
-        $this->assertEquals($expected, $actual);
-    }
-    public function testVerify()
+    public function testVerifyWorksWithDefaults()
     {
         Profile::init($this->config);
         $expected = TRUE;
         $actual   = Profile::verify();
+        $this->assertEquals($expected, $actual);
+    }
+    public function testVerifyUsesConfigKeys()
+    {
+        $_SERVER['TEST'] = 'TEST';
+        $this->config['SUPER']['profile'] = ['TEST'];
+        Profile::init($this->config);
+        $expected = TRUE;
+        $actual   = Profile::verify(FALSE,$this->config);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testVerifyReturnsFalseSessionValuesDontMatchActual()
+    {
+        $_SERVER['TEST'] = 'TEST';
+        $this->config['SUPER']['profile'] = ['TEST'];
+        Profile::init($this->config);
+        $_SERVER['TEST'] = 'XXX';
+        $expected = FALSE;
+        $actual   = Profile::verify(FALSE,$this->config);
         $this->assertEquals($expected, $actual);
     }
     public function testVerifyLogsIfFlagSet()
@@ -61,15 +63,6 @@ class ProfileTest extends TestCase
         $expected = TRUE;
         $actual   = strpos($contents, date('Y-m-d') !== FALSE);
         $this->assertEquals($expected, $actual, 'Does not contain expected contents');
-    }
-    public function testInitCreatesAuthFile()
-    {
-        Profile::init($this->config);
-        $path     = str_replace('//', '/', $this->config['AUTH_DIR'] . '/' . Profile::DEFAULT_AUTH_PREFIX . '*');
-        $list     = glob($path);
-        $expected = FALSE;
-        $actual   = empty($list);
-        $this->assertEquals($expected, $actual);
     }
     public function testLogoutWipesOutSession()
     {

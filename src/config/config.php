@@ -9,7 +9,6 @@ $config = [
     'HOST'   => '',
     'DELIM'  => '%%',
     'CONTENTS' => '%%CONTENTS%%',
-    'AUTH_DIR' => BASE_DIR . '/logs',
     'CLICK_CSV' => BASE_DIR . '/logs/clicks.csv',
     'MSG_MARKER'  => '<!-- %%MESSAGES%% -->',
     'CONTACT_LOG' => BASE_DIR . '/logs/contact.log',
@@ -32,6 +31,25 @@ $config = [
     'SUPER' => [
         'username'  => 'REPL_SUPER_NAME',  // fill in your username here
         'password'  => 'REPL_SUPER_PWD',   // fill in your password here
+        /*
+         * extra login validation fields
+         * change key/value pairs as desired
+         * add as many as you want
+         * they're selected at random when asked to login
+         */
+        'validation'   => [
+            // if value is array, authentication needs to use "in_array()"
+            'City'        => ['London','Tokyo'],
+            'Postal Code' => 'NW1 6XE',
+            'Last Name'   => ['Holmes','Lincoln'],
+        ],
+        'alt_logins' => [
+            'REPL_OTHER_NAME' => [
+                'username'  => 'REPL_OTHER_NAME',  // fill in alt username here
+                'password'  => 'REPL_OTHER_PWD',   // fill in alt password here
+            ],
+            // add others as needed
+        ],
         'attempts'  => 3,
         'message'   => 'Sorry! Unable to login.  Please contact your administrator',
         // reserved for future use:
@@ -44,17 +62,6 @@ $config = [
             'password' => 'password',
             'other'    => 'other',
             'phrase'   => 'phrase',     // CAPTCHA phrase
-        ],
-        /*
-         * extra login validation fields
-         * change key/value pairs as desired
-         * add as many as you want
-         * they're selected at random when asked to login
-         */
-        'validation'   => [
-            'City'        => 'London',
-            'Postal Code' => 'NW1 6XE',
-            'Last Name'   => 'Holmes',
         ],
         // only files with these extensions can be edited
         'allowed_ext'  => ['html','htm'],
