@@ -46,11 +46,29 @@ class Csv
     public $lines   = [];
     public $headers = [];
     public $csv_fn  = '';
-    public function __construct(string $csv_fn)
+    /**
+     * If CSV file doesn't exist, creates the file
+     * If $headers aren't empty, also writes out headers
+     *
+     * @param string $csv_fn : filename of CSV file
+     * @param array $headers : optional array of headers
+     * @return void
+     */
+    public function __construct(string $csv_fn, array $headers = [])
     {
         $this->csv_fn = $csv_fn;
-        if (file_exists($csv_fn))
+        $this->headers = $headers;
+        if (!file_exists($csv_fn)) {
+            if (empty($headers)) {
+                touch($csv_fn);
+            } else {
+                $obj = new SplFileObject($this->csv_fn, 'w');
+                $obj->fputcsv($headers);
+                unset($obj);
+            }
+        } else {
             $this->lines  = file($csv_fn, FILE_SKIP_EMPTY_LINES);
+        }
     }
     /**
      * Gets current size of $this->csv_fn
@@ -65,9 +83,10 @@ class Csv
      * Gets list of items from CSV
      *
      * @param string|array $key_field : header(s) to use as key; leave blank for numeric array
+     * @param bool $first_row  : TRUE : 1st row contains headers; FALSE : no headers
      * @return array $select : [key => value]; key === practice_key; value = $row
      */
-    public function getItemsFromCsv($key_field = NULL) : array
+    public function getItemsFromCsv($key_field = NULL, bool $first_row = TRUE) : array
     {
         $obj     = new SplFileObject($this->csv_fn, 'r');
         $select  = [];
@@ -83,7 +102,7 @@ class Csv
                 continue;
             }
             // draw headers from first line
-            if (empty($headers)) {
+            if (empty($headers) && $first_row) {
                 $headers = $row;
                 $count = count($headers);
                 $this->headers = $headers;
@@ -177,6 +196,31 @@ class Csv
         return $found;
     }
     /**
+     * Deletes row in CSV file
+     * If you don't supply $csv_fields, assumes no headers
+     * If $overwrite is set TRUE (default), CSV is rewritten minus deleted row
+     * If $overwrite is set FALSE, CSV::$lines reflects deletion, but CSV file itself remains the same
+     *
+     * @param string $search    : any value that might be in the CSV file
+     * @param array $csv_fields : array of fields names; leave blank if you don't use headers
+     * @param bool $case        : TRUE: case sensitive; FALSE: [default] case insensitive search
+     * @param bool $overwite    : TRUE: write contents (minus deleted row) back to CSV
+     * @return bool             : TRUE if entry deleted OK
+     */
+    public function deleteRowInCsv(string $search, array $csv_fields = [], bool $case = FALSE, bool $overwrite = TRUE) : bool
+    {
+        $row = $this->findItemInCSV($search, $case, (!empty($csv_fields)));
+        if (empty($row)) return FALSE;
+        if (!empty($csv_fields)) {
+            foreach ($row as $key => $value)
+                if (!empty($data[$key])) $row[$key] = $data[$key];
+        }
+        // remove row
+        unset($this->lines[$this->pos]);
+        // write CSV back out if $overwrite flag is set
+        return (!$overwrite) ? TRUE : (bool) file_put_contents($this->csv_fn, $this->lines);
+    }
+    /**
      * Updates row in CSV file
      * If you don't supply $csv_fields, assumes no headers
      * If no headers, update does delete and then insert
@@ -190,13 +234,10 @@ class Csv
     public function updateRowInCsv(string $search, array $data, array $csv_fields = [], bool $case = FALSE) : bool
     {
         $row = $this->findItemInCSV($search, $case, (!empty($csv_fields)));
-        if (empty($row)) return FALSE;
-        if (!empty($csv_fields)) {
-            foreach ($row as $key => $value)
-                if (!empty($data[$key])) $row[$key] = $data[$key];
-        }
-        // remove row
-        unset($this->lines[$this->pos]);
+        if (!$this->deleteRowInCsv($search, $csv_fields, $case, FALSE)) return FALSE;
+        // update $row with $data
+        foreach ($row as $key => $value)
+            if (!empty($data[$key])) $row[$key] = $data[$key];
         // append row to $lines
         $this->lines[] = static::array2csv(array_values($row)) . PHP_EOL;
         // write CSV back out

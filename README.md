@@ -443,3 +443,9 @@ FileCMS\Common\Security\Profile
   * Added config file as 2nd argument
   * Always checks value of `$_SESSION[Profile::PROFILE_KEY][Profile::PROFILE_DEF_SRC]`
   * If profile config keys are present, also confirms these values match
+### tag: v0.3.2
+`FileCMS\Common\Data\Csv`
+* If CSV file doesn't exist, first Csv instance creates it
+* If array of headers are supplied, first instance writes headers
+* Added new method `deleteRowInCsv()`
+* Slightly refactored `updateRowInCsv()` but functionality is the same

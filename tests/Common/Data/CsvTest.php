@@ -213,7 +213,7 @@ class CsvTest extends TestCase
         $actual   = $row['web_person_email'] ?? 'XXX';
         $this->assertEquals($expected, $actual);
     }
-    public function testUpdateRowInCsvNonChangedFieldsAreLeftAlong()
+    public function testUpdateRowInCsvNonChangedFieldsAreLeftAlone()
     {
         $csv_fn = $this->csvFileDir . '/test.csv';
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
@@ -229,5 +229,43 @@ class CsvTest extends TestCase
         $expected = 'silver';
         $actual   = $row['add_on_plan'] ?? 'XXX';
         $this->assertEquals($expected, $actual);
+    }
+    public function testDeleteRowInCsv()
+    {
+        $email = 'barney@flintstone.com';
+        $csv_fn = $this->csvFileDir . '/test.csv';
+        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
+        $arr = array_combine($this->headers, $arr);
+        $csv = new Csv($csv_fn);
+        $csv->writeRowToCsv($arr, $this->headers);
+        $arr['web_person_email'] = $email;
+        $csv->writeRowToCsv($arr, $this->headers);
+        $csv->deleteRowInCsv($email, $this->headers);
+        $expected = 2;
+        $actual   = count($csv->lines);
+        $this->assertEquals($expected, $actual, 'Invalid CSV::$lines count');
+        $file = file($csv_fn);
+        $expected = 2;
+        $actual   = count($file);
+        $this->assertEquals($expected, $actual, 'Incorrect number of rows in CSV');
+    }
+    public function testDeleteRowInCsvDoesNotOverwriteIfFlagNotSet()
+    {
+        $email = 'barney@flintstone.com';
+        $csv_fn = $this->csvFileDir . '/test.csv';
+        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
+        $arr = array_combine($this->headers, $arr);
+        $csv = new Csv($csv_fn);
+        $csv->writeRowToCsv($arr, $this->headers);
+        $arr['web_person_email'] = $email;
+        $csv->writeRowToCsv($arr, $this->headers);
+        $csv->deleteRowInCsv($email, $this->headers, FALSE, FALSE);
+        $expected = 2;
+        $actual   = count($csv->lines);
+        $this->assertEquals($expected, $actual, 'Invalid CSV::$lines count');
+        $file = file($csv_fn);
+        $expected = 3;
+        $actual   = count($file);
+        $this->assertEquals($expected, $actual, 'Incorrect number of rows in CSV');
     }
 }

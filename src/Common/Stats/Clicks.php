@@ -85,8 +85,8 @@ class Clicks
             $obj = new SplFileObject($click_fn, 'r');
             $num = count(self::CLICK_HEADERS);
             while (!$obj->eof() && $row = $obj->fgetcsv()) {
-                if (empty($row)) continue;
-                if (count($row) !== $num && !empty($row[0])) {
+                if (empty($row[0])) continue;
+                if (count($row) !== $num) {
                     self::$discrepancies[] = $row;
                     continue;
                 }
@@ -117,7 +117,7 @@ class Clicks
     public static function get(string $click_fn) : array
     {
         $callback = function ($row) { return $row[0] ?? FALSE; };
-        return self::raw_get($click_fn, $callback);
+        return static::raw_get($click_fn, $callback);
     }
     /**
      * Returns array sorted by URL by day w/ totals
@@ -134,7 +134,7 @@ class Clicks
             }
             return $val;
         };
-        return self::raw_get($click_fn, $callback);
+        return static::raw_get($click_fn, $callback);
     }
     /**
      * Returns array sorted by URL by month w/ totals
@@ -151,7 +151,7 @@ class Clicks
             }
             return $val;
         };
-        return self::raw_get($click_fn, $callback);
+        return static::raw_get($click_fn, $callback);
     }
     /**
      * Returns array sorted by URL by day w/ totals
@@ -167,6 +167,6 @@ class Clicks
             if (stripos($row[0], $path) === FALSE) return FALSE;
             return $row[0] . '-' . substr($row[1], 0, 7);
         };
-        return self::raw_get($click_fn, $callback, $path);
+        return static::raw_get($click_fn, $callback, $path);
     }
 }
