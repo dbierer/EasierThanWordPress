@@ -12,12 +12,13 @@ class CsvTest extends TestCase
     public function setUp() : void
     {
         $this->csvFn = $this->csvFileDir . '/order.csv';
+        $this->csvTestFn = $this->csvFileDir . '/test.csv';
         $this->csv = new Csv($this->csvFn);
         // populate headers
         $lines = file($this->csvFn);
         $this->headers = str_getcsv($lines[0]);
         // get rid of test.csv
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         if (file_exists($csv_fn)) unlink($csv_fn);
     }
     //     public function getItemsFromCsv($key_field = NULL) : array
@@ -85,7 +86,7 @@ class CsvTest extends TestCase
     }
     public function testFindItemInCsvCaseInsensitive()
     {
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -112,7 +113,7 @@ class CsvTest extends TestCase
     //     public function writeRowToCsv(array $post, array $csv_fields, bool $first = TRUE) : bool
     public function testWriteRowToCsvDoesNotWriteHeadersIf2ndArgEmpty()
     {
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -124,7 +125,7 @@ class CsvTest extends TestCase
     }
     public function testWriteRowToCsvWritesHeadersIfFileBlank()
     {
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -139,7 +140,7 @@ class CsvTest extends TestCase
     }
     public function testWriteRowToCsvWritesColumnsInOrder()
     {
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -151,7 +152,7 @@ class CsvTest extends TestCase
     }
     public function testGetSizeReportsZeroAfterNewInstance()
     {
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $csv = new Csv($csv_fn);
         $expected = 0;
         $actual   = $csv->getSize();
@@ -159,7 +160,7 @@ class CsvTest extends TestCase
     }
     public function testGetSizeReportsNonZeroAfterWriteRowToCsv()
     {
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -170,7 +171,7 @@ class CsvTest extends TestCase
     }
     public function testWriteRowToCsvTwoTimesDoesNotWriteHeadersTwice()
     {
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -184,7 +185,7 @@ class CsvTest extends TestCase
     //     public function updateRowInCsv(string $search, array $data, array $csv_fields = [], bool $case = FALSE) : bool
     public function testUpdateRowInCsvReturnsTrueIfUpdateOk()
     {
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -198,7 +199,7 @@ class CsvTest extends TestCase
     }
     public function testUpdateRowInCsvChangedFieldsAreUpdatedOk()
     {
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -215,7 +216,7 @@ class CsvTest extends TestCase
     }
     public function testUpdateRowInCsvNonChangedFieldsAreLeftAlone()
     {
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -233,7 +234,7 @@ class CsvTest extends TestCase
     public function testDeleteRowInCsv()
     {
         $email = 'barney@flintstone.com';
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -252,7 +253,7 @@ class CsvTest extends TestCase
     public function testDeleteRowInCsvDoesNotOverwriteIfFlagNotSet()
     {
         $email = 'barney@flintstone.com';
-        $csv_fn = $this->csvFileDir . '/test.csv';
+        $csv_fn = $this->csvTestFn;
         $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
         $arr = array_combine($this->headers, $arr);
         $csv = new Csv($csv_fn);
@@ -267,5 +268,16 @@ class CsvTest extends TestCase
         $expected = 3;
         $actual   = count($file);
         $this->assertEquals($expected, $actual, 'Incorrect number of rows in CSV');
+    }
+    public function testWriteRowToCsvReturnsExpectedRowsIfHeadersNotUsed()
+    {
+        $csv_fn = $this->csvTestFn;
+        copy($this->csvFn, $csv_fn);
+        $arr = ['TEST_275','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order','2022-10-06 22:19:40'];
+        $csv = new Csv($csv_fn);
+        $csv->writeRowToCsv($arr);
+        $expected = count(file($csv_fn));
+        $actual = count($csv->lines);
+        $this->assertEquals($expected, $actual, 'Internal $lines count does not match');
     }
 }

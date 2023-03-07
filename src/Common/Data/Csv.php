@@ -4,7 +4,7 @@ namespace FileCMS\Common\Data;
  * Treats CSV file like database
  * Lets you search, update and delete rows
  * IMPORTANT: uses file() function which means the entire CSV file will be in memory
- * IMPORTANT: cannot use this for large CSV files > 50 M in size
+ * IMPORTANT: ***cannot*** use this for large CSV files > 50 M in size
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -33,7 +33,9 @@ namespace FileCMS\Common\Data;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
+/**
+ * @todo Create a large file version of this
+ */
 use Throwable;
 use Exception;
 use SplFileObject;
@@ -104,9 +106,23 @@ class Csv
             // draw headers from first line
             if (empty($headers) && $first_row) {
                 $headers = $row;
-                $count = count($headers);
                 $this->headers = $headers;
-            } elseif (!empty($row) && $count === count($row)) {
+            } else {
+                $abs = count($row) - count($headers);
+                $abs = ($abs >= 0) ? $abs : -$abs;
+                switch (count($headers) <=> count($row)) {
+                    case -1 :
+                        for ($x = 1; $x <= $abs; $x++)
+                            $headers[] = sprintf('Header_%02d'. $x);
+                        break;
+                    case 1 :
+                        for ($x = 1; $x <= $abs; $x++)
+                            array_pop($headers);
+                        break;
+                    case 0 :
+                    default :
+                        // do nothing
+                }
                 $data = array_combine($headers, $row);
                 // build key
                 $key  = '';

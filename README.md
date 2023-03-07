@@ -449,3 +449,11 @@ FileCMS\Common\Security\Profile
 * If array of headers are supplied, first instance writes headers
 * Added new method `deleteRowInCsv()`
 * Slightly refactored `updateRowInCsv()` but functionality is the same
+### tag: v0.3.2
+`FileCMS\Common\Data\Csv`
+* `writeRowToCsv()`
+  * If you already have headers in the CSV file, this method will now allow you to write a row without using headers as the 2nd argument
+* `getItemsFromCsv()`
+  * Now allows you to read rows even if header count doesn't match
+  * If your headers are > the count of the CSV headers, just appends empty strings
+  * If your headers are < the count of the CSV headers, adds fake headers `Header_1`, `Header_2`, etc.

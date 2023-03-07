@@ -61,7 +61,7 @@ class ProfileTest extends TestCase
         $actual   = is_string($contents);
         $this->assertEquals($expected, $actual, 'Contents not a string');
         $expected = TRUE;
-        $actual   = strpos($contents, date('Y-m-d') !== FALSE);
+        $actual   = (bool) strpos($contents, date('Y-m-d'));
         $this->assertEquals($expected, $actual, 'Does not contain expected contents');
     }
     public function testLogoutWipesOutSession()
