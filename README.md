@@ -460,3 +460,5 @@ FileCMS\Common\Security\Profile
 * Also updated tests:
   * `Common\Data\CsvTest`
   * `Common\Security\ProfileTest`
+### tag: v0.3.4
+Fixed bad `sprintf()` call in `FileCMS\Common\Data\Csv::getItemsFromCsv()`
