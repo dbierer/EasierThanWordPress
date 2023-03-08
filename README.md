@@ -449,7 +449,7 @@ FileCMS\Common\Security\Profile
 * If array of headers are supplied, first instance writes headers
 * Added new method `deleteRowInCsv()`
 * Slightly refactored `updateRowInCsv()` but functionality is the same
-### tag: v0.3.2
+### tag: v0.3.3
 `FileCMS\Common\Data\Csv`
 * `writeRowToCsv()`
   * If you already have headers in the CSV file, this method will now allow you to write a row without using headers as the 2nd argument
@@ -460,4 +460,3 @@ FileCMS\Common\Security\Profile
 * Also updated tests:
   * `Common\Data\CsvTest`
   * `Common\Security\ProfileTest`
-
