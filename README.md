@@ -457,3 +457,7 @@ FileCMS\Common\Security\Profile
   * Now allows you to read rows even if header count doesn't match
   * If your headers are > the count of the CSV headers, just appends empty strings
   * If your headers are < the count of the CSV headers, adds fake headers `Header_1`, `Header_2`, etc.
+* Also updated tests:
+  * `Common\Data\CsvTest`
+  * `Common\Security\ProfileTest`
+

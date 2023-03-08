@@ -113,7 +113,7 @@ class Csv
                 switch (count($headers) <=> count($row)) {
                     case -1 :
                         for ($x = 1; $x <= $abs; $x++)
-                            $headers[] = sprintf('Header_%02d'. $x);
+                            $headers[] = sprintf('Header_%02d', $x);
                         break;
                     case 1 :
                         for ($x = 1; $x <= $abs; $x++)
