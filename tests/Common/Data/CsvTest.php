@@ -58,7 +58,7 @@ class CsvTest extends TestCase
         $actual   = Csv::array2csv($arr);
         $this->assertEquals($expected, $actual);
     }
-    //     public function findItemInCSV(string $search, bool $case = FALSE, bool $first = TRUE) : array
+    //     public function findItemInCSV(string $search, bool $case = FALSE, bool $first = TRUE, bool $all = FALSE) : array
     public function testFindItemInCsvPopulatesLines()
     {
         $search   = 'BETTY@UNLIKELYSOURCE.COM';
@@ -108,6 +108,13 @@ class CsvTest extends TestCase
         $search   = 'web_person_email';
         $expected = $this->headers;
         $actual   = $this->csv->findItemInCSV($search, FALSE, FALSE);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testFindItemInCsvReturnsMultipleRowsIfAllFlagSet()
+    {
+        $search   = 'please_add_me';
+        $expected = [];
+        $actual   = $this->csv->findItemInCSV($search, FALSE, FALSE,TRUE);
         $this->assertEquals($expected, $actual);
     }
     //     public function writeRowToCsv(array $post, array $csv_fields, bool $first = TRUE) : bool
@@ -279,5 +286,37 @@ class CsvTest extends TestCase
         $expected = count(file($csv_fn));
         $actual = count($csv->lines);
         $this->assertEquals($expected, $actual, 'Internal $lines count does not match');
+    }
+    public function testArrayCombineWhateverWorksWhenCountIsSame()
+    {
+        $headers = ['A','B','C'];
+        $data    = [1, 2, 3];
+        $expected = ['A' => 1,'B' => 2,'C' => 3];;
+        $actual = $this->csv->array_combine_whatever($headers, $data);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testArrayCombineWhateverStripsHeadersIfDataAssocArray()
+    {
+        $headers = ['A','B','C'];
+        $data    = ['X' => 1, 'Y' => 2, 'Z' => 3];
+        $expected = ['A' => 1,'B' => 2,'C' => 3];;
+        $actual = $this->csv->array_combine_whatever($headers, $data);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testArrayCombineWhateverWorksIfCountHeadersMoreThanData()
+    {
+        $headers = ['A','B','C','D'];
+        $data    = [1, 2, 3];
+        $expected = ['A' => 1,'B' => 2,'C' => 3];;
+        $actual = $this->csv->array_combine_whatever($headers, $data);
+        $this->assertEquals($expected, $actual);
+    }
+    public function testArrayCombineWhateverWorksIfCountHeadersLessThanData()
+    {
+        $headers = ['A','B','C'];
+        $data    = [1, 2, 3, 4];
+        $expected = ['A' => 1,'B' => 2,'C' => 3, 'header_01' => 4];;
+        $actual = $this->csv->array_combine_whatever($headers, $data);
+        $this->assertEquals($expected, $actual);
     }
 }

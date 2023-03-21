@@ -38,12 +38,14 @@ namespace FileCMS\Common\Data;
  */
 use Throwable;
 use Exception;
+use ArrayIterator;
 use SplFileObject;
 use FileCMS\Common\Contact\Email;
 use FileCMS\Common\Generic\Messages;
 class Csv
 {
-    const ERR_CSV   = 'ERROR: CSV file error';
+    const ERR_CSV    = 'ERROR: CSV file error';
+    const HDR_PREFIX = 'header_%02d';
     public $pos     = FALSE;
     public $lines   = [];
     public $headers = [];
@@ -82,6 +84,41 @@ class Csv
         return count($this->lines);
     }
     /**
+     * Does array_combine() for unequal header count
+     * NOTE: if 2nd arg is an associative array, headers will get stripped
+     *
+     * @param array $headers : desired headers
+     * @param array $data    : numberic array of data to be combined with headers
+     * @return array $combined : associative array
+     */
+    public function array_combine_whatever(array $headers, array $data)
+    {
+        $combined = [];
+        if (count($headers) === count($data)) {
+            $combined = array_combine($headers, $data);
+        } else {
+            $iter = new ArrayIterator(array_values($data));
+            if (count($headers) < $iter->count()) {
+                foreach ($headers as $key) {
+                    $combined[$key] = $iter->current();
+                    $iter->next();
+                }
+                $pos = 1;
+                while ($iter->valid()) {
+                    $key = sprintf(static::HDR_PREFIX, $pos++);
+                    $combined[$key] = $iter->current();
+                    $iter->next();
+                }
+            } else {
+                foreach ($iter as $value) {
+                    $combined[current($headers)] = $value;
+                    next($headers);
+                }
+            }
+        }
+        return $combined;
+    }
+    /**
      * Gets list of items from CSV
      *
      * @param string|array $key_field : header(s) to use as key; leave blank for numeric array
@@ -98,7 +135,7 @@ class Csv
         $idx     = 0;
         while ($row = $obj->fgetcsv()) {
             if (empty($row) || count($row) <= 1) continue;
-            // if $key_fiels is NULL, just append $row
+            // if $key_fields is NULL, just append $row
             if (empty($key_field)) {
                 $select[] = $row;
                 continue;
@@ -175,17 +212,23 @@ class Csv
         return $ok;
     }
     /**
-     * Finds key in CSV file
-     * Assumes first row is headers unless $first === FALSE
-     * Stores contents of CSV file in $this->lines
+     * Finds first row in CSV file matching the given key [default]
      * If found, sets $this->pos to the line number of the row found in $this->lines
+     * If $all === TRUE returns all matching rows
+     *
+     * Assumes first row of CSV file is headers unless $first === FALSE
+     * Stores contents of CSV file in $this->lines
      *
      * @param string $search  : any value that might be in the CSV file
      * @param bool $case      : TRUE: case sensitive; FALSE: [default] case insensitive search
      * @param bool $first_row : TRUE [default]: first row is headers; FALSE: first row is data
+     * @param bool $all       : FALSE [default]: only return 1st match; TRUE: return all matches
      * @return array
      */
-    public function findItemInCSV(string $search, bool $case = FALSE, bool $first = TRUE) : array
+    public function findItemInCSV(string $search,
+                                  bool $case = FALSE,
+                                  bool $first = TRUE,
+                                  bool $all = FALSE) : array
     {
         // otherwise process as normal
         $func  = ($case) ? 'strpos' : 'stripos';
@@ -200,12 +243,20 @@ class Csv
                 $hdr_count = count($this->headers);
             } else {
                 if ($func($row, $search) !== FALSE) {
-                    $found = str_getcsv($row);
-                    $this->pos = $key;
-                    if ($first && $hdr_count === count($found)) {
-                        $found = array_combine($this->headers, $found);
+                    $row = str_getcsv($row);
+                    if ($first && $hdr_count === count($row)) {
+                        $temp = array_combine($this->headers, $row);
+                    } else {
+                        $temp = $row;
                     }
-                    break;
+                    // only set $this->pos to the first match
+                    $this->pos = ($this->pos === 0) ? $key : $this->pos;
+                    if ($all) {
+                        $found[] = $temp;
+                    } else {
+                        $found = $temp;
+                        break;
+                    }
                 }
             }
         }
@@ -223,7 +274,7 @@ class Csv
      * @param bool $overwite    : TRUE: write contents (minus deleted row) back to CSV
      * @return bool             : TRUE if entry deleted OK
      */
-    public function deleteRowInCsv(string $search, array $csv_fields = [], bool $case = FALSE, bool $overwrite = TRUE) : bool
+    public function deleteRowInCsv(string $search, array $csv_fields = [], bool $case = FALSE, bool $overwrite = TRUE)
     {
         $row = $this->findItemInCSV($search, $case, (!empty($csv_fields)));
         if (empty($row)) return FALSE;
