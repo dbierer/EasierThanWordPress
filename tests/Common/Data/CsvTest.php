@@ -7,6 +7,7 @@ class CsvTest extends TestCase
 {
     public $csv = NULL;
     public $csvFn = '';
+    public $csvTestFn = '';
     public $csvFileDir = __DIR__ . '/../../logs';
     public $headers = [];
     public function setUp() : void
@@ -81,7 +82,7 @@ class CsvTest extends TestCase
         $this->csv->findItemInCSV($search, FALSE, TRUE);
         $lines = file($this->csvFn);
         $expected = $lines[3];
-        $actual   = $this->csv->lines[$this->csv->pos];
+        $actual   = $this->csv->lines[$this->csv->pos] ?? [];
         $this->assertEquals($expected, $actual);
     }
     public function testFindItemInCsvCaseInsensitive()

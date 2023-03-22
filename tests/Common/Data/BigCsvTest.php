@@ -7,28 +7,32 @@ class BigCsvTest extends TestCase
 {
     public $csv = NULL;
     public $csvFn = '';
+    public $csvTestFn = '';
     public $csvFileDir = __DIR__ . '/../../logs';
+    public $tmp_fn = '';
     public $headers = [];
     public $date = '';
+    public $test_arr = [];
     public function setUp() : void
     {
+        $this->date = date('Y-m-d H:i:s');
         $this->csvFn = $this->csvFileDir . '/order.csv';
         $this->csvTestFn = $this->csvFileDir . '/test.csv';
         $this->tmp_fn = $this->csvFileDir . '/temp.csv';
         $this->csv = new BigCsv($this->csvFn);
+		$this->test_arr = ['test','test','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Testy','Tester','LSD','testy@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
         // populate headers
         $lines = file($this->csvFn);
         $this->headers = str_getcsv($lines[0]);
         // get rid of test.csv and temp.csv
         if (file_exists($this->csvTestFn)) unlink($this->csvTestFn);
         if (file_exists($this->tmp_fn)) unlink($this->tmp_fn);
-        $this->date = date('Y-m-d H:i:s');
     }
     // __construct(string $csv_fn, array $headers = [])
     public function testConstructWritesHeadersIfGiven()
     {
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $csv = new BigCsv($csv_fn, $arr);
         unset($csv);
         $expected = $arr;
@@ -112,7 +116,7 @@ class BigCsvTest extends TestCase
     public function testWriteRowToCsvDoesNotWriteHeadersIf2ndArgEmpty()
     {
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
         $csv->writeRowToCsv($arr);
@@ -124,22 +128,32 @@ class BigCsvTest extends TestCase
     public function testWriteRowToCsvWritesHeadersIfFileBlank()
     {
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
         $csv->writeRowToCsv($arr, $this->headers);
         $expected = 2;
         $actual   = count(file($csv_fn));
         $this->assertEquals($expected, $actual, 'Line count does not match');
-        $expected = BigCsv::array2csv($this->headers);
-        $actual   = trim($lines[0]);
-        $this->assertEquals($expected, $actual, 'Header content does not match');
     }
-    /*
+    public function testWriteRowToCsvUpdatesSize()
+    {
+        $csv_fn = $this->csvTestFn;
+        $csv = new BigCsv($csv_fn);
+        $expected = 0;
+        $actual = $csv->size;
+        $this->assertEquals($expected, $actual, 'Size should be zero');
+        $arr = $this->test_arr;
+        $arr = array_combine($this->headers, $arr);
+        $csv->writeRowToCsv($arr, $this->headers);
+        $expected = TRUE;
+        $actual   = ($csv->size > 0);
+        $this->assertEquals($expected, $actual, 'Size not updated');
+    }
     public function testWriteRowToCsvWritesColumnsInOrder()
     {
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
         $csv->writeRowToCsv($arr, $this->headers);
@@ -148,11 +162,10 @@ class BigCsvTest extends TestCase
         //$actual   = array_combine(str_getcsv($lines[0]), str_getcsv($lines[1]));
         $this->assertEquals($expected, file($csv_fn));
     }
-    /*
     public function testUpdateRowInCsvReturnsTrueIfUpdateOk()
     {
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
         $csv->writeRowToCsv($arr, $this->headers);
@@ -166,24 +179,24 @@ class BigCsvTest extends TestCase
     public function testUpdateRowInCsvChangedFieldsAreUpdatedOk()
     {
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
-        $csv->writeRowToCsv($arr, $this->headers);
         $csv->writeRowToCsv($arr, $this->headers);
         $search = 'Barney Rubble';
         $replace = ['web_person_email' => 'pebbles@flintstone.com','web_person_name' => 'Pebbles Flintstone'];
         $csv->updateRowInCsv($search, $replace, $this->headers, FALSE);
         $lines = file($csv_fn);
-        $row   = array_combine(str_getcsv($lines[0]), str_getcsv($lines[2]));
+        $row   = array_combine(str_getcsv($lines[0]), str_getcsv($lines[1]));
         $expected = 'pebbles@flintstone.com';
         $actual   = $row['web_person_email'] ?? 'XXX';
         $this->assertEquals($expected, $actual);
     }
+    /*
     public function testUpdateRowInCsvNonChangedFieldsAreLeftAlone()
     {
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
         $csv->writeRowToCsv($arr, $this->headers);
@@ -201,7 +214,7 @@ class BigCsvTest extends TestCase
     {
         $email = 'barney@flintstone.com';
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
         $csv->writeRowToCsv($arr, $this->headers);
@@ -217,7 +230,7 @@ class BigCsvTest extends TestCase
     {
         $email = 'barney@flintstone.com';
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
         $csv->writeRowToCsv($arr, $this->headers);
@@ -233,7 +246,7 @@ class BigCsvTest extends TestCase
     {
         $csv_fn = $this->csvTestFn;
         copy($this->csvFn, $csv_fn);
-        $arr = ['TEST_275','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $csv = new BigCsv($csv_fn);
         $expected = count(file($csv_fn)) + 1;
         $csv->writeRowToCsv($arr);
@@ -244,7 +257,7 @@ class BigCsvTest extends TestCase
     {
         $email = 'barney@flintstone.com';
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
         $csv->writeRowToCsv($arr, $this->headers);
@@ -259,7 +272,7 @@ class BigCsvTest extends TestCase
     {
         $email = 'barney@flintstone.com';
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
         $csv->writeRowToCsv($arr, $this->headers);
@@ -274,7 +287,7 @@ class BigCsvTest extends TestCase
     {
         $email = 'barney@flintstone.com';
         $csv_fn = $this->csvTestFn;
-        $arr = ['silver','already_listed','https://unlikelysource.com','test@unlikelysource.com','Barney Rubble','Fred','Flintstone','LSD','doug@unlikelysource.com','M','0','https://mercurysafedentistry.com/order',$this->date];
+        $arr = $this->test_arr;
         $arr = array_combine($this->headers, $arr);
         $csv = new BigCsv($csv_fn);
         $csv->writeRowToCsv($arr, $this->headers);

@@ -88,7 +88,7 @@ class BigCsv extends Csv
                 // if size === 0 write out headers
                 if ($this->size === 0) {
                     $obj->fputcsv($csv_fields);
-                    $this->size = strlen(implode(',', $headers));
+                    $this->size = strlen(implode(',', $csv_fields));
                 }
                 // align $_POST data to csv fields
                 $data = [];
@@ -113,7 +113,10 @@ class BigCsv extends Csv
      * @param bool $first_row : TRUE [default]: first row is headers; FALSE: first row is data
      * @return array
      */
-    public function findItemInCSV(string $search, bool $case = FALSE, bool $first = TRUE) : array
+    public function findItemInCSV(string $search,
+                                  bool $case = FALSE,
+                                  bool $first = TRUE,
+                                  bool $all = FALSE) : array
     {
         $func  = ($case) ? 'strpos' : 'stripos';
         $found = [];
