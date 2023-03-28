@@ -37,8 +37,9 @@ use Exception;
 use SplFileObject;
 use FileCMS\Common\Contact\Email;
 use FileCMS\Common\Generic\Messages;
-class BigCsv extends Csv
+class BigCsv
 {
+	use CsvTrait;
     const ERR_CSV   = 'ERROR: CSV file error';
     public $pos     = FALSE;
     public $headers = [];
@@ -213,7 +214,7 @@ class BigCsv extends Csv
      *
      * @param string $search  : any value that might be in the CSV file
      * @param array $data     : array of items to update
-     * @param array $csv_fields : array of fields names; leave blank if you don't use headers
+     * @param array $csv_fields : array of fields names; leave blank if you want a simple replace
      * @param bool $case      : TRUE: case sensitive; FALSE: [default] case insensitive search
      * @return bool             : TRUE if entry made OK
      */
@@ -221,10 +222,14 @@ class BigCsv extends Csv
     {
         $row = $this->deleteRowInCsv($search, $csv_fields, $case);
         if (empty($row)) return FALSE;  // means row not found
-        // update $row with $data
-        foreach ($row as $key => $value)
-            if (!empty($data[$key])) $row[$key] = $data[$key];
+        // update $row with $data if $csv_fields not empty
+        if (empty($csv_fields)) {
+			$row = $data;
+		} else {
+			foreach ($csv_fields as $key)
+				if (!empty($data[$key])) $row[$key] = $data[$key];
+		}
         // write CSV back out
-        return (bool) (new SplFileObject($this->csv_fn, 'a'))->fputcsv($data);
+        return (bool) (new SplFileObject($this->csv_fn, 'a'))->fputcsv($row);
     }
 }

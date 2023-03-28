@@ -52,3 +52,21 @@
 #10 /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/phpunit(98): PHPUnit\TextUI\Command::main()
 #11 /home/ed/Repos/FileCMS/filecms-core/vendor/bin/phpunit(123): include('...')
 #12 {main}
+[28-Mar-2023 02:23:21 UTC] PHP Fatal error:  Uncaught ParseError: syntax error, unexpected token ";" in /home/ed/Repos/FileCMS/filecms-core/tests/Common/Data/BigCsvTest.php:327
+Stack trace:
+#0 /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/src/Util/FileLoader.php(49): PHPUnit\Util\FileLoader::load()
+#1 /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/src/Runner/StandardTestSuiteLoader.php(43): PHPUnit\Util\FileLoader::checkAndLoad()
+#2 /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/src/Runner/BaseTestRunner.php(146): PHPUnit\Runner\StandardTestSuiteLoader->load()
+#3 /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/src/Runner/BaseTestRunner.php(111): PHPUnit\Runner\BaseTestRunner->loadSuiteClass()
+#4 /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/src/TextUI/Command.php(119): PHPUnit\Runner\BaseTestRunner->getTest()
+#5 /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/src/TextUI/Command.php(97): PHPUnit\TextUI\Command->run()
+#6 /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/phpunit(98): PHPUnit\TextUI\Command::main()
+#7 /home/ed/Repos/FileCMS/filecms-core/vendor/bin/phpunit(123): include('...')
+#8 {main}
+
+Next PHPUnit\TextUI\RuntimeException: syntax error, unexpected token ";" in /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/src/TextUI/Command.php:99
+Stack trace:
+#0 /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/phpunit(98): PHPUnit\TextUI\Command::main()
+#1 /home/ed/Repos/FileCMS/filecms-core/vendor/bin/phpunit(123): include('...')
+#2 {main}
+  thrown in /home/ed/Repos/FileCMS/filecms-core/vendor/phpunit/phpunit/src/TextUI/Command.php on line 99
