@@ -55,6 +55,8 @@ trait CsvTrait
      * Does array_combine() for unequal header count
      * NOTE: if 2nd arg is an associative array, headers will get stripped
      *
+	 * @todo Move `array_combine_whatever()` to a generic class w/ static usage
+	 * @todo Set up `CsvTrait::array_combine_whatever()` to make a static call to this generic class
      * @param array $headers : desired headers
      * @param array $data    : numberic array of data to be combined with headers
      * @return array $combined : associative array

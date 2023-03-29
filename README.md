@@ -462,3 +462,25 @@ FileCMS\Common\Security\Profile
   * `Common\Security\ProfileTest`
 ### tag: v0.3.4
 Fixed bad `sprintf()` call in `FileCMS\Common\Data\Csv::getItemsFromCsv()`
+### tag: v0.3.5
+`FileCMS\Common\Data\BigCsv`
+* New class
+* Handles files of any size
+* Doesn't use `file()`
+* Low memory consumption
+* Not as fast as `Csv`
+`FileCMS\Common\Data\CsvTrait`
+* Hold common constants and methods
+* Used by `Csv` and `BigCsv`
+* Added new method `array_combine_whatever()`
+  * If header count === data count runs `array_combine()`
+  * If header count < data count starts creating headers `header_01`, `header_02` etc.
+  * If header count > data count just assigns the headers to the data items and drops remaining headers
+`FileCMS\Common\Data\Csv`
+* Refactored slightly to use `CsvTrait`
+* Added flag `$all` to `findItemInCSV()`
+  * If set `FALSE` (default) only returns 1st match
+  * If set `TRUE` returns all matching rows
+TODO
+* Move `array_combine_whatever()` to a generic class w/ static usage
+* Set up `CsvTrait::array_combine_whatever()` to make a static call to this generic class
