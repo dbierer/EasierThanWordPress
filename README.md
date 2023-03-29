@@ -463,6 +463,8 @@ FileCMS\Common\Security\Profile
 ### tag: v0.3.4
 Fixed bad `sprintf()` call in `FileCMS\Common\Data\Csv::getItemsFromCsv()`
 ### tag: v0.3.5
+Arghhhh ... struggling with git
+### tag: v0.3.6
 #### `FileCMS\Common\Data\BigCsv`
 * New class
 * Handles files of any size
