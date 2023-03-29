@@ -51,7 +51,7 @@ class Html
     const DEFAULT_EXT      = ['html', 'htm'];
     const FALLBACK_HOME    = 'fallback.html';
     public $uri     = '';
-    public $htmDir  = '';
+    public $htmlDir = '';
     public $cardDir = '';
     public $delim   = '';
     public $msg     = '';

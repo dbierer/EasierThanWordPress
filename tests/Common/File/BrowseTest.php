@@ -9,9 +9,10 @@ use FileCMS\Common\File\Browse;
 use PHPUnit\Framework\TestCase;
 class BrowseTest extends TestCase
 {
-    public $testImgFileList = [];
-    public $testFileDir = '';
     public $config = [];
+    public $testImgDir = '';
+    public $testFileDir = '';
+    public $testImgFileList = [];
     public function setUp() : void
     {
         $this->testFileDir = realpath(__DIR__ . '/../../test_files');
