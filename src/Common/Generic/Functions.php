@@ -1,7 +1,7 @@
 <?php
-namespace FileCMS\Common\Data;
+namespace FileCMS\Common\Generic;
 /*
- * Contains array methods that expand upon array_combine() and go from array to CSV
+ * Common functions used throughout the framework
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -30,9 +30,8 @@ namespace FileCMS\Common\Data;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-use SplFileObject;
 use ArrayIterator;
-trait CsvTrait
+class Functions
 {
     const HDR_PREFIX = 'header_%02d';
     /**
@@ -59,27 +58,36 @@ trait CsvTrait
 	 * @todo Set up `CsvTrait::array_combine_whatever()` to make a static call to this generic class
      * @param array $headers : desired headers
      * @param array $data    : numberic array of data to be combined with headers
+     * @param string $prefix : prefix used for substitute headers (if count($headers) < count($data)
+     *                       : IMPORTANT: $prefix must be an sprintf() format string!
      * @return array $combined : associative array
      */
-    public function array_combine_whatever(array $headers, array $data) : array
+    public static function array_combine_whatever(array $headers, array $data, string $prefix = '') : array
     {
         $combined = [];
+		$prefix   = $prefix ?: static::HDR_PREFIX;
+		// add sprintf() format code if "%" missing
+		if (strpos($prefix, '%') === FALSE) $prefix .= '_%02d';
+		// if header count matches data count, just use array_combine()
         if (count($headers) === count($data)) {
             $combined = array_combine($headers, $data);
         } else {
             $iter = new ArrayIterator(array_values($data));
+            // otherwise, if header count is short, combine values until you run out of headers
             if (count($headers) < $iter->count()) {
                 foreach ($headers as $key) {
                     $combined[$key] = $iter->current();
                     $iter->next();
                 }
                 $pos = 1;
+                // now start creating substitute headers
                 while ($iter->valid()) {
-                    $key = sprintf(static::HDR_PREFIX, $pos++);
+                    $key = sprintf($prefix, $pos++);
                     $combined[$key] = $iter->current();
                     $iter->next();
                 }
             } else {
+				// if header count is too long, assign data to headers until you run out of data
                 foreach ($iter as $value) {
                     $combined[current($headers)] = $value;
                     next($headers);
@@ -87,53 +95,5 @@ trait CsvTrait
             }
         }
         return $combined;
-    }
-    /**
-     * Gets list of items from CSV
-     *
-     * @param string|array $key_field : header(s) to use as key; leave blank for numeric array
-     * @param bool $first_row  : TRUE : 1st row contains headers; FALSE : no headers
-     * @return array $select : [key => value]; key === practice_key; value = $row
-     */
-    public function getItemsFromCsv($key_field = NULL, bool $first_row = TRUE) : array
-    {
-        $obj     = new SplFileObject($this->csv_fn, 'r');
-        $select  = [];
-        $headers = [];
-        $count   = 0;
-        $def_key = date('Ymd');
-        $idx     = 0;
-        while ($row = $obj->fgetcsv()) {
-            if (empty($row) || count($row) <= 1) continue;
-            // if $key_fields is NULL, just append $row
-            if (empty($key_field)) {
-                $select[] = $row;
-                continue;
-            }
-            // draw headers from first line
-            if (empty($headers) && $first_row) {
-                $headers = $row;
-                $this->headers = $headers;
-            } else {
-                $data = $this->array_combine_whatever($headers, $row);
-                // build key
-                $key  = '';
-                if (is_array($key_field)) {
-                    foreach ($key_field as $name) {
-                        if (!empty($data[$name])) {
-                            $key .= trim($data[$name]) . '_';
-                        } else {
-                            $key .= $def_key . sprintf('%4d_',$idx++);
-                        }
-                    }
-                    $key = substr($key, 0, -1);
-                } else {
-                    $key = trim($data[$key_field]);
-                }
-                $select[$key] = $data;
-            }
-        }
-        ksort($select);
-        return $select;
     }
 }

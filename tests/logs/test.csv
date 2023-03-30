@@ -1,2 +1,6 @@
 add_on_plan,msmf_listed,import_url,web_person_email,web_person_name,first_name,last_name,degree,dentist_email,gender,smart_cert,source,order_date
-A,B,C
+silver,sign_me_up,https://unlikelysource.com/wilma,sam@test.com,Sam Smith,Wilma,Flintstone,XYZ,wilma@flintstone.com,F,1,https://mercurysafedentistry.com/order,2022-10-28 02:16:50
+gold,not_interested,https://unlikelysource.com,barney@unlikelysource.com,Barney Rubble,Fred,Flintstone,ABC,fred@unlikelysource.com,M,0,https://mercurysafedentistry.com/order,2023-01-24 01:51:58
+platinum,already_listed,https://unlikelysource.com,noz@hisstuff.com,Noz Hisstuff,Betty,Rubble,CBS,betty@unlikelysource.com,F,1,https://mercurysafedentistry.com/order,2023-01-24 01:51:58
+custom,not_interested,https://unlikelysource.com,whiz@unlikelysource.com,Gee Whiz,BamBam,Flintstone,LSD,bambam@unlikelysource.com,M,0,https://mercurysafedentistry.com/order,2023-03-09 02:30:57
+TEST_275,already_listed,https://unlikelysource.com,test@unlikelysource.com,"Barney Rubble",Fred,Flintstone,LSD,doug@unlikelysource.com,M,0,https://mercurysafedentistry.com/order,"2022-10-06 22:19:40"

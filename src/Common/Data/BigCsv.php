@@ -37,14 +37,8 @@ use Exception;
 use SplFileObject;
 use FileCMS\Common\Contact\Email;
 use FileCMS\Common\Generic\Messages;
-class BigCsv
+class BigCsv extends CsvBase
 {
-	use CsvTrait;
-    const ERR_CSV   = 'ERROR: CSV file error';
-    public $pos     = FALSE;
-    public $headers = [];
-    public $csv_fn  = '';
-    public $size    = 0;
     /**
      * If CSV file doesn't exist, creates the file
      * If $headers aren't empty, also writes out headers
@@ -122,7 +116,6 @@ class BigCsv
         $func  = ($case) ? 'strpos' : 'stripos';
         $found = [];
         $hdr_count = 0;
-        $this->pos = 0;
         $this->headers = [];
         $obj = new SplFileObject($this->csv_fn, 'r');
         while (!$obj->eof()) {
@@ -167,7 +160,6 @@ class BigCsv
         $first = !empty($csv_fields);   // if $csv_fields is not empty === first row is headers
         $found = [];
         $hdr_count = 0;
-        $this->pos = 0;
         $this->headers = [];
         // get temp file if none supplied
         if (empty($tmp_fn))

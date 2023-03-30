@@ -3,14 +3,14 @@ namespace FileCMS\Common\Data;
 /*
  * Treats CSV file like database
  * Lets you search, update and delete rows
- * 
+ *
  * IMPORTANT: uses file() function which means the entire CSV file will be in memory
  * IMPORTANT: ***cannot*** use this for large CSV files > 50 M in size
- * 
+ *
  * If you need to handle large files, use FileCMS\Common\Data\BigCsv
  * The API is identical to this class, but performance is slower
  *
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
@@ -44,14 +44,11 @@ use ArrayIterator;
 use SplFileObject;
 use FileCMS\Common\Contact\Email;
 use FileCMS\Common\Generic\Messages;
-class Csv
+use FileCMS\Common\Generic\Functions;
+class Csv extends CsvBase
 {
-	use CsvTrait;
-    const ERR_CSV   = 'ERROR: CSV file error';
-    public $pos     = FALSE;
-    public $lines   = [];
-    public $headers = [];
-    public $csv_fn  = '';
+    public $pos   = FALSE;
+    public $lines = [];
     /**
      * If CSV file doesn't exist, creates the file
      * If $headers aren't empty, also writes out headers
@@ -210,7 +207,7 @@ class Csv
         foreach ($row as $key => $value)
             if (!empty($data[$key])) $row[$key] = $data[$key];
         // append row to $lines
-        $this->lines[] = static::array2csv(array_values($row)) . PHP_EOL;
+        $this->lines[] = Functions::array2csv(array_values($row)) . PHP_EOL;
         // write CSV back out
         return (bool) file_put_contents($this->csv_fn, $this->lines);
     }

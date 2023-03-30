@@ -2,6 +2,7 @@
 namespace FileCMSTest\Common\Data;
 
 use FileCMS\Common\Data\BigCsv;
+use FileCMS\Common\Generic\Functions;
 use PHPUnit\Framework\TestCase;
 class BigCsvTest extends TestCase
 {
@@ -159,7 +160,7 @@ class BigCsvTest extends TestCase
         $csv->writeRowToCsv($arr, $this->headers);
         $lines = file($csv_fn);
         $expected = $arr;
-        $actual   = $csv->array_combine_whatever(str_getcsv($lines[0]), str_getcsv($lines[1]));
+        $actual   = Functions::array_combine_whatever(str_getcsv($lines[0]), str_getcsv($lines[1]));
         $this->assertEquals($expected, $actual);
     }
     // deleteRowInCsv(string $search, array $csv_fields = [], bool $case = FALSE, bool $overwrite = TRUE, string $tmp_fn = '', bool $erase_tmp = TRUE) : array
@@ -292,7 +293,7 @@ class BigCsvTest extends TestCase
         $replace = ['web_person_email' => 'pebbles@flintstone.com','web_person_name' => 'Pebbles Flintstone'];
         $csv->updateRowInCsv($search, $replace, $this->headers, FALSE);
         $lines = file($csv_fn);
-        $row   = $csv->array_combine_whatever(str_getcsv($lines[0]), str_getcsv($lines[1]));
+        $row   = Functions::array_combine_whatever(str_getcsv($lines[0]), str_getcsv($lines[1]));
         $expected = $replace['web_person_email'];
         $actual   = $row['web_person_email'] ?? 'XXX';
         $this->assertEquals($expected, $actual);
@@ -309,7 +310,7 @@ class BigCsvTest extends TestCase
         $replace = ['web_person_email' => 'pebbles@flintstone.com','web_person_name' => 'Pebbles Flintstone'];
         $csv->updateRowInCsv($search, $replace, $this->headers, FALSE);
         $lines = file($csv_fn);
-        $row   = $csv->array_combine_whatever(str_getcsv($lines[0]), str_getcsv($lines[2]));
+        $row   = Functions::array_combine_whatever(str_getcsv($lines[0]), str_getcsv($lines[2]));
         $expected = $arr['add_on_plan'];
         $actual   = $row['add_on_plan'] ?? 'XXX';
         $this->assertEquals($expected, $actual);

@@ -483,6 +483,20 @@ Arghhhh ... struggling with git
 * Added flag `$all` to `findItemInCSV()`
   * If set `FALSE` (default) only returns 1st match
   * If set `TRUE` returns all matching rows
-#### TODO
-* Move `array_combine_whatever()` to a generic class w/ static usage
-* Set up `CsvTrait::array_combine_whatever()` to make a static call to this generic class
+### tag: v0.3.7
+#### `FileCMS\Common\Data\*`
+* Moved `CsvTrait::array2csv()` and `array_combine_whatever()` to `FileCMS\Common\Generic\Functions`
+* Moved remaining `CsvTrait` functionality to `CsvBase`
+* Removed `CsvTrait`
+* Refactored `Csv` and `BigCsv` to extend `CsvBase`
+#### `FileCMS\Common\Generic\Functions`
+```
+public static function array2csv(array $data) : string
+```
+* Writes an array to CSV
+* Credits: https://stackoverflow.com/questions/13108157/php-array-to-csv
+
+```
+public static function array_combine_whatever(array $headers, array $data, string $prefix = '') : array
+```
+* Does the equivalent of `array_combine()` even if `count($headers)` doesn't match `count($data)`
