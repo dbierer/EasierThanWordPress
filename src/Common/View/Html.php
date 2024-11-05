@@ -36,7 +36,19 @@ namespace FileCMS\Common\View;
  *
  */
 
+use function trim;
+use function glob;
+use function substr;
+use function explode;
+use function shuffle;
+use function ob_start;
+use function array_keys;
 use function ctype_digit;
+use function file_exists;
+use function str_replace;
+use function ob_end_clean;
+use function ob_get_contents;
+use function file_get_contents;
 use ArrayIterator;
 use LimitIterator;
 use RecursiveDirectoryIterator;
@@ -57,6 +69,7 @@ class Html
     public $msg     = '';
     public $config  = [];
     public $allowed = [];   // allowed extensions
+    public $notFound = FALSE;  // set TRUE if requested page not found
     public function __construct(array $config, string $uri, string $htmlDir)
     {
         $this->config  = $config;
@@ -131,6 +144,7 @@ class Html
                     $body = $this->runPhpFile($bodyFn);
                 // fallback: just go home
                 } else {
+                    $this->notFound = TRUE;
                     $this->uri = '/home';
                     $home   = $this->config['HOME'] ?? self::DEFAULT_HOME;
                     $bodyFn = $this->htmlDir . '/' . $home;
