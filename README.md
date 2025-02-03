@@ -504,3 +504,5 @@ public static function array_combine_whatever(array $headers, array $data, strin
   * Invokes `ob_start()` and does a PHP `require` on the layout file
   * Runs layout as a PHP script
   * Allows you to automate things like the copyright date (e.g. `<?= date('Y); ?>`
+#### Updated PHP Minimum Version
+* Updated the minimum PHP version to PHP 8
