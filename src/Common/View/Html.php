@@ -94,7 +94,14 @@ class Html
         $output = '';
         $layout = $this->config['LAYOUT'] ?? static::DEFAULT_LAYOUT;
         $fn     = str_replace('//', '/', $layout);
-        $layout = file_get_contents($fn);
+        if (str_ends_with($fn, 'phtml')) {
+            ob_start();
+            require $fn;
+            $layout = ob_get_contents();
+            ob_end_clean();
+        } else {
+            $layout = file_get_contents($fn);
+        }
         // inject meta + title tags if $meta === TRUE
         if ($meta) {
             $meta = $this->config['META'][$this->uri] ?? $this->config['META']['default'] ?? [];
