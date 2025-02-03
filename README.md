@@ -1,6 +1,4 @@
 # FileCMS
-NOTE: formerly called _SimpleHtml_
-
 Simple PHP framework that builds HTML files from HTML widgets.
 * Includes a class that can generate and validate CAPTCHAs (uses the GD extension).
 * Includes the CKEditor for full-featured editing.
@@ -10,7 +8,7 @@ Simple PHP framework that builds HTML files from HTML widgets.
 * Entirely file-based: does not require a database!
 * Very fast and flexible.
 * Once you've got it up and running, just upload HTML snippets and/or modify the configuration file.
-* Works on PHP 7.0 to 8.2
+* IMPORTANT: minimum version is PHP 8!
 
 License: Apache v2
 
@@ -500,3 +498,9 @@ public static function array2csv(array $data) : string
 public static function array_combine_whatever(array $headers, array $data, string $prefix = '') : array
 ```
 * Does the equivalent of `array_combine()` even if `count($headers)` doesn't match `count($data)`
+### tag: v0.3.8
+#### `FileCMS\Common\View\Html`
+* Modified to accept a layout file with a `phtml` extension
+  * Invokes `ob_start()` and does a PHP `require` on the layout file
+  * Runs layout as a PHP script
+  * Allows you to automate things like the copyright date (e.g. `<?= date('Y); ?>`
