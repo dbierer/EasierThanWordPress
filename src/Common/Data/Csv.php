@@ -87,9 +87,10 @@ class Csv extends CsvBase
      *
      * @param array $post       : normally sanitized $_POST
      * @param array $csv_fields : array of CSV headers; leave blank if headers not used
+     * @param string $delim     : default == "\n"
      * @return bool             : TRUE if entry made OK
      */
-    public function writeRowToCsv(array $post, array $csv_fields = []) : bool
+    public function writeRowToCsv(array $post, array $csv_fields = [], string $delim = "\n") : bool
     {
         $ok = FALSE;
         try {
@@ -98,13 +99,13 @@ class Csv extends CsvBase
                 $data = $post;
             } else {
                 // write headers if filesize is 0
-                if ($this->getSize() === 0) $obj->fputcsv($csv_fields);
+                if ($this->getSize() === 0) $obj->fputcsv($csv_fields, $delim);
                 // align $_POST data to csv fields
                 $data = [];
                 foreach ($csv_fields as $name)
                     $data[$name] = $post[$name] ?? '';
             }
-            $ok = (bool) $obj->fputcsv(array_values($data));
+            $ok = (bool) $obj->fputcsv(array_values($data), $delim);
         } catch (Throwable $t) {
             error_log(__METHOD__ . ':' . get_class($t) . ':' . $t->getMessage() . ':' . $t->getTraceAsString());
         }
